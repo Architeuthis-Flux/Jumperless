@@ -8,7 +8,7 @@ That repo has a lot more info that generally applies to this one too, so go read
 
 I'd like to basically rewrite that whole codebase from scratch because it's kind of a mess. So the new stuff will go here. 
 
-Here's the general vague roadmap (for anyone who wants to contribute):
+## Here's the general vague roadmap (for anyone who wants to contribute):
 
 Matrix interface code (Dumb Mode) - done
 
