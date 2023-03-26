@@ -12,25 +12,37 @@ I'd like to basically rewrite that whole codebase from scratch because it's kind
 
 Matrix interface code (Dumb Mode) - done
 
+
 Storage of the current state - started but needs a lot more work
 
+
 Pathfinding - started minutes ago
-  -Hardware safety checks (throw an error if you try to connect power directly to ground)- not started
-  -Path Redundancy/priority - not started
+ 
+   --Hardware safety checks (throw an error if you try to connect power directly to ground)- not started
+ 
+   --Path Redundancy/priority - not started
+  
   
 Coming up with a format to send commands - mused upon but not decided
-  -Command input parsing (UART) - not started
-  -Command input parsing (I2C) - not started
+ 
+   --Command input parsing (UART) - not started
+  
+   --Command input parsing (I2C) - not started
+
 
 Power Supply control (needs HW revision or just remove the DAC/Opamp entirely)- not started
 
 
-*Everything above will be running on the AVR32DD32 controller chip, below is external interface stuff*
+
+   *Everything above will be running on the AVR32DD32 controller chip, below is external interface stuff*
+
 
 
 Making an Arduino library for the Master - not started
 
+
 (optional) Writing a python library to form and send UART commands
+
 
 (optional) GUI for making connections
 
