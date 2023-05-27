@@ -1,85 +1,158 @@
-#ifndef MATRIXSTATE_H
-#define MATRIXSTATE_H
 
 #include <Arduino.h>
-//#include "JumperlessDefinesRP2040.h"
+#include "JumperlessDefinesRP2040.h"
+#include "MatrixStateRP2040.h"
 
 
 
 
+
+struct netStruct net[MAX_NETS] = { //these are the special function nets that will always be made
+//netNumber,       ,netName          ,memberNodes[]         ,memberBridges[][2]     ,specialFunction        ,intsctNet[] ,doNotIntersectNodes[]                 ,priority
+    {     127      ,"Empty Net"      ,{EMPTY_NET}           ,{{}}                   ,EMPTY_NET              ,{}          ,{EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET} , 0},     
+    {     1        ,"GND\t"          ,{GND}                 ,{{}}                   ,GND                    ,{}          ,{SUPPLY_3V3,SUPPLY_5V,DAC0_5V,DAC1_8V}    , 1},
+    {     2        ,"+5V\t"          ,{SUPPLY_5V}           ,{{}}                   ,SUPPLY_5V              ,{}          ,{GND,SUPPLY_3V3,DAC0_5V,DAC1_8V}          , 1},
+    {     3        ,"+3.3V\t"        ,{SUPPLY_3V3}          ,{{}}                   ,SUPPLY_3V3             ,{}          ,{GND,SUPPLY_5V,DAC0_5V,DAC1_8V}           , 1},
+    {     4        ,"DAC 0\t"        ,{DAC0_5V}             ,{{}}                   ,DAC0_5V                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC1_8V}        , 1},
+    {     5        ,"DAC 1\t"        ,{DAC1_8V}             ,{{}}                   ,DAC1_8V                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC0_5V}        , 1},
+    {     6        ,"I Sense +"      ,{CURRENT_SENSE_PLUS}  ,{{}}                   ,CURRENT_SENSE_PLUS     ,{}          ,{CURRENT_SENSE_MINUS}                     , 2},
+    {     7        ,"I Sense -"      ,{CURRENT_SENSE_MINUS} ,{{}}                   ,CURRENT_SENSE_MINUS    ,{}          ,{CURRENT_SENSE_PLUS}                      , 2},
+    //{     8        ,"Net 8"      ,{4,2,9,30,40,22,3} ,{{}}                   ,-1    ,{}          ,{}                      , 0},
+    //{     9        ,"Net 9"      ,{5,7,33,23,21,8,14} ,{{}}                   ,-1    ,{}          ,{}                      , 0},
+};
+
+char *netNameConstants[MAX_NETS] = {(char*)"Net 0",(char*)"Net 1",(char*)"Net 2",(char*)"Net 3",(char*)"Net 4",(char*)"Net 5",(char*)"Net 6",(char*)"Net 7",(char*)"Net 8",(char*)"Net 9",(char*)"Net 10",(char*)"Net 11",(char*)"Net 12",(char*)"Net 13",(char*)"Net 14",(char*)"Net 15",(char*)"Net 16",(char*)"Net 17",(char*)"Net 18",(char*)"Net 19",(char*)"Net 20",(char*)"Net 21",(char*)"Net 22",(char*)"Net 23",(char*)"Net 24",(char*)"Net 25",(char*)"Net 26",(char*)"Net 27",(char*)"Net 28",(char*)"Net 29",(char*)"Net 30",(char*)"Net 31",(char*)"Net 32",(char*)"Net 33",(char*)"Net 34",(char*)"Net 35",(char*)"Net 36",(char*)"Net 37",(char*)"Net 38",(char*)"Net 39",(char*)"Net 40",(char*)"Net 41",(char*)"Net 42",(char*)"Net 43",(char*)"Net 44",(char*)"Net 45",(char*)"Net 46",(char*)"Net 47",(char*)"Net 48",(char*)"Net 49",(char*)"Net 50",(char*)"Net 51",(char*)"Net 52",(char*)"Net 53",(char*)"Net 54",(char*)"Net 55",(char*)"Net 56",(char*)"Net 57",(char*)"Net 58",(char*)"Net 59",(char*)"Net 60",(char*)"Net 61",(char*)"Net 62"};//,{"Net 63",(char*)"Net 64",(char*)"Net 65",(char*)"Net 66",(char*)"Net 67",(char*)"Net 68",(char*)"Net 69",(char*)"Net 70",(char*)"Net 71",(char*)"Net 72",(char*)"Net 73",(char*)"Net 74",(char*)"Net 75",(char*)"Net 76",(char*)"Net 77",(char*)"Net 78",(char*)"Net 79",(char*)"Net 80",(char*)"Net 81",(char*)"Net 82",(char*)"Net 83",(char*)"Net 84",(char*)"Net 85",(char*)"Net 86",(char*)"Net 87",(char*)"Net 88",(char*)"Net 89",(char*)"Net 90",(char*)"Net 91",(char*)"Net 92",(char*)"Net 93",(char*)"Net 94",(char*)"Net 95",(char*)"Net 96",(char*)"Net 97",(char*)"Net 98",(char*)"Net 99",(char*)"Net 100",(char*)"Net 101",(char*)"Net 102",(char*)"Net 103",(char*)"Net 104",(char*)"Net 105",(char*)"Net 106",(char*)"Net 107",(char*)"Net 108",(char*)"Net 109",(char*)"Net 110",(char*)"Net 111",(char*)"Net 112",(char*)"Net 113",(char*)"Net 114",(char*)"Net 115",(char*)"Net 116",(char*)"Net 117",(char*)"Net 118",(char*)"Net 119",(char*)"Net 120",(char*)"Net 121",(char*)"Net 122",(char*)"Net 123",(char*)"Net 124",(char*)"Net 125",(char*)"Net 126",(char*)"Net 127"}};
+//char (*netNamesPtr) = netNameConstants[0];
+
+struct chipStatus ch[12] = {
+  {0,'A',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_I, CHIP_J, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_K, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_H},//X MAP constant
+  {CHIP_L,  t2,t3, t4, t5, t6, t7, t8}},  // Y MAP constant
+
+  {1,'B',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_I, CHIP_J, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_K, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
+  {CHIP_L,  t9,t10,t11,t12,t13,t14,t15}},
+
+  {2,'C',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_I, CHIP_J, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_K, CHIP_H, CHIP_H},
+  {CHIP_L, t16,t17,t18,t19,t20,t21,t22}},
+
+  {3,'D',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_I, CHIP_J, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_K},
+  {CHIP_L, t23,t24,t25,t26,t27,t28,t29}},
+
+  {4,'E',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_K, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_I, CHIP_J, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
+  {CHIP_L,   b2, b3, b4, b5, b6, b7, b8}},
+
+  {5,'F',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_B, CHIP_K, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_I, CHIP_J, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
+  {CHIP_L,  b9, b10,b11,b12,b13,b14,b15}},
+
+  {6,'G',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_K, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_I, CHIP_J, CHIP_H, CHIP_H},
+  {CHIP_L,  b16,b17,b18,b19,b20,b21,b22}},
+
+  {7,'H',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_K, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_I, CHIP_J},
+  {CHIP_L,  b23,b24,b25,b26,b27,b28,b29}},
+
+  {8,'I',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {NANO_A0, NANO_D1, NANO_A2, NANO_D3, NANO_A4, NANO_D5, NANO_A6, NANO_D7, NANO_D11, NANO_D9, NANO_D13, NANO_RESET, DAC0_5V, ADC0_5V, SUPPLY_3V3, GND},
+  {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}},
+
+  {9,'J',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {NANO_D0, NANO_A1, NANO_D2, NANO_A3, NANO_D4, NANO_A5, NANO_D6, NANO_A7, NANO_D8, NANO_D10, NANO_D12, NANO_AREF, DAC1_8V, ADC1_5V, SUPPLY_5V, GND},
+  {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}},
+
+  {10,'K',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9},
+  {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}},
+
+  {11,'L',
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
+  {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
+  {CURRENT_SENSE_MINUS, CURRENT_SENSE_PLUS, ADC0_5V, ADC1_5V, ADC2_5V, ADC3_8V, DAC1_8V, DAC0_5V, t1, t30, b1, b30, NANO_A4, NANO_A5, SUPPLY_5V, GND},
+  {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}}
+  };
+
+enum nanoPinsToIndex       {     NANO_PIN_D0 ,     NANO_PIN_D1 ,     NANO_PIN_D2 ,     NANO_PIN_D3 ,     NANO_PIN_D4 ,     NANO_PIN_D5 ,     NANO_PIN_D6 ,     NANO_PIN_D7 ,     NANO_PIN_D8 ,     NANO_PIN_D9 ,     NANO_PIN_D10 ,     NANO_PIN_D11 ,      NANO_PIN_D12 ,     NANO_PIN_D13 ,       NANO_PIN_RST ,      NANO_PIN_REF ,     NANO_PIN_A0 ,     NANO_PIN_A1 ,     NANO_PIN_A2 ,     NANO_PIN_A3 ,     NANO_PIN_A4 ,     NANO_PIN_A5 ,     NANO_PIN_A6 ,     NANO_PIN_A7 };
+
+extern struct nanoStatus nano;
+
+
+const char* definesToChar (int defined) //converts the internally used #defined numbers into human readable strings
+{
+
+char same[] = "   ";
+const char *defNanoToChar[26] = {"NANO_D0", "NANO_D1", "NANO_D2", "NANO_D3", "NANO_D4", "NANO_D5", "NANO_D6", "NANO_D7", "NANO_D8", "NANO_D9", "NANO_D10", "NANO_D11", "NANO_D12", "NANO_D13", "NANO_RESET", "NANO_AREF", "NANO_A0", "NANO_A1", "NANO_A2", "NANO_A3", "NANO_A4", "NANO_A5", "NANO_A6", "NANO_A7"};
+const char *defSpecialToChar[12] = {"GND","NOT_DEFINED","NOT_DEFINED","SUPPLY_3V3","NOT_DEFINED","SUPPLY_5V","DAC_0_+5V","DAC_1_+-8V","CURRENT_SENSE +","CURRENT_SENSE -"};
+const char *emptyNet[] = {"EMPTY_NET", "?"};
+
+if (defined >= 70 && defined <= 93)
+{
+return defNanoToChar[defined-70];
+} else if (defined >= 100 && defined <= 110)
+  {
+    return defSpecialToChar[defined-100];
+  } else if (defined == EMPTY_NET)
+  {
+    return emptyNet[0];
+  }else {
+ //itoa(defined,same,10);
+    return same;
+  }
+
+
+}
 /*
 
-int netIndex = 8; //either search for the next available empty net or keep an index?
-
-int8_t bridges[MAX_BRIDGES][3];//{{netNumber,node1,node2}, ...} //should bridges be stored inside or outside the net structs?
-
-*/
-
-struct netStruct{ 
-
-uint8_t number; //nets are uint8_t, nodes are int8_t
-
-const char *name; // human readable "Net 3"
-
-int8_t nodes[MAX_NODES] = {};//maybe make this smaller and allow nets to just stay connected currently 64x64 is 4 Kb
-
-int8_t bridges[MAX_NODES/2][2]; //either store them here or in one long array that references the net
-
-int8_t specialFunction = -1; // store #defined number for that special function -1 for regular net
-
-uint8_t intersections[8]; //if this net shares a node with another net, store this here. If it's a regular net, we'll need a function to just merge them into one new net. special functions can intersect though (except Power and Ground), 0x7f is a reserved empty net that nothing and intersect
-
-int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net that contains any #defined nodes here, it won't connect and throw an error (SUPPLY to GND)
-
-uint8_t priority = 0; //priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
-
-
-};
-
-extern struct netStruct net[MAX_NETS];
-
-//thanks Copilot for not making me type all this out
-
-//this needs to be here so the pointers have somewhere to point to when we name nets
-
-extern char *netNameConstants[MAX_NETS];
-
-struct chipStatus{
-
-int chipNumber;
-char chipChar;
-int8_t xStatus[16]; //store the bb row or nano conn this is eventually connected to so they can be stacked if conns are redundant
-int8_t yStatus[8];  //store the row/nano it's connected to
-const int8_t xMap[16];
-const int8_t yMap[8];
-
-};
-
-
-struct nanoStatus {  //there's only one of these so ill declare and initalize together unlike above
+struct nanoStatus nanoConnections = {  //there's only one of these so ill declare and initalize together unlike above
 
 //all these arrays should line up (both by index and visually) so one index will give you all this data
 
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        | 
-const char *pinNames[24]=  {   " D0",   " D1",   " D2",   " D3",   " D4",   " D5",   " D6",   " D7",   " D8",   " D9",    "D10",    "D11",     "D12",    "D13",      "RST",     "REF",   " A0",   " A1",   " A2",   " A3",   " A4",   " A5",   " A6",   " A7"};// String with readable name //padded to 3 chars (space comes before chars)
+ char *pinNames[24]=  {   " D0",   " D1",   " D2",   " D3",   " D4",   " D5",   " D6",   " D7",   " D8",   " D9",    "D10",    "D11",     "D12",    "D13",      "RST",     "REF",   " A0",   " A1",   " A2",   " A3",   " A4",   " A5",   " A6",   " A7"};// String with readable name //padded to 3 chars (space comes before chars)
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |                         
-const int8_t pinMap[24] =  { NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11,  NANO_D12, NANO_D13, NANO_RESET, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7};//Array index to internal arbitrary #defined number
+ int8_t pinMap[24] =  { NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11,  NANO_D12, NANO_D13, NANO_RESET, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7};//Array index to internal arbitrary #defined number
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |    
-const int8_t numConns[24]= {  1     , 1      , 2      , 2      , 2      , 2      , 2      , 2      , 2      , 2      , 2       , 2       ,  2       , 2       , 1         , 1        , 2      , 2      , 2      , 2      , 2      , 2      , 1      , 1      };//Whether this pin has 1 or 2 connections to special function chips    (OR maybe have it be a map like i = 2  j = 3  k = 4  l = 5 if there's 2 it's the product of them ij = 6  ik = 8  il = 10 jk = 12 jl = 15 kl = 20 we're trading minuscule amounts of CPU for RAM)  
+ int8_t numConns[24]= {  1     , 1      , 2      , 2      , 2      , 2      , 2      , 2      , 2      , 2      , 2       , 2       ,  2       , 2       , 1         , 1        , 2      , 2      , 2      , 2      , 2      , 2      , 1      , 1      };//Whether this pin has 1 or 2 connections to special function chips    (OR maybe have it be a map like i = 2  j = 3  k = 4  l = 5 if there's 2 it's the product of them ij = 6  ik = 8  il = 10 jk = 12 jl = 15 kl = 20 we're trading minuscule amounts of CPU for RAM)  
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |    
-const int8_t  mapIJ[24] =  { CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J  , CHIP_I  ,  CHIP_J  , CHIP_I  , CHIP_I    ,  CHIP_J  , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J };//Since there's no overlapping connections between Chip I and J, this holds which of those 2 chips has a connection at that index, if numConns is 1, you only need to check this one
-const int8_t  mapKL[24] =  { -1     , -1     , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K  , CHIP_K  ,  CHIP_K  , -1      , -1        , -1       , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_L , CHIP_L , -1     , -1     };//Since there's no overlapping connections between Chip K and L, this holds which of those 2 chips has a connection at that index, -1 for no connection
+ int8_t  mapIJ[24] =  { CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J  , CHIP_I  ,  CHIP_J  , CHIP_I  , CHIP_I    ,  CHIP_J  , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J , CHIP_I , CHIP_J };//Since there's no overlapping connections between Chip I and J, this holds which of those 2 chips has a connection at that index, if numConns is 1, you only need to check this one
+ int8_t  mapKL[24] =  { -1     , -1     , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_K  , CHIP_K  ,  CHIP_K  , -1      , -1        , -1       , CHIP_K , CHIP_K , CHIP_K , CHIP_K , CHIP_L , CHIP_L , -1     , -1     };//Since there's no overlapping connections between Chip K and L, this holds which of those 2 chips has a connection at that index, -1 for no connection
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |   
-const int8_t xMapI[24]  =  { -1     , 1      , -1     , 3      , -1     , 5      , -1     , 7      , -1     , 9      , -1      , 8       ,  -1      , 10      , 11        , -1       , 0      , -1     , 2      , -1     , 4      , -1     , 6      , -1     };//holds which X pin is connected to the index on Chip I, -1 for none
+int8_t xMapI[24]  =  { -1     , 1      , -1     , 3      , -1     , 5      , -1     , 7      , -1     , 9      , -1      , 8       ,  -1      , 10      , 11        , -1       , 0      , -1     , 2      , -1     , 4      , -1     , 6      , -1     };//holds which X pin is connected to the index on Chip I, -1 for none
    int8_t xStatusI[24]  =  { -1     , 0      , -1     , 0      , -1     , 0      , -1     , 0      , -1     , 0      , -1      , 0       ,  -1      , 0       , 0         , -1       , 0      , -1     , 0      , -1     , 0      , -1     , 0      , -1     };//-1 for not connected to that chip, 0 for available, >0 means it's connected and the netNumber is stored here
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |    
-const int8_t xMapJ[24]  =  { 0      , -1     , 2      , -1     , 4      , -1     , 6      , -1     , 8      , -1     , 9       , -1      ,  10      , -1      , -1        , 11       , -1     , 1      , -1     , 3      , -1     , 5      , -1     , 7      };//holds which X pin is connected to the index on Chip J, -1 for none
+int8_t xMapJ[24]  =  { 0      , -1     , 2      , -1     , 4      , -1     , 6      , -1     , 8      , -1     , 9       , -1      ,  10      , -1      , -1        , 11       , -1     , 1      , -1     , 3      , -1     , 5      , -1     , 7      };//holds which X pin is connected to the index on Chip J, -1 for none
    int8_t xStatusJ[24]  =  { 0      , -1     , 0      , -1     , 0      , -1     , 0      , -1     , 0      , -1     , 0       , -1      , 0        , 0       , -1        , 0        , -1     , 0      , -1     , 0      , -1     , 0      , -1     , 0      };//-1 for not connected to that chip, 0 for available, >0 means it's connected and the netNumber is stored here
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |    
-const int8_t xMapK[24]  =  { -1     , -1     , 4      , 5      , 6      , 7      , 8      , 9      , 10     , 11     , 12      , 13      ,  14      , -1      , -1        , -1       , 0      , 1      , 2      , 3      , -1     , -1     , -1     , -1     };//holds which X pin is connected to the index on Chip K, -1 for none
+ int8_t xMapK[24]  =  { -1     , -1     , 4      , 5      , 6      , 7      , 8      , 9      , 10     , 11     , 12      , 13      ,  14      , -1      , -1        , -1       , 0      , 1      , 2      , 3      , -1     , -1     , -1     , -1     };//holds which X pin is connected to the index on Chip K, -1 for none
    int8_t xStatusK[24]  =  { -1     , -1     , 0      , 0      , 0      , 0      , 0      , 0      , 0      , 0      , 0       , 0       ,  0       , -1      , -1        , -1       , 0      , 0      , 0      , 0      , -1     , -1     , -1     , -1     };//-1 for not connected to that chip, 0 for available, >0 means it's connected and the netNumber is stored here
 //                         |        |        |        |        |        |        |        |        |        |        |         |         |          |         |           |          |        |        |        |        |        |        |        |        |    
-const int8_t xMapL[24]  =  { -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1      , -1      ,  -1      , -1      , -1        , -1       , -1     , -1     , -1     , -1     , 12     , 13     , -1     , -1     };//holds which X pin is connected to the index on Chip L, -1 for none
+int8_t xMapL[24]  =  { -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1      , -1      ,  -1      , -1      , -1        , -1       , -1     , -1     , -1     , -1     , 12     , 13     , -1     , -1     };//holds which X pin is connected to the index on Chip L, -1 for none
    int8_t xStatusL[24]  =  { -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1     , -1      , -1      ,  -1      , -1      , -1        , -1       , -1     , -1     , -1     , -1     , 0      , 0      , -1     , -1     };//-1 for not connected to that chip, 0 for available, >0 means it's connected and the netNumber is stored here
 
 // mapIJKL[]     will tell you whethher there's a connection from that nano pin to the corresponding special function chip 
@@ -89,7 +162,6 @@ const int8_t xMapL[24]  =  { -1     , -1     , -1     , -1     , -1     , -1    
 const int8_t reversePinMap[110] = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11, NANO_D12, NANO_D13, NANO_RESET, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,GND,101,102,SUPPLY_3V3,104,SUPPLY_5V,DAC0_5V,DAC1_8V,CURRENT_SENSE_PLUS,CURRENT_SENSE_MINUS};
 
 };
-
 
 
 
@@ -120,9 +192,7 @@ struct pathStruct{
   int redundantConnection = 0; // if the paths are redundant (for lower resistance) this is the pathNumber of the other one(s)
 
 };
-
-const char* definesToChar (int defined);
-
+*/
 /*
 uint8_t connectionsMatrix[85][85];
 
@@ -244,4 +314,4 @@ maybe copy kicad's schematic format
 
 
 
-#endif
+
