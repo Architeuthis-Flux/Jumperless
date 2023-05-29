@@ -2,9 +2,6 @@
 #define MATRIXSTATE_H
 
 #include <Arduino.h>
-//#include "JumperlessDefinesRP2040.h"
-
-
 
 
 /*

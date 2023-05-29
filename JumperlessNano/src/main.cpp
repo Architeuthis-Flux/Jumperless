@@ -1,12 +1,10 @@
 #include <Arduino.h>
-
 #include "JumperlessDefinesRP2040.h"
-
-
-
 #include "NetManager.h"
 #include "MatrixStateRP2040.h"
 #include "LittleFS.h"
+
+
 
 //nanoStatus nano;
 const char* definesToChar (int); //i really need to find a way to not need to forward declare fuctions with this setup, i hate it
@@ -18,8 +16,9 @@ void setup() {
 
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT_12MA);
-
-  
+ LittleFS.begin();
+ delay(3000);
+   openNodeFile();
 }
 
 void loop() {
@@ -27,12 +26,22 @@ void loop() {
 digitalWrite(LED_BUILTIN,HIGH);
 delay(100);
 digitalWrite(LED_BUILTIN,LOW);
-delay(1000);
+
+  delay(800);
+ 
 getNodesToConnect();
+delay(800);
+Serial.println("\n\n\rfinal netlist\n\n\r");
+listSpecialNets();
 listNets();
-//searchExistingNets();
+while(1);
+
+
 Serial.println("\n\r");
 
+//writeJSONtoFile();
+
+//delay(1000);
 /*
 for (int i = 0; i < 9; i++) //this is just to check that the structs are being set up correctly
 {

@@ -3,6 +3,7 @@
 #define MAX_NETS 64
 #define MAX_BRIDGES 255
 #define MAX_NODES 64
+#define MAX_DNI 8 //max number of doNotIntersect rules
 
 
 

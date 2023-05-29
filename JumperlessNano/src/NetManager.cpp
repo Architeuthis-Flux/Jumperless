@@ -2,69 +2,202 @@
 
 #include "NetManager.h"
 #include <Arduino.h>
-// #include "JumperlessDefinesRP2040.h"
-// #include "nodeFile.txt"
 #include "LittleFS.h"
-
 #include "MatrixStateRP2040.h"
 
 int8_t newNode1 = -1;
 int8_t newNode2 = -1;
-int8_t newBridge[MAX_BRIDGES][3]; // node1, node2, net
+int newBridge[MAX_BRIDGES][3]; // node1, node2, net
+int newBridgeLength;
 
-FILE *nodeFile;
-
-int nodePairIndex = 0;
+int newBridgeIndex = 0;
 
 int foundNode1Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 int foundNode2Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 
+// StaticJsonDocument <800> bridgeList;
+
+String nodeFileString;
+String bridgeString;
+String specialFunctionsString;
+
+File nodeFile;
+
+void openNodeFile()
+{
+
+    nodeFile = LittleFS.open("nodeFile.txt", "r");
+    if (!nodeFile)
+    {
+        Serial.println("Failed to open nodeFile");
+        return;
+    }
+    else
+    {
+        Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
+    }
+
+    nodeFileString = nodeFile.readString();
+
+    nodeFile.close();
+    splitStringToFields();
+    // parseStringToBridges();
+}
+
+void splitStringToFields()
+{
+    int openBraceIndex = 0;
+    int closeBraceIndex = 0;
+
+    Serial.println("\n\rraw input file\n\r");
+    Serial.println(nodeFileString);
+    Serial.println("\n\rsplitting and cleaning up string\n\r");
+    Serial.println("_");
+    openBraceIndex = nodeFileString.indexOf("{");
+    closeBraceIndex = nodeFileString.indexOf("}");
+    bridgeString = nodeFileString.substring(openBraceIndex + 1, closeBraceIndex);
+    bridgeString.trim();
+
+    Serial.println(bridgeString);
+
+    Serial.println("^\n\r");
+
+    nodeFileString.remove(0, closeBraceIndex + 1);
+    nodeFileString.trim();
+
+    openBraceIndex = nodeFileString.indexOf("{");
+    closeBraceIndex = nodeFileString.indexOf("}");
+    specialFunctionsString = nodeFileString.substring(openBraceIndex + 1, closeBraceIndex);
+    specialFunctionsString.trim();
+    Serial.println("_");
+    Serial.println(specialFunctionsString);
+    Serial.println("^\n\r");
+    replaceSFNamesWithDefinedInts();
+}
+
+void replaceSFNamesWithDefinedInts(void)
+{
+    Serial.println("replacing special function names with defined ints\n\r");
+    specialFunctionsString.replace("GND", "100");
+    specialFunctionsString.replace("SUPPLY_5V", "105");
+    specialFunctionsString.replace("SUPPLY_3V3", "103");
+    specialFunctionsString.replace("DAC0_5V", "106");
+    specialFunctionsString.replace("DAC1_8V", "107");
+    specialFunctionsString.replace("I_N", "109");
+    specialFunctionsString.replace("I_P", "108");
+
+    specialFunctionsString.replace("EMPTY_NET", "127");
+
+    Serial.println(specialFunctionsString);
+    Serial.println("\n\n\r");
+    parseStringToBridges();
+}
+
+void parseStringToBridges(void)
+{
+
+    int bridgeStringLength = bridgeString.length() - 1;
+
+    int specialFunctionsStringLength = specialFunctionsString.length() - 1;
+
+    int readLength = 0;
+    int readTotal = specialFunctionsStringLength;
+
+    newBridgeLength = 0;
+    newBridgeIndex = 0;
+
+     Serial.println("parsing bridges into array\n\r");
+
+    for (int i = 0; i <= specialFunctionsStringLength; i += readLength)
+    {
+       
+        sscanf(specialFunctionsString.c_str(), "%i-%i,\n\r%n", &newBridge[newBridgeIndex][0], &newBridge[newBridgeIndex][1], &readLength);
+        specialFunctionsString.remove(0, readLength);
+
+        readTotal -= readLength;
+
+        // Serial.print(newBridge[newBridgeIndex][0]);
+        // Serial.print("-");
+        // Serial.println(newBridge[newBridgeIndex][1]);
+
+        newBridgeLength++;
+        newBridgeIndex++;
+
+        // delay(500);
+    }
+
+    readTotal = bridgeStringLength;
+
+    for (int i = 0; i <= bridgeStringLength; i += readLength)
+    {
+
+        sscanf(bridgeString.c_str(), "%i-%i,\n\r%n", &newBridge[newBridgeIndex][0], &newBridge[newBridgeIndex][1], &readLength);
+        bridgeString.remove(0, readLength);
+
+        readTotal -= readLength;
+
+        // Serial.print(newBridge[newBridgeIndex][0]);
+        // Serial.print("-");
+        // Serial.println(newBridge[newBridgeIndex][1]);
+
+        newBridgeLength++;
+        newBridgeIndex++;
+
+        // delay(500);
+    }
+        for (int i = 0; i < newBridgeLength; i++)
+    {
+        Serial.print("[");
+        Serial.print(newBridge[i][0]);
+        Serial.print("-");
+        Serial.print(newBridge[i][1]);
+        Serial.print("],");
+    }
+    Serial.print("\n\rbridge pairs = ");
+    Serial.println(newBridgeLength);
+    // Serial.println(nodeFileString);
+}
+
 void getNodesToConnect() // read in the nodes you'd like to connect
 {
 
-    char readBuffer1[8];
-    char readBuffer2[8];
+    Serial.println("\n\n\rconnecting nodes into nets\n\r");
 
-    LittleFS.begin();
-
-    File f = LittleFS.open("nodeFile.txt", "r");
-    if (f.available())
+    for (int i = 0; i < newBridgeLength; i++)
     {
-        for (int i = 0; i < nodePairIndex; i++)
-        {
-            for (int k = 0; k < 8; k++)
-            {
-                readBuffer1[k] = ' ';
-                readBuffer2[k] = ' ';
-            }
+        newNode1 = newBridge[i][0];
 
-            f.readBytesUntil('-', readBuffer1, 4);
-            f.readBytesUntil(',', readBuffer2, 4);
-        }
+        newNode2 = newBridge[i][1];
 
-        newNode1 = atoi(readBuffer1);
-        newNode2 = atoi(readBuffer2);
+        newBridgeIndex++;
 
-        Serial.print(newNode1);
+        printNodeOrName(newNode1);
         Serial.print("-");
-        Serial.println(newNode2);
+        printNodeOrName(newNode2);
+        Serial.print("\n\r");
 
         // do some error checking
 
         if (newNode1 == 0 || newNode2 == 0)
         {
-            listNets();
+            // listNets();
             // return ;
         }
-        searchExistingNets(newNode1, newNode2);
-        nodePairIndex++;
+        else
+        {
+            searchExistingNets(newNode1, newNode2);
+        }
+
+       // if (i < 7)
+       // {
+            listSpecialNets();
+       // }
+
+            listNets();
+      
+        
     }
-    else
-    {
-        LittleFS.end();
-        listNets();
-        nodePairIndex = 0;
-    }
+    Serial.println("done");
 }
 
 int searchExistingNets(int node1, int node2) // search through existing nets for all nodes that match either one of the new nodes (so it will be added to that net)
@@ -73,8 +206,8 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
     foundNode1Net = 0;
     foundNode2Net = 0;
 
-    int foundNode1OnSpecialNet = 0;
-    int foundNode2OnSpecialNet = 0;
+    int foundNode1inSpecialNet = 0;
+    int foundNode2inSpecialNet = 0;
 
     for (int i = 1; i < MAX_NETS; i++)
     {
@@ -92,12 +225,18 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
 
             if (net[i].nodes[j] == node1)
             {
-                Serial.print("found node 1 in net ");
-                Serial.println(i);
+                if (i > 7)
+                {
+                    Serial.print("found Node ");
+                    printNodeOrName(node1);
+                    Serial.print(" in Net ");
+                    Serial.println(i);
+                }
 
                 if (net[i].specialFunction > 0)
                 {
-                    foundNode1OnSpecialNet = i;
+                    foundNode1Net = i;
+                    foundNode1inSpecialNet = i;
                 }
                 else
                 {
@@ -106,12 +245,18 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
             }
             if (net[i].nodes[j] == node2)
             {
-                Serial.print("found node 2 in net ");
-                Serial.println(i);
+                if (i > 7)
+                {
+                    Serial.print("found Node ");
+                    printNodeOrName(node2);
+                    Serial.print(" in Net ");
+                    Serial.println(i);
+                }
 
                 if (net[i].specialFunction > 0)
                 {
-                    foundNode2OnSpecialNet = i;
+                    foundNode2Net = i;
+                    foundNode2inSpecialNet = i;
                 }
                 else
                 {
@@ -126,57 +271,108 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
 
         addNodeToNet(foundNode1Net, node1); // note that they both connect to node1's net
         addNodeToNet(foundNode1Net, node2);
+        addBridgeToNet(foundNode1Net, node1, node2);
         return 1;
     }
     else if ((foundNode1Net > 0 && foundNode2Net > 0) && (foundNode1Net != foundNode2Net)) // if both nodes are in different nets, combine them
     {
-        Serial.print("combining nets ");
-        Serial.print(foundNode1Net);
-        Serial.print(" and ");
-        Serial.println(foundNode2Net);
-        listNets();
-        for (int i = 0; i < MAX_NODES; i++)
+        if (checkDoNotIntersectsByNet(foundNode1Net, foundNode2Net) == 1 )
         {
-            if (net[foundNode2Net].nodes[i] == 0)
+            int swap = 0;
+            if ( (foundNode2Net <= 7 && foundNode1Net <= 7))
             {
-                break;
+                    Serial.print("can't combine Special Nets, skipping\n\r"); //maybe have it add a bridge between them if it's allowed?
+            } else {
+
+                if (foundNode2Net <= 7)
+                {
+                    swap = foundNode1Net;
+                    foundNode1Net = foundNode2Net;
+                    foundNode2Net = swap;
+                }
+
+            Serial.print("combining Nets ");
+            Serial.print(foundNode1Net);
+            Serial.print(" and ");
+            Serial.println(foundNode2Net);
+            // Serial.println("before");
+            // listNets();
+            //  Serial.println("after");
+            for (int i = 0; i < MAX_NODES; i++)
+            {
+                if (net[foundNode2Net].nodes[i] == 0)
+                {
+                    break;
+                }
+
+                addNodeToNet(foundNode1Net, net[foundNode2Net].nodes[i]);
             }
 
-            addNodeToNet(foundNode1Net, net[foundNode2Net].nodes[i]);
-        }
-
-        for (int i = 0; i < MAX_BRIDGES; i++)
-        {
-            if (net[foundNode2Net].bridges[i][0] == 0)
+            for (int i = 0; i < MAX_BRIDGES; i++)
             {
-                break;
+                if (net[foundNode2Net].bridges[i][0] == 0)
+                {
+                    break;
+                }
+
+                addBridgeToNet(foundNode1Net, net[foundNode2Net].bridges[i][0], net[foundNode2Net].bridges[i][1]);
+            }
+            for (int i = 0; i < MAX_DNI; i++)
+            {
+                if (net[foundNode2Net].doNotIntersectNodes[i] == 0)
+                {
+                    break;
+                }
+
+                addNodeToNet(foundNode1Net, net[foundNode2Net].doNotIntersectNodes[i]);
             }
 
-            addBridgeToNet(foundNode1Net, net[foundNode2Net].bridges[i][0], net[foundNode2Net].bridges[i][1]);
+            deleteNet(foundNode2Net);
+            }
         }
-
-        deleteNet(foundNode2Net);
-
-        // net[foundNode2Net].number = 0; // clear the old net //make this a function
+        else
+        {
+            //createNewNet();
+        }
+       
 
         return 2;
     }
     else if (foundNode1Net > 0 && node2 > 0) // if node1 is in a net and node2 is not, add node2 to node1's net
     {
-        Serial.print("adding node2 to net ");
-        Serial.println(foundNode1Net);
+        if (checkDoNotIntersectsByNode(foundNode1Net, node2) == 1)
+        {
+            Serial.print("adding Node ");
+            printNodeOrName(node2);
+            Serial.print(" to Net ");
+            Serial.println(foundNode1Net);
 
-        addNodeToNet(foundNode1Net, node2);
+            addNodeToNet(foundNode1Net, node2);
+            addBridgeToNet(foundNode1Net, node1, node2);
+        }
+        else
+        {
+            createNewNet();
+        }
 
         return 3;
     }
     else if (foundNode2Net > 0 && node1 > 0) // if node2 is in a net and node1 is not, add node1 to node2's net
     {
-        Serial.print("adding node1 to net ");
-        Serial.println(foundNode2Net);
+        if (checkDoNotIntersectsByNode(foundNode2Net, node1) == 1)
+        {
+            Serial.print("adding Node ");
+            printNodeOrName(node1);
+            Serial.print(" to Net ");
+            Serial.println(foundNode2Net);
 
-        addNodeToNet(foundNode2Net, node1);
-
+            addNodeToNet(foundNode2Net, node1);
+            addBridgeToNet(foundNode2Net, node1, node2);
+        }
+        else
+        {
+            createNewNet();
+        }
         return 4;
     }
 
@@ -186,6 +382,18 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
         createNewNet(); // if neither node is in a net, create a new one
 
         return 0;
+    }
+}
+
+int printNodeOrName(int node) // returns number of characters printed (for tabs)
+{
+    if (node >= 100)
+    {
+        return Serial.print(definesToChar(node));
+    }
+    else
+    {
+        return Serial.print(node);
     }
 }
 
@@ -208,7 +416,7 @@ int shiftNets(int deletedNet) // why in the ever-loving fuck does this work? the
             break;
         }
     }
-    Serial.print("deleted net = ");
+    Serial.print("deleted Net ");
     Serial.println(deletedNet);
 
     for (int i = deletedNet; i < lastNet; i++)
@@ -258,7 +466,13 @@ void checkCurrentSense(void)
 
 void listNets(void)
 {
-    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\n\r");
+    if (net[8].number == 0)
+    {
+        //Serial.print("No nets to list\n\r");
+        //return;
+    } else {
+    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tDo Not Intersects");
+
     int tabs = 0;
     for (int i = 8; i < MAX_NETS; i++)
     {
@@ -280,7 +494,7 @@ void listNets(void)
         for (int j = 0; j < MAX_NODES; j++)
         {
 
-            tabs += Serial.print(net[i].nodes[j]);
+            tabs += printNodeOrName(net[i].nodes[j]);
 
             if (net[i].nodes[j + 1] == 0)
             {
@@ -300,12 +514,13 @@ void listNets(void)
 
         Serial.print("{");
 
+        tabs = 0;
         for (int j = 0; j < MAX_BRIDGES; j++)
         {
 
-            Serial.print(net[i].bridges[j][0]);
-            Serial.print("-");
-            Serial.print(net[i].bridges[j][1]);
+            tabs += printNodeOrName(net[i].bridges[j][0]);
+            tabs += Serial.print("-");
+            tabs += printNodeOrName(net[i].bridges[j][1]);
             // Serial.print(",");
 
             if (net[i].bridges[j + 1][0] == 0)
@@ -315,17 +530,41 @@ void listNets(void)
             else
             {
 
-                Serial.print(",");
+                tabs += Serial.print(",");
             }
         }
-        Serial.print("}\t");
+        tabs += Serial.print("}\t");
+
+        for (int i = 0; i < 3 - (tabs / 8); i++)
+        {
+            Serial.print("\t");
+        }
+
+        for (int j = 0; j < MAX_DNI; j++)
+        {
+
+            tabs += printNodeOrName(net[i].doNotIntersectNodes[j]);
+
+            if (net[i].doNotIntersectNodes[j + 1] == 0)
+            {
+                break;
+            }
+            else
+            {
+
+                tabs += Serial.print(",");
+            }
+        }
     }
-    Serial.print("\n\n\r");
+    }
+    Serial.print("\n\n\n\r");
 }
 
 void listSpecialNets()
 {
-    for (int i = 0; i < MAX_NETS; i++)
+    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tDo Not Intersects");
+    int tabs = 0;
+    for (int i = 0; i < 8; i++)
     {
         if (net[i].number == 0) // stops searching if it gets to an unallocated net
         {
@@ -333,60 +572,81 @@ void listSpecialNets()
             break;
         }
 
-        if (net[i].specialFunction > 0)
+        Serial.print("\n\r");
+        Serial.print(i);
+        Serial.print("\t");
+        Serial.print(net[i].name);
+        Serial.print("\t");
+        Serial.print(net[i].number);
+        Serial.print("\t\t");
+
+        tabs = 0;
+        for (int j = 0; j < MAX_NODES; j++)
         {
-            Serial.print("\n\r");
-            Serial.print(net[i].name), DEC;
+            tabs += printNodeOrName(net[i].nodes[j]);
+            // tabs += Serial.print(definesToChar(net[i].nodes[j]));
+
+            if (net[i].nodes[j + 1] == 0)
+            {
+                break;
+            }
+            else
+            {
+
+                tabs += Serial.print(",");
+            }
+        }
+
+        for (int i = 0; i < 3 - (tabs / 8); i++)
+        {
             Serial.print("\t");
-            Serial.print(net[i].number);
+        }
+
+        Serial.print("{");
+
+        tabs = 0;
+        for (int j = 0; j < MAX_BRIDGES; j++)
+        {
+
+            tabs += printNodeOrName(net[i].bridges[j][0]);
+            tabs += Serial.print("-");
+            tabs += printNodeOrName(net[i].bridges[j][1]);
+            // Serial.print(",");
+
+            if (net[i].bridges[j + 1][0] == 0)
+            {
+                break;
+            }
+            else
+            {
+
+                tabs += Serial.print(",");
+            }
+        }
+        tabs += Serial.print("}\t");
+
+        for (int i = 0; i < 3 - (tabs / 8); i++)
+        {
             Serial.print("\t");
-            Serial.print(definesToChar(net[i].specialFunction));
-            if (i == 1)
-                Serial.print("\t"); // padding for "GND"
-            Serial.print("\t{");
+        }
 
-            for (int k = 0; k < 8; k++)
+        for (int j = 0; j < MAX_DNI; j++)
+        {
+
+            tabs += printNodeOrName(net[i].doNotIntersectNodes[j]);
+
+            if (net[i].doNotIntersectNodes[j + 1] == 0 || i == 0)
             {
-                if (net[i].doNotIntersectNodes[k] != 0)
-                {
-
-                    Serial.print(definesToChar(net[i].doNotIntersectNodes[k]));
-                    Serial.print(",");
-                }
+                break;
             }
-            Serial.print("}\t\t\t");
-
-            for (int j = 0; j < MAX_NODES; j++)
+            else
             {
-                if (net[i].nodes[j] == 0)
-                {
-                    break;
-                }
 
-                Serial.print(definesToChar(net[i].nodes[j]));
-                Serial.print(",");
-
-                Serial.print(net[i].nodes[j]);
-                Serial.print(",");
+                tabs += Serial.print(",");
             }
-
-            Serial.print("\t{");
-
-            for (int j = 0; j < MAX_BRIDGES; j++)
-            {
-                if (net[i].bridges[j][0] == 0)
-                {
-                    break;
-                }
-
-                Serial.print(definesToChar(net[i].bridges[j][0]));
-                Serial.print("-");
-                Serial.print(definesToChar(net[i].bridges[j][1]));
-                Serial.print(",");
-            }
-            Serial.print("}\t");
         }
     }
+    Serial.print("\n\r");
 }
 
 void createNewNet() // add those nodes to a new net
@@ -404,7 +664,6 @@ void createNewNet() // add those nodes to a new net
 
     addBridgeToNet(newNetNumber, newNode1, newNode2);
 }
-
 
 void addBridgeToNet(uint8_t netToAddBridge, int8_t node1, int8_t node2) // just add those nodes to the net
 {
@@ -425,7 +684,7 @@ int findFirstUnusedNetIndex() // search for a free net[]
     {
         if (net[i].nodes[0] == 0)
         {
-            //Serial.print("found unused net ");
+            Serial.print("found unused Net ");
             Serial.println(i);
 
             return i;
@@ -441,8 +700,8 @@ int findFirstUnusedBridgeIndex(int netNumber)
     {
         if (net[netNumber].bridges[i][0] == 0)
         {
-            //Serial.print("found unused bridge ");
-            Serial.println(i);
+            // Serial.print("found unused bridge ");
+            // Serial.println(i);
 
             return i;
             break;
@@ -467,41 +726,95 @@ int findFirstUnusedNodeIndex(int netNumber) // search for a free net[]
     return 0x7f;
 }
 
-void checkDoNotIntersects() // make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
+int checkDoNotIntersectsByNet(int netToCheck1, int netToCheck2) //If you're searching DNIs by net, there won't be any valid ways to make a new net with both nodes, so its skipped
 {
-    for (int i = 0; i < MAX_NETS; i++)
+    int problem = 0;
+
+    for (int i = 0; i <= MAX_DNI; i++)
     {
-        if (net[i].number == 0) // stops searching if it gets to an unallocated net
+        if (net[netToCheck1].doNotIntersectNodes[i] == 0)
         {
-            break;
+             break;
         }
 
-        for (int j = 0; j < MAX_NODES; j++)
-        {
-            if (net[i].nodes[j] == 0)
+        for (int j = 0; j <= MAX_NODES; j++)
+        {   //Serial.print (net[netToCheck1].doNotIntersectNodes[i]);
+            //Serial.print ("-");
+           // Serial.println (net[netToCheck2].nodes[j]);
+            
+            if (net[netToCheck2].nodes[j] == 0)
             {
                 break;
             }
 
-            for (int k = 0; k < 8; k++)
+            if (net[netToCheck1].doNotIntersectNodes[i] == net[netToCheck2].nodes[j])
             {
-                if (net[i].doNotIntersectNodes[k] == 0)
-                {
-                    break;
-                }
+                Serial.print("Net ");
+                printNodeOrName(netToCheck2);
+                Serial.print(" can't be combined with Net ");
+                Serial.print(netToCheck1);
+                Serial.print(" due to Do Not Intersect rules, skipping (first net DNI to second net nodes)\n\r"); 
+                return 0;
+                problem ++;
+            }
+        }
+        //Serial.println (" ");
+    }
 
-                if (net[i].nodes[j] == net[i].doNotIntersectNodes[k])
-                {
-                    Serial.print("you tried to connect a node that is not allowed on this net, skipping");
-                    return;
-                }
+    for (int i = 0; i <= MAX_DNI; i++)
+    {
+        if (net[netToCheck2].doNotIntersectNodes[i] == 0)
+        {
+             break;
+        }
+
+        for (int j = 0; j <= MAX_NODES; j++)
+        {
+            if (net[netToCheck1].nodes[j] == 0)
+            {
+                break;
+            }
+
+            if (net[netToCheck2].doNotIntersectNodes[i] == net[netToCheck1].nodes[j])
+            {
+                Serial.print("Net ");
+                printNodeOrName(netToCheck2);
+                Serial.print(" can't be combined with Net ");
+                Serial.print(netToCheck1);
+                Serial.print(" due to Do Not Intersect rules, skipping(second net DNI to first net nodes)\n\r");
+                return 0;
             }
         }
     }
+
+    return 1; // return 1 if it's ok to connect these nets
 }
 
+int checkDoNotIntersectsByNode(int netToCheck, int nodeToCheck) // make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
+{
+
+    for (int i = 0; i < MAX_DNI; i++)
+    {
+        if (net[netToCheck].doNotIntersectNodes[i] == 0)
+        {
+            break;
+        }
+
+        if (net[netToCheck].doNotIntersectNodes[i] == nodeToCheck)
+        {
+            Serial.print("Node ");
+            printNodeOrName(nodeToCheck);
+            Serial.print(" is not allowed on Net ");
+            Serial.print(netToCheck);
+            Serial.print(" due to Do Not Intersect rules, a new net will be created\n\r");
+            return 0;
+        }
+    }
+
+    return 1; // return 1 if it's ok to connect these nets
+}
 /*
-void addNodesToNet(); //just add those nodes to the net
+
 
 void checkDoNotIntersects(); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
 

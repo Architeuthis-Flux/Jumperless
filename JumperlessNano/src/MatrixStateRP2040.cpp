@@ -102,13 +102,14 @@ enum nanoPinsToIndex       {     NANO_PIN_D0 ,     NANO_PIN_D1 ,     NANO_PIN_D2
 
 extern struct nanoStatus nano;
 
-
+char same[12];
 const char* definesToChar (int defined) //converts the internally used #defined numbers into human readable strings
 {
 
-char same[] = "   ";
+
+itoa(defined,same,10);
 const char *defNanoToChar[26] = {"NANO_D0", "NANO_D1", "NANO_D2", "NANO_D3", "NANO_D4", "NANO_D5", "NANO_D6", "NANO_D7", "NANO_D8", "NANO_D9", "NANO_D10", "NANO_D11", "NANO_D12", "NANO_D13", "NANO_RESET", "NANO_AREF", "NANO_A0", "NANO_A1", "NANO_A2", "NANO_A3", "NANO_A4", "NANO_A5", "NANO_A6", "NANO_A7"};
-const char *defSpecialToChar[12] = {"GND","NOT_DEFINED","NOT_DEFINED","SUPPLY_3V3","NOT_DEFINED","SUPPLY_5V","DAC_0_+5V","DAC_1_+-8V","CURRENT_SENSE +","CURRENT_SENSE -"};
+const char *defSpecialToChar[12] = {"GND","NOT_DEFINED","NOT_DEFINED","3V3","NOT_DEFINED","5V","DAC_0","DAC_1","I_POS","I_NEG"};
 const char *emptyNet[] = {"EMPTY_NET", "?"};
 
 if (defined >= 70 && defined <= 93)
@@ -122,7 +123,7 @@ return defNanoToChar[defined-70];
     return emptyNet[0];
   }else {
  //itoa(defined,same,10);
-    return same;
+    return " ";
   }
 
 

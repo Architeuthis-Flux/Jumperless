@@ -8,6 +8,15 @@
 
 
 
+void writeJSONtoFile();
+
+void openNodeFile();
+
+void splitStringToFields();
+void replaceSFNamesWithDefinedInts();
+void parseStringToBridges();
+int printNodeOrName(int node);
+
 void getNodesToConnect(); //read in the nodes you'd like to connect
 
 int searchExistingNets(int,int); //search through existing nets for all nodes that match either one of the new nodes (so it will be added to that net)
@@ -26,7 +35,9 @@ void addNodeToNet(int, int); //just add those nodes to the net
 
 void addBridgeToNet(uint8_t, int8_t, int8_t); //just add those nodes to the net
 
-void checkDoNotIntersects(); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
+int checkDoNotIntersectsByNet(int,int); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
+
+int checkDoNotIntersectsByNode(int,int); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
 
 void combineNets(); //combine those 2 nets into a single net, probably call addNodesToNet and deleteNet and just expand the lower numbered one. Should we shift nets down? or just reuse the newly emply space for the next net
 
