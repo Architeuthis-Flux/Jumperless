@@ -6,16 +6,16 @@
 #include "NetManager.h"
 #include "NetsToChipConnections.h"
 
-//don't try to understand this, it's still a mess
+// don't try to understand this, it's still a mess
 
-int startEndChip[2] = {-1, -1}; 
+int startEndChip[2] = {-1, -1};
 int bothNodes[2] = {-1, -1};
 int endChip;
 int chipCandidates[2][4] = {{-1, -1, -1, -1}, {-1, -1, -1, -1}}; // nano and sf nodes have multiple possible chips they could be connected to, so we need to store them all and check them all
 
-int chipsLeastToMostCrowded[12] = {0,1,2,3,4,5,6,7,8,9,10,11}; //this will be sorted from most to least crowded, and will be used to determine which chip to use for each node
-int sfChipsLeastToMostCrowded[4] = {8,9,10,11}; //this will be sorted from most to least crowded, and will be used to determine which chip to use for each node
-int bbToSfLanes[8][4] = {{0}}; // [Chip A - H][CHIP I-K] 0 = free  1 = used
+int chipsLeastToMostCrowded[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // this will be sorted from most to least crowded, and will be used to determine which chip to use for each node
+int sfChipsLeastToMostCrowded[4] = {8, 9, 10, 11};                        // this will be sorted from most to least crowded, and will be used to determine which chip to use for each node
+int bbToSfLanes[8][4] = {{0}};                                            // [Chip A - H][CHIP I-K] 0 = free  1 = used
 
 int numberOfUniqueNets = 0;
 int numberOfNets = 0;
@@ -129,7 +129,7 @@ void bridgesToPaths(void)
 
     printPathArray();
     sortAllChipsLeastToMostCrowded();
-     resolveChipCandidates();
+    resolveChipCandidates();
 }
 
 void findStartAndEndChips(int node1, int node2, int pathIdx)
@@ -234,7 +234,7 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
             break;
         }
         }
-        //Serial.print("\n\r");
+        // Serial.print("\n\r");
     }
 
     if (startEndChip[0] == -1 || startEndChip[1] == -1)
@@ -242,23 +242,18 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
     }
     else
     {
-       
     }
-
-    
 }
 
 void resolveChipCandidates(void)
 {
-    int nodesToResolve[2] = {0,0}; // {node1,node2} 0 = already found, 1 = needs resolving
-
-   
+    int nodesToResolve[2] = {0, 0}; // {node1,node2} 0 = already found, 1 = needs resolving
 
     for (int pathIndex = 0; pathIndex < numberOfPaths; pathIndex++)
     {
         nodesToResolve[0] = 0;
         nodesToResolve[1] = 0;
-        
+
         if (path[pathIndex].chip[0] == -1)
         {
             nodesToResolve[0] = 1;
@@ -276,89 +271,66 @@ void resolveChipCandidates(void)
         {
             nodesToResolve[1] = 0;
         }
-    
-
-
 
         for (int nodeOneOrTwo = 0; nodeOneOrTwo < 2; nodeOneOrTwo++)
         {
-            if(nodesToResolve[nodeOneOrTwo] == 1)
+            if (nodesToResolve[nodeOneOrTwo] == 1)
             {
-   
 
-            path[pathIndex].chip[nodeOneOrTwo] = moreAvailableChip(path[pathIndex].candidates[nodeOneOrTwo][0], path[pathIndex].candidates[nodeOneOrTwo][1]);
+                path[pathIndex].chip[nodeOneOrTwo] = moreAvailableChip(path[pathIndex].candidates[nodeOneOrTwo][0], path[pathIndex].candidates[nodeOneOrTwo][1]);
 
-            Serial.print("path[");
-            Serial.print(pathIndex);
-            Serial.print("] chip from ");
-            Serial.print(chipNumToChar(path[pathIndex].chip[(1+nodeOneOrTwo)%2]));
-            Serial.print(" to chip ");
-            Serial.print(chipNumToChar(path[pathIndex].chip[nodeOneOrTwo]));
-            Serial.print(" chosen\n\n\r");
+                Serial.print("path[");
+                Serial.print(pathIndex);
+                Serial.print("] chip from ");
+                Serial.print(chipNumToChar(path[pathIndex].chip[(1 + nodeOneOrTwo) % 2]));
+                Serial.print(" to chip ");
+                Serial.print(chipNumToChar(path[pathIndex].chip[nodeOneOrTwo]));
+                Serial.print(" chosen\n\n\r");
             }
-
-
-
         }
-
-
-
-
     }
-
-
 }
 
-void bbToSfConnections (void)
+void bbToSfConnections(void)
 {
 
-    for (int i = 0 ; i < numberOfPaths; i++)
+    for (int i = 0; i < numberOfPaths; i++)
     {
         if (path[i].chip[0] > 7 && path[i].chip[1] <= 7 && path[i].chip[1] >= 0)
         {
 
-
-                bbToSfLanes[path[i].chip[1]][path[i].chip[0] - 8] ++; //why is this happening every loop
-                Serial.print (i);
-                Serial.print (" ");
-                Serial.print (chipNumToChar((path[i].chip[1])));
-                Serial.print ("-");
-                Serial.println (chipNumToChar((path[i].chip[0])));
-                
-
-        } else if (path[i].chip[1] > 7 && path[i].chip[0] <= 7 && path[i].chip[0] >= 0)
-
-                bbToSfLanes[path[i].chip[0]][path[i].chip[1] - 8] ++;
-                Serial.print (i);
-                Serial.print (" ");
-                Serial.print (chipNumToChar((path[i].chip[0])));
-                Serial.print ("-");
-                Serial.println (chipNumToChar((path[i].chip[1])));
-
-
-
-
+            bbToSfLanes[path[i].chip[1]][path[i].chip[0] - 8]++; // why is this happening every loop
+            Serial.print(i);
+            Serial.print(" ");
+            Serial.print(chipNumToChar((path[i].chip[1])));
+            Serial.print("-");
+            Serial.println(chipNumToChar((path[i].chip[0])));
         }
+        else if (path[i].chip[1] > 7 && path[i].chip[0] <= 7 && path[i].chip[0] >= 0)
 
-    
-
-for (int i = 0; i < 8; i++)
-{
-    Serial.print(chipNumToChar(i));
-    Serial.print(": ");
-    for (int j = 0; j < 4; j++)
-    {
-        Serial.print(chipNumToChar(j + 8));
-        Serial.print(bbToSfLanes[i][j]);
-        Serial.print("  ");
+            bbToSfLanes[path[i].chip[0]][path[i].chip[1] - 8]++;
+        Serial.print(i);
+        Serial.print(" ");
+        Serial.print(chipNumToChar((path[i].chip[0])));
+        Serial.print("-");
+        Serial.println(chipNumToChar((path[i].chip[1])));
     }
-    Serial.println("\n\r");
+
+    for (int i = 0; i < 8; i++)
+    {
+        Serial.print(chipNumToChar(i));
+        Serial.print(": ");
+        for (int j = 0; j < 4; j++)
+        {
+            Serial.print(chipNumToChar(j + 8));
+            Serial.print(bbToSfLanes[i][j]);
+            Serial.print("  ");
+        }
+        Serial.println("\n\r");
+    }
 }
 
-
-}
-
-int moreAvailableChip (int chip1 , int chip2)
+int moreAvailableChip(int chip1, int chip2)
 {
     int chipChosen = -1;
     sortAllChipsLeastToMostCrowded();
@@ -371,15 +343,12 @@ int moreAvailableChip (int chip1 , int chip2)
             break;
         }
     }
-return chipChosen;
-
+    return chipChosen;
 }
-
 
 void sortSFchipsLeastToMostCrowded(void)
 {
-    int numberOfConnectionsPerSFchip[4] = {0,0,0,0}; 
-
+    int numberOfConnectionsPerSFchip[4] = {0, 0, 0, 0};
 
     for (int i = 0; i < numberOfPaths; i++)
     {
@@ -390,39 +359,28 @@ void sortSFchipsLeastToMostCrowded(void)
                 numberOfConnectionsPerSFchip[path[i].chip[j] - 8]++;
             }
         }
-        
-
-
-
     }
-for (int i = 0; i < 4; i++)
-{
-Serial.print("sf connections: ");
-Serial.print (chipNumToChar(i + 8));
-Serial.print(numberOfConnectionsPerSFchip[i]);
-Serial.print("\n\r");
-
-
-}
-
-
-
+    for (int i = 0; i < 4; i++)
+    {
+        Serial.print("sf connections: ");
+        Serial.print(chipNumToChar(i + 8));
+        Serial.print(numberOfConnectionsPerSFchip[i]);
+        Serial.print("\n\r");
+    }
 }
 
 void sortAllChipsLeastToMostCrowded(void)
 {
     debugNTCC = false;
-    int numberOfConnectionsPerChip[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //this will be used to determine which chip is most crowded
- 
+    int numberOfConnectionsPerChip[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // this will be used to determine which chip is most crowded
 
-        for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; i++)
     {
         chipsLeastToMostCrowded[i] = i;
-
     }
 
     Serial.println("\n\r");
-    
+
     for (int i = 0; i < numberOfPaths; i++)
     {
         for (int j = 0; j < 2; j++)
@@ -432,19 +390,18 @@ void sortAllChipsLeastToMostCrowded(void)
                 numberOfConnectionsPerChip[path[i].chip[j]]++;
             }
         }
-        
     }
-if (debugNTCC)
-{
-    for (int i = 0; i < 12; i++)
+    if (debugNTCC)
     {
-        Serial.print(chipNumToChar(i));
-        Serial.print(": ");
-        Serial.println(numberOfConnectionsPerChip[i]);
-    }
+        for (int i = 0; i < 12; i++)
+        {
+            Serial.print(chipNumToChar(i));
+            Serial.print(": ");
+            Serial.println(numberOfConnectionsPerChip[i]);
+        }
 
-    Serial.println("\n\r");
-}
+        Serial.println("\n\r");
+    }
     int temp = 0;
 
     for (int i = 0; i < 12; i++)
@@ -454,7 +411,7 @@ if (debugNTCC)
             if (numberOfConnectionsPerChip[j] > numberOfConnectionsPerChip[j + 1])
             {
                 temp = numberOfConnectionsPerChip[j];
-                //chipsLeastToMostCrowded[j] = chipsLeastToMostCrowded[j + 1];
+                // chipsLeastToMostCrowded[j] = chipsLeastToMostCrowded[j + 1];
                 numberOfConnectionsPerChip[j] = numberOfConnectionsPerChip[j + 1];
                 numberOfConnectionsPerChip[j + 1] = temp;
 
@@ -473,28 +430,26 @@ if (debugNTCC)
             sfChipsLeastToMostCrowded[i - 8] = chipsLeastToMostCrowded[i];
         }
         if (debugNTCC)
-{
-        Serial.print(chipNumToChar(chipsLeastToMostCrowded[i]));
-        Serial.print(": ");
-        Serial.println(numberOfConnectionsPerChip[i]);
-}
+        {
+            Serial.print(chipNumToChar(chipsLeastToMostCrowded[i]));
+            Serial.print(": ");
+            Serial.println(numberOfConnectionsPerChip[i]);
+        }
     }
-if (debugNTCC)
-{
-    for (int i = 0; i < 4; i++)
+    if (debugNTCC)
     {
-        Serial.print("\n\n\r");
-        Serial.print(chipNumToChar(sfChipsLeastToMostCrowded[i]));
-        Serial.print(": ");
-    
-        Serial.print("\n\n\r");
+        for (int i = 0; i < 4; i++)
+        {
+            Serial.print("\n\n\r");
+            Serial.print(chipNumToChar(sfChipsLeastToMostCrowded[i]));
+            Serial.print(": ");
+
+            Serial.print("\n\n\r");
+        }
     }
+    debugNTCC = true;
+    bbToSfConnections();
 }
-debugNTCC = true;
-bbToSfConnections();
-
-}
-
 
 void printPathArray(void) // this also prints candidates and x y
 {
@@ -585,7 +540,7 @@ void clearChipsOnPathToNegOne(void)
             path[i].net = -1;
         }
 
-        for (int c = 0; c < 3; c++) 
+        for (int c = 0; c < 3; c++)
         {
             path[i].chip[c] = -1;
             path[i].x[c] = -1;
@@ -593,7 +548,7 @@ void clearChipsOnPathToNegOne(void)
 
             path[i].candidates[c][0] = -1;
             path[i].candidates[c][1] = -1;
-            path[i].candidates[c][2] = -1; //CEEEEEEEE!!!!!! i had this set to 3 and it was clearing everything, but no im not using rust
+            path[i].candidates[c][2] = -1; // CEEEEEEEE!!!!!! i had this set to 3 and it was clearing everything, but no im not using rust
         }
     }
 }

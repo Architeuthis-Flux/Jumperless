@@ -7,96 +7,92 @@
 #include "NetsToChipConnections.h"
 #include "LEDs.h"
 
+// nanoStatus nano;
+const char *definesToChar(int); // i really need to find a way to not need to forward declare fuctions with this setup, i hate it
 
-//nanoStatus nano;
-const char* definesToChar (int); //i really need to find a way to not need to forward declare fuctions with this setup, i hate it
+// void printConnections();
 
-//void printConnections();
-
-
-void setup() {
+void setup()
+{
 
   Serial.begin(115200);
   pinMode(25, OUTPUT);
 
- LittleFS.begin();
- delay(3000);
-   openNodeFile();
+  LittleFS.begin();
+  delay(3000);
+  openNodeFile();
 
-initLEDs();
-
+  initLEDs();
 }
 
-void loop() {
-
-//digitalWrite(LED_BUILTIN,HIGH);
-//delay(100);
-//digitalWrite(LED_BUILTIN,LOW);
-
-  rainbowy(180 ,55    , 20); // Red
-
-  //delay(800);
- 
-getNodesToConnect();
-//delay(800);
-Serial.println("\n\n\rfinal netlist\n\n\r");
-listSpecialNets();
-listNets();
-//printBridgeArray();
-
-bridgesToPaths();
-while(1);
-
-
-//Serial.println("\n\r");
-
-//writeJSONtoFile();
-
-//delay(1000);
-/*
-for (int i = 0; i < 9; i++) //this is just to check that the structs are being set up correctly
+void loop()
 {
-Serial.print("\n\r");
-Serial.print (net[i].name);
-Serial.print ("\t");
-Serial.print (net[i].number);
-Serial.print ("\t");
-Serial.print (definesToChar(net[i].specialFunction));
-if (i == 1) Serial.print ("\t"); //padding for "GND"
-Serial.print ("\t{");
 
+  // digitalWrite(LED_BUILTIN,HIGH);
+  // delay(100);
+  // digitalWrite(LED_BUILTIN,LOW);
 
-for (int k = 0; k < 8; k++)
-{
-      if (net[i].doNotIntersectNodes[k] != 0) 
-    {
-      
-Serial.print (definesToChar(net[i].doNotIntersectNodes[k]));
-Serial.print (",");
-    }
+  rainbowy(180, 55, 20); // Red
 
-}
-Serial.print ("}\t");
+  // delay(800);
 
-  for (int j = 0 ; j < MAX_NODES; j++)
+  getNodesToConnect();
+  // delay(800);
+  Serial.println("\n\n\rfinal netlist\n\n\r");
+  listSpecialNets();
+  listNets();
+  // printBridgeArray();
+
+  bridgesToPaths();
+  while (1)
+    ;
+
+  // Serial.println("\n\r");
+
+  // writeJSONtoFile();
+
+  // delay(1000);
+  /*
+  for (int i = 0; i < 9; i++) //this is just to check that the structs are being set up correctly
   {
-    if (net[i].nodes[j] != 0) 
-    {
-      
-      Serial.print (definesToChar(net[i].nodes[j]));
-        Serial.print (",");
-    }
-     
+  Serial.print("\n\r");
+  Serial.print (net[i].name);
+  Serial.print ("\t");
+  Serial.print (net[i].number);
+  Serial.print ("\t");
+  Serial.print (definesToChar(net[i].specialFunction));
+  if (i == 1) Serial.print ("\t"); //padding for "GND"
+  Serial.print ("\t{");
+
+
+  for (int k = 0; k < 8; k++)
+  {
+        if (net[i].doNotIntersectNodes[k] != 0)
+      {
+
+  Serial.print (definesToChar(net[i].doNotIntersectNodes[k]));
+  Serial.print (",");
+      }
+
   }
-  Serial.println("\n\n\n\n\r");
- 
+  Serial.print ("}\t");
 
-}*/
-delay(100);
+    for (int j = 0 ; j < MAX_NODES; j++)
+    {
+      if (net[i].nodes[j] != 0)
+      {
 
+        Serial.print (definesToChar(net[i].nodes[j]));
+          Serial.print (",");
+      }
+
+    }
+    Serial.println("\n\n\n\n\r");
+
+
+  }*/
+  delay(100);
 }
-
-
 
 /*
 
@@ -210,7 +206,7 @@ void printConnections(void) {
     }
 
     Serial.println(" ");
-  
+
   Serial.println("\n\n");
 */
 /*
