@@ -1,5 +1,10 @@
 
 
+#define DEBUG_FILEPARSING 1
+#define TIME_FILEPARSING 1
+#define DEBUG_NETMANAGER 1
+#define TIME_NETMANAGER 1
+
 #define MAX_NETS 64
 #define MAX_BRIDGES 255
 #define MAX_NODES 64
@@ -54,7 +59,10 @@
 #define ADC2_5V 28
 #define ADC3_8V 29
 
-
+#define T_RAIL_POS 31
+#define T_RAIL_NEG 0
+#define B_RAIL_POS 63
+#define B_RAIL_NEG 32
 
 
 #define t1  1

@@ -3,7 +3,9 @@
 #include "NetManager.h"
 #include "MatrixStateRP2040.h"
 #include "LittleFS.h"
-
+#include "FileParsing.h"
+#include "NetsToChipConnections.h"
+#include "LEDs.h"
 
 
 //nanoStatus nano;
@@ -15,29 +17,38 @@ const char* definesToChar (int); //i really need to find a way to not need to fo
 void setup() {
 
   Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT_12MA);
+  pinMode(25, OUTPUT);
+
  LittleFS.begin();
  delay(3000);
    openNodeFile();
+
+initLEDs();
+
 }
 
 void loop() {
 
-digitalWrite(LED_BUILTIN,HIGH);
-delay(100);
-digitalWrite(LED_BUILTIN,LOW);
+//digitalWrite(LED_BUILTIN,HIGH);
+//delay(100);
+//digitalWrite(LED_BUILTIN,LOW);
 
-  delay(800);
+  rainbowy(180 ,55    , 20); // Red
+
+  //delay(800);
  
 getNodesToConnect();
-delay(800);
+//delay(800);
 Serial.println("\n\n\rfinal netlist\n\n\r");
 listSpecialNets();
 listNets();
+//printBridgeArray();
+
+bridgesToPaths();
 while(1);
 
 
-Serial.println("\n\r");
+//Serial.println("\n\r");
 
 //writeJSONtoFile();
 

@@ -1,22 +1,32 @@
 bridges
 {
 1-2,
-3-4,
-5-6,
-7-8,
+30-4,
+50-60,
+17-38,
 9-10,
-11-12,
-12-13,
-2-3,
-10-11,
+16-12,
+D13-D1,
+D0-1,
+A1-5,
+D13-A7,
+AREF-A1,
+20-33,
+10-41,
+D10-D11,
+D11-D12,
 1-11,
-0-7,
+D2-33,
+D9,18,
+D5-44,
+A2-33,
 }
 
-special functions
+special functions //these are connected first so DNIs will be applied to all the nets
 {
-1-GND,
+19-GND,
 11-SUPPLY_5V,
+D10-SUPPLY_3V3,
 6-I_P,
 I_P-I_N,
 }

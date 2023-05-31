@@ -6,15 +6,14 @@
 #include "JumperlessDefinesRP2040.h"
 //#include "MatrixStateRP2040.h"
 
+extern int newBridge[MAX_BRIDGES][3]; // node1, node2, net
+extern int newBridgeLength;
+extern int newBridgeIndex;
+
 
 
 void writeJSONtoFile();
 
-void openNodeFile();
-
-void splitStringToFields();
-void replaceSFNamesWithDefinedInts();
-void parseStringToBridges();
 int printNodeOrName(int node);
 
 void getNodesToConnect(); //read in the nodes you'd like to connect
@@ -39,7 +38,7 @@ int checkDoNotIntersectsByNet(int,int); //make sure none of the nodes on the net
 
 int checkDoNotIntersectsByNode(int,int); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
 
-void combineNets(); //combine those 2 nets into a single net, probably call addNodesToNet and deleteNet and just expand the lower numbered one. Should we shift nets down? or just reuse the newly emply space for the next net
+void combineNets(int,int); //combine those 2 nets into a single net, probably call addNodesToNet and deleteNet and just expand the lower numbered one. Should we shift nets down? or just reuse the newly emply space for the next net
 
 void deleteNet(int); //make sure to check special function nets and clear connections to it
 
@@ -48,6 +47,12 @@ int shiftNets(int); //returns last net number to be deleted
 void deleteBridge();
 
 void deleteNode(); //disconnects everything connected to that one node
+
+const char* definesToChar (int defined);
+
+void printBridgeArray();
+
+
 
 void checkIfNodesAreABridge(); //if both of those nodes make up a memberBridge[][] pair. if not, warn and exit
 
