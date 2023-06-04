@@ -97,36 +97,40 @@
 #define t30 30
 
 
-#define b1  32
-#define b2  33
-#define b3  34
-#define b4  35
-#define b5  36
-#define b6  37
-#define b7  38
-#define b8  39
-#define b9  40
-#define b10 41
-#define b11 42
-#define b12 43
-#define b13 44
-#define b14 45
-#define b15 46
-#define b16 47
-#define b17 48
-#define b18 49
-#define b19 50
-#define b20 51
-#define b21 52
-#define b22 53
-#define b23 54
-#define b24 55
-#define b25 56
-#define b26 57
-#define b27 58
-#define b28 59
-#define b29 60
-#define b30 61
+#define b1  31
+#define b2  32
+#define b3  33
+#define b4  34
+#define b5  35
+#define b6  36
+#define b7  37
+#define b8  38
+#define b9  39
+#define b10 40
+#define b11 41
+#define b12 42
+#define b13 43
+#define b14 44
+#define b15 45
+#define b16 46
+#define b17 47
+#define b18 48
+#define b19 49
+#define b20 50
+#define b21 51
+#define b22 52
+#define b23 53
+#define b24 54
+#define b25 55
+#define b26 56
+#define b27 57
+#define b28 58
+#define b29 59
+#define b30 60
+
+
+
+
 
 
 #define NANO_D0  70 //these are completely arbitrary but they should come in handy

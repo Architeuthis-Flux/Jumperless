@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "MatrixStateRP2040.h"
 #include "SafeString.h"
+#include "NetsToChipConnections.h"
 
 int8_t newNode1 = -1;
 int8_t newNode2 = -1;
@@ -74,6 +75,8 @@ void getNodesToConnect() // read in the nodes you'd like to connect
     }
     if (debugNM)
         Serial.println("done");
+
+        sortPathsByNet();
 }
 
 int searchExistingNets(int node1, int node2) // search through existing nets for all nodes that match either one of the new nodes (so it will be added to that net)

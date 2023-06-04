@@ -20,11 +20,14 @@ D2-33,
 D9,18,
 D5-44,
 A2-33,
+25-55,
 }
 
 special functions //these are connected first so DNIs will be applied to all the nets
 {
 19-GND,
+52-GND,
+53-GND,
 11-SUPPLY_5V,
 D10-SUPPLY_3V3,
 6-I_P,

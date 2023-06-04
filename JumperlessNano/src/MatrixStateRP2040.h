@@ -23,13 +23,14 @@ int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net tha
 
 uint8_t priority = 0; //priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
 
-
+uint32_t color; //color of the net in hex
 };
 
 extern struct netStruct net[MAX_NETS];
 
 extern char *netNameConstants[MAX_NETS];
 
+extern const int bbNodesToChip[62];
 
 struct chipStatus{
 
@@ -85,6 +86,9 @@ const int8_t reversePinMap[110];// = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D
 extern struct nanoStatus nano;
 
 //see the comments at the end for a more nicely formatted version that's not in struct initalizers
+enum pathType {BBtoBB, BBtoNANO, NANOtoNANO, BBtoSF, NANOtoSF};
+
+enum nodeType {BB, NANO, SF};
 
 struct pathStruct{
 
@@ -96,8 +100,14 @@ struct pathStruct{
   int x[3];
   int y[3];
   int candidates[3][3];
+  int altPathNeeded;
+  enum pathType pathType;
+  enum nodeType nodeType[3];
+  bool sameChip;
 
 };
+
+
 
 extern struct pathStruct path[MAX_BRIDGES]; //this is the array of paths 
 

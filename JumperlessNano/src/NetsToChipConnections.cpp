@@ -20,9 +20,39 @@ int bbToSfLanes[8][4] = {{0}};                                            // [Ch
 int numberOfUniqueNets = 0;
 int numberOfNets = 0;
 int numberOfPaths = 0;
+
 unsigned long timeToSort = 0;
 
 bool debugNTCC = false;
+
+/*
+sort paths by net
+
+find start and end chips - update chipStatus struct there
+
+
+
+
+
+
+
+
+
+for each path
+    find start and end chips
+    resolve chip candidates
+    sort chips least to most crowded
+    assign chips to path
+    update bbToSfLanes
+    update chipsLeastToMostCrowded
+    update sfChipsLeastToMostCrowded
+
+
+
+
+
+
+*/
 
 void sortPathsByNet(void) // not actually sorting, just copying the bridges and nets back from netStruct so they're both in the same order
 {
@@ -129,7 +159,7 @@ void bridgesToPaths(void)
 
     printPathArray();
     sortAllChipsLeastToMostCrowded();
-    resolveChipCandidates();
+    //resolveChipCandidates();
 }
 
 void findStartAndEndChips(int node1, int node2, int pathIdx)
@@ -151,7 +181,7 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
         Serial.println(" ");
         int candidatesFound = 0;
 
-        switch (bothNodes[twice]) // not checking availability, just finding the chip
+        switch (bothNodes[twice]) 
         {
 
         case 1:
@@ -159,32 +189,22 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
         case 32:
         case 61:
         {
-            startEndChip[twice] = CHIP_L;
-            Serial.print("sf chip: ");
-            Serial.println(chipNumToChar(startEndChip[twice]));
-            path[pathIdx].chip[twice] = startEndChip[twice];
-
+            
+            path[pathIdx].chip[twice] = CHIP_L;
+            Serial.print("chip: ");
+            Serial.println(chipNumToChar(path[pathIdx].chip[twice]));
             break;
         }
 
         case 2 ... 29: // on the breadboard
         case 33 ... 60:
         {
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 1; j < 8; j++) // start at 1 so we dont confuse CHIP_L for a node
-                {
-                    if (ch[i].yMap[j] == bothNodes[twice])
-                    {
-                        startEndChip[twice] = i;
-                        Serial.print("bb chip: ");
-                        Serial.println(chipNumToChar(startEndChip[twice]));
-                        path[pathIdx].chip[twice] = startEndChip[twice];
-                        break;
-                    }
-                }
-            }
+
+            path[pathIdx].chip[twice] = bbNodesToChip[bothNodes[twice]];
+            Serial.print("chip: ");
+            Serial.println(chipNumToChar(path[pathIdx].chip[twice]));
             break;
+
         }
         case NANO_D0 ... NANO_A7: // on the nano
         {
@@ -192,10 +212,11 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
 
             if (nano.numConns[nanoIndex] == 1)
             {
-                startEndChip[twice] = nano.mapIJ[nanoIndex];
                 Serial.print("nano chip: ");
-                Serial.println(chipNumToChar(startEndChip[twice]));
-                path[pathIdx].chip[twice] = startEndChip[twice];
+                
+                path[pathIdx].chip[twice] = nano.mapIJ[nanoIndex];
+                Serial.println(chipNumToChar(path[pathIdx].chip[twice]));
+
             }
             else
             {
@@ -230,20 +251,188 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
                     }
                 }
             }
+
+            if (candidatesFound == 1)
+            {
+                path[pathIdx].chip[twice] = chipCandidates[twice][0];
+                Serial.print("\n\rchip: ");
+                path[pathIdx].candidates[twice][0] = -1;
+                Serial.println(chipNumToChar(path[pathIdx].chip[twice]));
+            }
+
             Serial.println(" ");
             break;
         }
+
         }
-        // Serial.print("\n\r");
+       
+       mergeOverlappingCandidates(pathIdx);
+       assignPathType(pathIdx);
     }
 
-    if (startEndChip[0] == -1 || startEndChip[1] == -1)
-    {
-    }
-    else
-    {
-    }
+
 }
+
+void mergeOverlappingCandidates (int pathIndex) //also sets altPathNeeded flag if theyre on different sf chips (there are no direct connections between them)
+{
+    if (path[pathIndex].candidates[0][0] != -1 && path[pathIndex].candidates[1][0] != -1)
+    {
+
+        
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (path[pathIndex].candidates[0][i] == path[pathIndex].candidates[1][j])
+                {
+                    path[pathIndex].chip[0] = path[pathIndex].candidates[0][i];
+                    path[pathIndex].chip[1] = path[pathIndex].candidates[0][i];
+                    path[pathIndex].candidates[0][0] = -1;
+                    path[pathIndex].candidates[0][1] = -1;
+                    path[pathIndex].candidates[0][2] = -1;
+                    path[pathIndex].candidates[1][0] = -1;
+                    path[pathIndex].candidates[1][1] = -1;
+                    path[pathIndex].candidates[1][2] = -1;
+                    break;
+                }
+            }
+        }
+        //path[pathIndex].altPathNeeded = 1;
+    }
+
+    if (path[pathIndex].chip[0] >= CHIP_I && path[pathIndex].chip[1] >= CHIP_I)
+    {
+        if (path[pathIndex].chip[0] != path[pathIndex].chip[1])
+        {
+            path[pathIndex].altPathNeeded = 1;
+        }
+        
+    }
+ 
+}
+
+void assignPathType (int pathIndex)
+{
+    
+    if (path[pathIndex].chip[0] == path[pathIndex].chip[1])
+    {
+        path[pathIndex].sameChip = true;
+    } else {
+        path[pathIndex].sameChip = false;
+    }
+
+
+
+    if ((path[pathIndex].node1 >= 1 && path[pathIndex].node1 <= 30) || (path[pathIndex].node1 >= 31 && path[pathIndex].node1 <= 60))
+    { 
+        if (path[pathIndex].node1 == 1 || path[pathIndex].node1 == 30 || path[pathIndex].node1 == 31 || path[pathIndex].node1 == 60)
+        {
+            path[pathIndex].nodeType[0] = BB; //maybe have a separate type for ChipL connected nodes, but not now
+        } else {
+            path[pathIndex].nodeType[0] = BB;
+        }
+       
+    } else if (path[pathIndex].node1 >= NANO_D0 && path[pathIndex].node1 <= NANO_A7)
+    {
+        path[pathIndex].nodeType[0] = NANO;
+
+    } else if (path[pathIndex].node1 >= GND && path[pathIndex].node1 <= CURRENT_SENSE_MINUS)
+    {
+        path[pathIndex].nodeType[0] = SF;
+    }
+
+    if ((path[pathIndex].node2 >= 1 && path[pathIndex].node2 <= 30) || (path[pathIndex].node2 >= 31 && path[pathIndex].node2 <= 60))
+    { 
+        if (path[pathIndex].node2 == 1 || path[pathIndex].node2 == 30 || path[pathIndex].node2 == 31 || path[pathIndex].node2 == 60)
+        {
+            path[pathIndex].nodeType[1] = BB; //maybe have a separate type for ChipL connected nodes, but not now
+        } else {
+            path[pathIndex].nodeType[1] = BB;
+        }
+       
+    } else if (path[pathIndex].node2 >= NANO_D0 && path[pathIndex].node2 <= NANO_A7)
+    {
+        path[pathIndex].nodeType[1] = NANO;
+
+    } else if (path[pathIndex].node2 >= GND && path[pathIndex].node2 <= CURRENT_SENSE_MINUS)
+    {
+        path[pathIndex].nodeType[1] = SF;
+    }
+
+
+
+if ((path[pathIndex].nodeType[0] == SF && path[pathIndex].nodeType[1] == NANO) || (path[pathIndex].nodeType[0] == NANO && path[pathIndex].nodeType[1] == SF))
+{
+    path[pathIndex].pathType = NANOtoSF;
+
+} else if ((path[pathIndex].nodeType[0] == BB && path[pathIndex].nodeType[1] == SF) || (path[pathIndex].nodeType[0] == SF && path[pathIndex].nodeType[1] == BB))
+{
+    path[pathIndex].pathType = BBtoSF;
+
+} else if ((path[pathIndex].nodeType[0] == BB && path[pathIndex].nodeType[1] == NANO) || (path[pathIndex].nodeType[0] == NANO && path[pathIndex].nodeType[1] == BB))
+{
+    path[pathIndex].pathType = BBtoNANO;
+
+} else if (path[pathIndex].nodeType[0] == BB && path[pathIndex].nodeType[1] == BB)
+{
+    path[pathIndex].pathType = BBtoBB;
+
+} else if (path[pathIndex].nodeType[0] == NANO && path[pathIndex].nodeType[1] == NANO)
+{
+    path[pathIndex].pathType = NANOtoNANO;
+}
+
+
+
+}
+
+
+int xMapForNode(int node, int chip)
+{
+    int nodeFound = 0;
+    for (int i = 0; i < 16; i++)
+    {
+        if (ch[chip].xMap[i] == node)
+        {
+            nodeFound = i;
+            break;
+        }
+    }
+
+    return nodeFound;
+    
+}
+
+int yMapForNode(int node, int chip)
+{
+    int nodeFound = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        if (ch[chip].yMap[i] == node)
+        {
+            nodeFound = i;
+            break;
+        }
+    }
+    return nodeFound;
+}
+
+int xMapForChip(int chip)
+{
+    int nodeFound = 0;
+    for (int i = 0; i < 16; i++)
+    {
+        if (ch[chip].xMap[i] == chip)
+        {
+            nodeFound = i;
+            break;
+        }
+    }
+    return nodeFound;
+}
+
+
+
 
 void resolveChipCandidates(void)
 {
@@ -334,6 +523,8 @@ int moreAvailableChip(int chip1, int chip2)
 {
     int chipChosen = -1;
     sortAllChipsLeastToMostCrowded();
+    sortSFchipsLeastToMostCrowded();
+
 
     for (int i = 0; i < 12; i++)
     {
@@ -345,6 +536,7 @@ int moreAvailableChip(int chip1, int chip2)
     }
     return chipChosen;
 }
+
 
 void sortSFchipsLeastToMostCrowded(void)
 {
@@ -371,7 +563,7 @@ void sortSFchipsLeastToMostCrowded(void)
 
 void sortAllChipsLeastToMostCrowded(void)
 {
-    debugNTCC = false;
+    //debugNTCC = false;
     int numberOfConnectionsPerChip[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // this will be used to determine which chip is most crowded
 
     for (int i = 0; i < 12; i++)
@@ -448,7 +640,7 @@ void sortAllChipsLeastToMostCrowded(void)
         }
     }
     debugNTCC = true;
-    bbToSfConnections();
+   // bbToSfConnections();
 }
 
 void printPathArray(void) // this also prints candidates and x y
@@ -494,8 +686,19 @@ void printPathArray(void) // this also prints candidates and x y
             printChipNumToChar(path[i].candidates[1][j]);
             tabs += Serial.print(" ");
         }
+        tabs += Serial.print("\n\rpath type: ");
+        tabs += printPathType(i);
+      
 
-        tabs += Serial.println("\n\n\r");
+        if( path[i].altPathNeeded == true)
+        {
+            tabs += Serial.print("\n\ralt path needed");
+        }
+        else
+        {
+           
+        }
+          tabs += Serial.println("\n\n\r");
 
         // Serial.print(tabs);
         // for (int i = 0; i < 24 - (tabs); i++)
@@ -504,6 +707,32 @@ void printPathArray(void) // this also prints candidates and x y
         // }
         tabs = 0;
     }
+}
+
+int printPathType (int pathIndex)
+{
+
+switch (path[pathIndex].pathType)
+{
+    case 0:
+        return Serial.print("BB to BB");
+        break;
+    case 1:
+        return Serial.print("BB to NANO");
+        break;
+    case 2:
+        return Serial.print("NANO to NANO");
+        break;
+    case 3:
+        return Serial.print("BB to SF");
+        break;
+    case 4:
+        return Serial.print("NANO to SF");
+        break;
+    default:
+        return Serial.print("Not Assigned");
+        break;
+}
 }
 
 int defToNano(int nanoIndex)

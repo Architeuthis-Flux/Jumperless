@@ -32,7 +32,7 @@ void loop()
   // delay(100);
   // digitalWrite(LED_BUILTIN,LOW);
 
-  rainbowy(180, 55, 20); // Red
+  //rainbowy(180, 55, 20); // Red
 
   // delay(800);
 
@@ -41,9 +41,10 @@ void loop()
   Serial.println("\n\n\rfinal netlist\n\n\r");
   listSpecialNets();
   listNets();
-  // printBridgeArray();
+  printBridgeArray();
 
   bridgesToPaths();
+  assignNetColors();
   while (1)
     ;
 
@@ -91,7 +92,7 @@ void loop()
 
 
   }*/
-  delay(100);
+  //delay(100);
 }
 
 /*
