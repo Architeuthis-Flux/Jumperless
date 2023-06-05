@@ -41,7 +41,8 @@ int xMapForNode(int node, int chip);
 int yMapForNode(int node, int chip);
 
 
-int xMapForChip(int chip);
+int xMapForChipLane0(int chip, int chip2);
+int xMapForChipLane1(int chip, int chip2);
 
 
 void mergeOverlappingCandidates (int pathIndex);
@@ -51,9 +52,11 @@ void assignPathType (int pathIndex);
 
 int printPathType (int pathIndex);
 
+void swapNodes (int);
 
+void commitPaths(void);
 
-
+void printPathsCompact(void);
 
 
 

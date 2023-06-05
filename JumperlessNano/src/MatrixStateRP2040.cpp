@@ -50,7 +50,7 @@ struct chipStatus ch[12] = {
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_I, CHIP_J, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_K, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
-  {CHIP_L,  t9,t10,t11,t12,t13,t14,t15}},
+  {CHIP_L,  t9,t10,t11,t12,t13,t14,t15}},//yMap
 
   {2,'C',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status

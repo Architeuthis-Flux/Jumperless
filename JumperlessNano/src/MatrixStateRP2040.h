@@ -86,9 +86,9 @@ const int8_t reversePinMap[110];// = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D
 extern struct nanoStatus nano;
 
 //see the comments at the end for a more nicely formatted version that's not in struct initalizers
-enum pathType {BBtoBB, BBtoNANO, NANOtoNANO, BBtoSF, NANOtoSF};
+enum pathType {BBtoBB, BBtoNANO, NANOtoNANO, BBtoSF, NANOtoSF, BBtoBBL, NANOtoBBL, SFtoSF, SFtoBBL, BBLtoBBL};
 
-enum nodeType {BB, NANO, SF};
+enum nodeType {BB, NANO, SF, BBL};
 
 struct pathStruct{
 
@@ -99,11 +99,12 @@ struct pathStruct{
   int chip[3];
   int x[3];
   int y[3];
-  int candidates[3][3];
+  int candidates[3][3]; //[node][candidate]
   int altPathNeeded;
   enum pathType pathType;
   enum nodeType nodeType[3];
   bool sameChip;
+  bool Lchip;
 
 };
 
