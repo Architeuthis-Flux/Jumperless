@@ -52,7 +52,7 @@
 #define I2C0_SDA 4
 #define I2C0_SCL 5 
 
-#define LED_DATA_OUT 25
+#define LED_DATA_OUT 6
 
 #define ADC0_5V 26
 #define ADC1_5V 27

@@ -35,7 +35,7 @@ void rainbowy(int saturation, int brightness, int wait)
         // saturation and value (brightness) (both 0-255, similar to the
         // ColorHSV() function, default 255), and a true/false flag for whether
         // to apply gamma correction to provide 'truer' colors (default true).
-        leds.rainbow(firstPixelHue, 1, saturation, 220, true);
+        leds.rainbow(firstPixelHue, 1, saturation, 255, true);
         // Above line is equivalent to:
         // strip.rainbow(firstPixelHue, 1, 255, 255, true);
         leds.show(); // Update strip with new contents

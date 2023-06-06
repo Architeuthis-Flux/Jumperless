@@ -6,8 +6,8 @@
 #include "Adafruit_NeoPixel.h"
 
 #define LED_PIN 25
-#define LED_COUNT 80
-#define BRIGHTNESS 50
+#define LED_COUNT 160
+#define BRIGHTNESS 100
 
 extern Adafruit_NeoPixel leds;
 

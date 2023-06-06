@@ -96,9 +96,9 @@ struct pathStruct{
   int node2;
   int net; 
 
-  int chip[3];
-  int x[3];
-  int y[3];
+  int chip[4];
+  int x[4];
+  int y[4];
   int candidates[3][3]; //[node][candidate]
   int altPathNeeded;
   enum pathType pathType;

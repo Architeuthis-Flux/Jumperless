@@ -16,7 +16,7 @@ void setup()
 {
 
   Serial.begin(115200);
-  pinMode(25, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   LittleFS.begin();
   delay(3000);
@@ -45,8 +45,11 @@ void loop()
 
   bridgesToPaths();
   assignNetColors();
-  while (1)
-    ;
+  //rainbowy(180, 55, 20); // Red
+
+  while (1);
+  //rainbowy(180, 55, 20); // Red
+    
 
   // Serial.println("\n\r");
 

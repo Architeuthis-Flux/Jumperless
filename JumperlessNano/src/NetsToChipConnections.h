@@ -58,6 +58,10 @@ void commitPaths(void);
 
 void printPathsCompact(void);
 
+void resolveAltPaths(void);
+
+void printChipStatus(void);
+
 
 
 

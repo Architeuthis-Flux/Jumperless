@@ -21,6 +21,13 @@ D9,18,
 D5-44,
 A2-33,
 25-55,
+7-27,
+6-26,
+5-25,
+4-24,
+3-28,
+2-29,
+8-23,
 }
 
 special functions //these are connected first so DNIs will be applied to all the nets
