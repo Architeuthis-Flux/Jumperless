@@ -170,6 +170,8 @@ void bridgesToPaths(void)
     sortAllChipsLeastToMostCrowded();
     resolveChipCandidates();
     commitPaths();
+    resolveUncommittedHops();
+
     // resolveChipCandidates();
 }
 
@@ -342,19 +344,7 @@ void commitPaths(void)
                 Serial.print(" \t ");
                 Serial.print(ch[path[i].chip[1]].xStatus[xMapL0c1]);
                 Serial.print(" \t ");
-                /*
-                                if (xMapL1c0 != -1)
-                                {
-                                    Serial.print(ch[path[i].chip[0]].xStatus[xMapL1c0]);
-                                    Serial.print(" \t ");
-                                    Serial.print(ch[path[i].chip[1]].xStatus[xMapL1c1]);
-                                }
-                                else
-                                {
-                                    Serial.print(" X \t X");
-                                }
 
-                                */
             }
             break;
         }
@@ -365,7 +355,7 @@ void commitPaths(void)
 
             if (path[i].chip[0] != CHIP_L && path[i].chip[1] == CHIP_L) // if theyre both chip L we'll deal with it differently
             {
-                //Serial.print("\tBBtoCHIP L  ");
+                // Serial.print("\tBBtoCHIP L  ");
                 int yMapBBc0 = 0; // y 0 is always connected to chip L
 
                 int xMapChipL = xMapForNode(path[i].node2, CHIP_L);
@@ -374,15 +364,13 @@ void commitPaths(void)
 
                 ch[path[i].chip[0]].yStatus[yMapForNode(path[i].node1, path[i].chip[0])] = path[i].net;
 
-
                 if ((ch[path[i].chip[0]].yStatus[0] == -1) || ch[path[i].chip[0]].yStatus[0] == path[i].net)
                 {
                     ch[path[i].chip[0]].yStatus[0] = path[i].net;
                     ch[CHIP_L].yStatus[yMapChipL] = path[i].net;
                     ch[CHIP_L].xStatus[xMapChipL] = path[i].net;
 
-                    
-
+                   // if (nano.numConns[
 
                     path[i].y[0] = 0;
                     path[i].x[0] = -2; // we have to wait to assign a free x pin to bounce from
@@ -392,6 +380,8 @@ void commitPaths(void)
 
                     path[i].x[2] = -2; // we need another hop to get to the node
                     path[i].y[2] = yMapForNode(path[i].node1, path[i].chip[0]);
+                    path[i].chip[2] = path[i].chip[0];
+                    path[i].sameChip = true; //so we know both -2 values need to be the same
 
                     // path[i].sameChip = true; //so we know both -2 values need to be the same
 
@@ -437,10 +427,10 @@ void commitPaths(void)
 
             int xMapSFc1 = xMapForNode(path[i].node2, path[i].chip[1]);
             int yMapSFc1 = path[i].chip[0];
-            
+
             if ((ch[path[i].chip[0]].xStatus[xMapBBc0] == path[i].net || ch[path[i].chip[0]].xStatus[xMapBBc0] == -1) && (ch[path[i].chip[1]].yStatus[yMapSFc1] == path[i].net || ch[path[i].chip[1]].yStatus[yMapSFc1] == -1)) // how's that for a fuckin if statement
             {
-                
+
                 path[i].x[0] = xMapBBc0;
                 path[i].x[1] = xMapSFc1;
 
@@ -559,19 +549,333 @@ void commitPaths(void)
         }
         Serial.println("\n\r");
     }
-
-    printPathsCompact();
-    printChipStatus();
+    duplicateSFnets();
     resolveAltPaths();
+    printPathsCompact();
+
+
+
+    printChipStatus();
+    duplicateSFnets();
+
+
+    
+    
 }
 
 void commitBBtoBB(int i)
 {
 }
 
+void duplicateSFnets(void)
+{
+    for (int i = 0; i < 26; i++)
+    {
+        if (ch[duplucateSFnodes[i][0]].xStatus[duplucateSFnodes[i][1]] > 0 )
+        {
+            if(ch[duplucateSFnodes[i][2]].xStatus[duplucateSFnodes[i][3]] == -1)
+            {
+                ch[duplucateSFnodes[i][2]].xStatus[duplucateSFnodes[i][3]] =  ch[duplucateSFnodes[i][0]].xStatus[duplucateSFnodes[i][1]] ;
+            }
+        } 
+
+        if (ch[duplucateSFnodes[i][2]].xStatus[duplucateSFnodes[i][3]] > 0 )
+        {
+            if(ch[duplucateSFnodes[i][0]].xStatus[duplucateSFnodes[i][1]] == -1)
+            {
+                ch[duplucateSFnodes[i][0]].xStatus[duplucateSFnodes[i][1]] =  ch[duplucateSFnodes[i][2]].xStatus[duplucateSFnodes[i][3]] ;
+            }
+        }
+    }
+}
+
+
 
 void resolveAltPaths(void)
 {
+
+    for (int i = 0; i <= numberOfPaths; i++)
+    {
+        int swapped = 0;
+
+        
+        if (path[i].altPathNeeded == true)
+        {
+
+duplicateSFnets();
+             if (path[i].pathType == BBtoSF || path[i].pathType == BBtoNANO) //do bb to sf first because these are harest to find
+            {   
+                int foundPath = 0;
+                Serial.println("BBtoSF");
+                Serial.print(i);
+                
+                for (int bb = 0; bb < 8; bb++) // check if any other chips have free paths to both the sf chip and target chip
+                {
+
+                    if (foundPath == 1)
+                    {
+                        Serial.print('!');
+                        break;
+                    }
+
+
+
+                        if (path[i].Lchip == true )
+                        {
+                               //Serial.print("Lchip");
+
+
+                        
+      
+                        if (ch[CHIP_L].yStatus[bb] == -1 || ch[CHIP_L].yStatus[bb] == path[1].net)
+                        {
+                           
+
+                        int xMapL0c0 = xMapForChipLane0(path[i].chip[0], path[i].chip[bb]);
+                        int xMapL1c0 = xMapForChipLane1(path[i].chip[0], path[i].chip[bb]);
+
+                        int xMapL0c1 = xMapForChipLane0(path[i].chip[bb], path[i].chip[0]);
+                        int xMapL1c1 = xMapForChipLane1(path[i].chip[bb], path[i].chip[0]);
+
+                        int freeLane = -1;
+
+                        if ((xMapL1c0 != -1) && ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net) // check if lane 1 shares a net first so it should prefer sharing lanes
+                        {
+                            freeLane = 1;
+                        }
+                        else if ((ch[path[i].chip[0]].xStatus[xMapL0c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL0c0] == path[i].net) // lanes will alway be taken together, so only check chip 1
+                        {
+                            freeLane = 0;
+                        }
+                        else if ((xMapL1c0 != -1) && ((ch[path[i].chip[0]].xStatus[xMapL1c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net))
+                        {
+                            freeLane = 1;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        ch[CHIP_L].yStatus[bb] = path[1].net;
+                        path[i].chip[2] = bb;
+                        path[i].altPathNeeded = false;
+
+                        //int otherNode = yMapForChip(path[i].node2, path[i].chip[1]);
+
+                        if (freeLane == 0)
+                        {
+                            
+                            ch[path[i].chip[0]].xStatus[xMapL0c0] = path[i].net;
+                            ch[path[i].chip[1]].xStatus[xMapL0c1] = path[i].net;
+
+                            ch[path[i].chip[2]].yStatus[0] = path[i].net;
+                            
+
+                            path[i].x[0] = xMapForChipLane0(path[i].chip[0], path[i].chip[2]);
+                            path[i].x[1] = xMapForNode(path[i].node2, path[i].chip[1]);
+
+                            path[i].x[2] = xMapForChipLane0(path[i].chip[2], path[i].chip[0]);
+                            //path[i].x[3] = -2;
+
+                            path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                            path[i].y[1] = bb;
+                            path[i].y[2] = 0;
+                            //path[i].chip[2] = bb;
+                            //path[i].y[3] = 0;
+                        }
+                        else if (freeLane == 1)
+                        {
+                            ch[path[i].chip[0]].xStatus[xMapL1c0] = path[i].net;
+                            ch[path[i].chip[1]].xStatus[xMapL1c1] = path[i].net;
+
+                            ch[path[i].chip[2]].yStatus[0] = path[i].net;
+                            
+
+                            path[i].x[0] = xMapForChipLane1(path[i].chip[0], path[i].chip[2]);
+                            path[i].x[1] = xMapL1c1;
+
+                            path[i].x[2] = xMapForChipLane1(path[i].chip[2], path[i].chip[0]);
+                            //path[i].x[3] = -2;
+
+                            path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                            path[i].y[1] = bb;
+                            path[i].y[2] = 0;
+                           // path[i].y[3] = 0;
+                        }
+
+                        foundPath = 1;
+                                                    if (debugNTCC2)
+                            {
+                                Serial.print(i);
+                                Serial.print("  chip[2]: ");
+                                Serial.print(chipNumToChar(path[i].chip[2]));
+
+                                Serial.print("  x[2]: ");
+                                Serial.print(path[i].x[2]);
+
+                                Serial.print("  y[2]: ");
+                                Serial.print(path[i].y[2]);
+
+                                Serial.print("  y[3]: ");
+                                Serial.print(path[i].y[3]);
+
+                                Serial.print(" \n\r");
+                            }
+
+
+
+                        }
+
+
+                        
+                    }
+                    int xMapBB = xMapForChipLane0(bb, path[i].chip[1]);
+
+                    int yMapSF = bb;
+
+                    int sfChip = path[i].chip[1];
+
+                        //not chip L
+
+                    if (ch[bb].xStatus[xMapBB] == path[i].net || ch[bb].xStatus[xMapBB] == -1 && path[i].Lchip == false) // were going through each bb chip to see if it has a connection to both chips free
+
+                    {
+                        /*
+                    Serial.print("bb: ");
+                    Serial.print(bb);
+                    Serial.print("  \tsfChip: ");
+                    Serial.print(sfChip);
+                    Serial.print("  \txMapBB: ");
+                    Serial.print(xMapBB);
+                    Serial.print("  \tyMapSF: ");
+                    Serial.print(yMapSF);
+                    Serial.print("\txStatus: ");
+                    Serial.print(ch[bb].xStatus[xMapBB]);
+
+
+
+                    Serial.print("  \n\r");
+*/
+                        int xMapL0c0 = xMapForChipLane0(path[i].chip[0], path[i].chip[bb]);
+                        int xMapL1c0 = xMapForChipLane1(path[i].chip[0], path[i].chip[bb]);
+
+                        int xMapL0c1 = xMapForChipLane0(path[i].chip[bb], path[i].chip[0]);
+                        int xMapL1c1 = xMapForChipLane1(path[i].chip[bb], path[i].chip[0]);
+
+                        int freeLane = -1;
+
+                        if ((xMapL1c0 != -1) && ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net) // check if lane 1 shares a net first so it should prefer sharing lanes
+                        {
+                            freeLane = 1;
+                        }
+                        else if ((ch[path[i].chip[0]].xStatus[xMapL0c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL0c0] == path[i].net) // lanes will alway be taken together, so only check chip 1
+                        {
+                            freeLane = 0;
+                        }
+                        else if ((xMapL1c0 != -1) && ((ch[path[i].chip[0]].xStatus[xMapL1c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net))
+                        {
+                            freeLane = 1;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+
+                        path[i].chip[2] = bb;
+                        path[i].altPathNeeded = false;
+
+                        int SFnode = xMapForNode(path[i].node2, path[i].chip[1]);
+
+                        if (freeLane == 0)
+                        {
+
+                            ch[path[i].chip[0]].xStatus[xMapL0c0] = path[i].net;
+                            ch[path[i].chip[1]].xStatus[SFnode] = path[i].net;
+
+                            ch[path[i].chip[2]].xStatus[xMapL0c1] = path[i].net;
+                            ch[path[i].chip[2]].xStatus[xMapBB] = path[i].net;
+
+                            path[i].x[0] = xMapL0c0;
+                            path[i].x[1] = SFnode;
+
+                            path[i].x[2] = xMapL0c1;
+                            path[i].x[3] = xMapBB;
+
+                            path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                            path[i].y[1] = yMapSF;
+                            path[i].y[2] = -2;
+
+                            ch[path[i].chip[0]].yStatus[path[i].y[0]] = path[i].net;
+                            
+                            ch[path[i].chip[1]].yStatus[path[i].y[1]] = path[i].net;
+                        }
+                        else if (freeLane == 1)
+                        {
+                            ch[path[i].chip[0]].xStatus[xMapL1c0] = path[i].net;
+                            ch[path[i].chip[1]].xStatus[SFnode] = path[i].net;
+
+                            ch[path[i].chip[2]].xStatus[xMapL1c1] = path[i].net;
+                            ch[path[i].chip[2]].xStatus[xMapBB] = path[i].net;
+
+                            path[i].x[0] = xMapL1c0;
+                            path[i].x[1] = SFnode;
+
+                            path[i].x[2] = xMapL1c1;
+                            path[i].x[3] = xMapBB;
+
+                            path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                            path[i].y[1] = yMapSF;
+                            path[i].y[2] = -2;
+
+                            ch[path[i].chip[0]].yStatus[path[i].y[0]] = path[i].net;
+                            
+                            ch[path[i].chip[1]].yStatus[path[i].y[1]] = path[i].net;
+                        }
+
+                        foundPath = 1;
+
+                        if (debugNTCC2 == true)
+                        {
+                            Serial.print(i);
+                            Serial.print(" \tchip[0]: ");
+                            Serial.print(chipNumToChar(path[i].chip[0]));
+
+                            Serial.print("  x[0]: ");
+                            Serial.print(path[i].x[0]);
+
+                            Serial.print("  y[0]: ");
+                            Serial.print(path[i].y[0]);
+
+                            Serial.print("\t  chip[1]: ");
+                            Serial.print(chipNumToChar(path[i].chip[1]));
+
+                            Serial.print("  x[1]: ");
+                            Serial.print(path[i].x[1]);
+
+                            Serial.print("  y[1]: ");
+                            Serial.print(path[i].y[1]);
+
+                            Serial.print(" \t ");
+                            Serial.print(ch[path[i].chip[0]].xStatus[xMapL0c0]);
+
+                            Serial.print(" \t ");
+                            Serial.print(ch[path[i].chip[1]].xStatus[xMapL0c1]);
+                            Serial.print(" \t\n\r");
+                        }
+                        // break;
+                    }
+
+                    if (foundPath == 0 && swapped == 0)
+                    {
+                        swapped = 1;
+                        swapDuplicateNode(i);
+                        bb = 0;
+                    }
+                }
+
+
+            }
+        }
+    }
 
     for (int i = 0; i < numberOfPaths; i++)
     {
@@ -594,27 +898,26 @@ void resolveAltPaths(void)
                 ch[path[i].chip[0]].yStatus[yNode1] = path[i].net;
                 ch[path[i].chip[1]].yStatus[yNode2] = path[i].net;
 
-
-                if ((ch[CHIP_L].yStatus[path[i].chip[0]] == path[i].net || ch[CHIP_L].yStatus[path[i].chip[0]] == -1) && (ch[CHIP_L].yStatus[path[i].chip[1]] == path[i].net || ch[CHIP_L].yStatus[path[i].chip[1]] == -1))
+                if ((ch[CHIP_L].yStatus[path[i].chip[0]] == path[i].net || ch[CHIP_L].yStatus[path[i].chip[0]] == -1) 
+                && (ch[CHIP_L].yStatus[path[i].chip[1]] == path[i].net || ch[CHIP_L].yStatus[path[i].chip[1]] == -1))
                 {
                     ch[CHIP_L].yStatus[path[i].chip[0]] = path[i].net;
                     ch[CHIP_L].yStatus[path[i].chip[1]] = path[i].net;
 
                     path[i].chip[2] = CHIP_L;
                     path[i].x[2] = -2;
+                    path[i].x[3] = -2;
                     path[i].y[2] = path[i].chip[0];
                     path[i].y[3] = path[i].chip[1];
                     path[i].altPathNeeded = false;
 
-                    path[i].x[0] = -2;//bounce
+                    path[i].x[0] = -2; // bounce
                     path[i].x[1] = -2;
 
-                    path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);//connect to chip L
-                    path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
+                    path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]); // connect to chip L
+                    path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
-                    //if chip L is set, we'll infer that y is 0
-
-
+                    // if chip L is set, we'll infer that y is 0
 
                     if (debugNTCC2)
                     {
@@ -648,18 +951,18 @@ void resolveAltPaths(void)
 
                             path[i].chip[2] = ijk;
                             path[i].x[2] = -2;
+                            path[i].x[3] = -2;
                             path[i].y[2] = path[i].chip[0];
                             path[i].y[3] = path[i].chip[1];
                             path[i].altPathNeeded = false;
 
-
-                            path[i].x[0] = -2;//bounce
+                            path[i].x[0] = -2; // bounce
                             path[i].x[1] = -2;
 
-                            path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);//connect to chip L
-                            path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
+                            path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]); // connect to chip L
+                            path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
-                            //if chip L is set, we'll infer that y is 0
+                            // if chip L is set, we'll infer that y is 0
 
                             if (debugNTCC2)
                             {
@@ -687,6 +990,8 @@ void resolveAltPaths(void)
                     {
                         break;
                     }
+                    int giveUpOnL = 0;
+                    int swapped = 0;
 
                     for (int bb = 0; bb < 8; bb++) // this is a long winded way to do this but it's at least slightly readable
                     {
@@ -697,28 +1002,58 @@ void resolveAltPaths(void)
                         int xMapL1c0 = xMapForChipLane1(bb, path[i].chip[0]);
                         int xMapL1c1 = xMapForChipLane1(bb, path[i].chip[1]);
 
+
+                        if (bb == 7 && giveUpOnL == 0 && swapped == 0)
+                        {
+                            bb = 0;
+                            giveUpOnL = 0;
+                            swapped = 1;
+                            swapDuplicateNode(i);
+                        }else if (bb == 7 && giveUpOnL == 0 && swapped == 1)
+                        {
+                            bb = 0;
+                            giveUpOnL = 1;
+                        }
+
+                        if ((ch[CHIP_L].yStatus[bb] != -1 && ch[CHIP_L].yStatus[bb] != path[i].net) && giveUpOnL == 0)
+                        {
+                            //giveUpOnL = 1;
+                            continue;
+                        }
+           
+
                         if (ch[bb].xStatus[xMapL0c0] == path[i].net || ch[bb].xStatus[xMapL0c0] == -1) // were going through each bb chip to see if it has a connection to both chips free
                         {
                             if (ch[bb].xStatus[xMapL0c1] == path[i].net || ch[bb].xStatus[xMapL0c1] == -1) // lanes 0 0
                             {
                                 ch[bb].xStatus[xMapL0c0] = path[i].net;
                                 ch[bb].xStatus[xMapL0c1] = path[i].net;
+                                
+                                if (giveUpOnL == 0)
+                                {
+                                    ch[CHIP_L].yStatus[bb] = path[i].net;
+                                path[i].y[2] = 0;
+                                path[i].y[3] = 0;
+                                } else{
+                                    Serial.println("Gave up on L");
+                                path[i].y[2] = -2;
+                                path[i].y[3] = -2;
+                                }
+                                
+
 
                                 path[i].chip[2] = bb;
                                 path[i].x[2] = xMapL0c0;
                                 path[i].x[3] = xMapL0c1;
-                                path[i].y[2] = -2;
-                                path[i].y[3] = -2;
+
                                 path[i].altPathNeeded = false;
 
-                                path[i].x[0] = xMapForChipLane0(path[i].chip[0],bb);
-                                path[i].x[1] = xMapForChipLane0(path[i].chip[1],bb);
+                                path[i].x[0] = xMapForChipLane0(path[i].chip[0], bb);
+                                path[i].x[1] = xMapForChipLane0(path[i].chip[1], bb);
 
-                                path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);
-                                path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
+                                path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                                path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
-
-                                
                                 if (debugNTCC2)
                                 {
                                     Serial.print(i);
@@ -743,19 +1078,28 @@ void resolveAltPaths(void)
                                 ch[bb].xStatus[xMapL1c0] = path[i].net;
                                 ch[bb].xStatus[xMapL1c1] = path[i].net;
 
+                                if (giveUpOnL == 0)
+                                {
+                                    ch[CHIP_L].yStatus[bb] = path[i].net;
+                                path[i].y[2] = 0;
+                                path[i].y[3] = 0;
+                                } else{
+                                    Serial.println("Gave up on L");
+                                path[i].y[2] = -2;
+                                path[i].y[3] = -2;
+                                }
+
                                 path[i].chip[2] = bb;
                                 path[i].x[2] = xMapL1c0;
                                 path[i].x[3] = xMapL1c1;
-                                path[i].y[2] = -2;
-                                path[i].y[3] = -2;
+                
                                 path[i].altPathNeeded = false;
 
-                                path[i].x[0] = xMapForChipLane1(path[i].chip[0],bb);
-                                path[i].x[1] = xMapForChipLane1(path[i].chip[1],bb);
+                                path[i].x[0] = xMapForChipLane1(path[i].chip[0], bb);
+                                path[i].x[1] = xMapForChipLane1(path[i].chip[1], bb);
 
-                                path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);
-                                path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
-
+                                path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                                path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
                                 if (debugNTCC2)
                                 {
@@ -779,21 +1123,32 @@ void resolveAltPaths(void)
                             if (ch[bb].xStatus[xMapL1c1] == path[i].net || ch[bb].xStatus[xMapL1c1] == -1) // lanes 0 1
                             {
 
+                                if (giveUpOnL == 0)
+                                {
+                                    ch[CHIP_L].yStatus[bb] = path[i].net;
+                                path[i].y[2] = 0;
+                                path[i].y[3] = 0;
+                                } else{
+                                    Serial.println("Gave up on L");
+                                path[i].y[2] = -2;
+                                path[i].y[3] = -2;
+                                }
+
+
                                 ch[bb].xStatus[xMapL0c0] = path[i].net;
                                 ch[bb].xStatus[xMapL1c1] = path[i].net;
 
                                 path[i].chip[2] = bb;
                                 path[i].x[2] = xMapL0c0;
                                 path[i].x[3] = xMapL1c1;
-                                path[i].y[2] = -2;
-                                path[i].y[3] = -2;
+                    
                                 path[i].altPathNeeded = false;
 
-                                path[i].x[0] = xMapForChipLane0(path[i].chip[0],bb);
-                                path[i].x[1] = xMapForChipLane1(path[i].chip[1],bb);
+                                path[i].x[0] = xMapForChipLane0(path[i].chip[0], bb);
+                                path[i].x[1] = xMapForChipLane1(path[i].chip[1], bb);
 
-                                path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);
-                                path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
+                                path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                                path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
                                 if (debugNTCC2)
                                 {
@@ -816,6 +1171,16 @@ void resolveAltPaths(void)
                         {
                             if (ch[bb].xStatus[xMapL0c1] == path[i].net || ch[bb].xStatus[xMapL0c1] == -1) // lanes 1 0
                             {
+                                if (giveUpOnL == 0)
+                                {
+                                    ch[CHIP_L].yStatus[bb] = path[i].net;
+                                path[i].y[2] = 0;
+                                path[i].y[3] = 0;
+                                } else{
+                                    Serial.println("Gave up on L");
+                                path[i].y[2] = -2;
+                                path[i].y[3] = -2;
+                                }
 
                                 ch[bb].xStatus[xMapL0c1] = path[i].net;
                                 ch[bb].xStatus[xMapL1c0] = path[i].net;
@@ -827,11 +1192,11 @@ void resolveAltPaths(void)
                                 path[i].y[3] = -2;
                                 path[i].altPathNeeded = false;
 
-                                path[i].x[0] = xMapForChipLane1(path[i].chip[0],bb);
-                                path[i].x[1] = xMapForChipLane0(path[i].chip[1],bb);
+                                path[i].x[0] = xMapForChipLane1(path[i].chip[0], bb);
+                                path[i].x[1] = xMapForChipLane0(path[i].chip[1], bb);
 
-                                path[i].y[0] = yMapForNode(path[i].node1,path[i].chip[0]);
-                                path[i].y[1] = yMapForNode(path[i].node2,path[i].chip[1]);
+                                path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                                path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
 
                                 if (debugNTCC2)
                                 {
@@ -871,58 +1236,416 @@ void resolveAltPaths(void)
                 break;
             }
 
-            case BBtoNANO:
-            case BBtoSF:
-            {
-                Serial.println("BBtoSF");
-
-                int foundPath = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                break;
-            }
-
             case NANOtoSF:
             case NANOtoNANO:
             {
                 Serial.println("NANOtoNANO");
+                int foundHop = 0;
+                int giveUpOnL = 0;
+                int swapped = 0;
+                if (path[i].Lchip == true)
+                {
+
+                    for (int bb = 0; bb < 8; bb++) // this is a long winded way to do this but it's at least slightly readable
+                    {
+                        int sfChip1 = path[i].chip[0];
+                        int sfChip2 = path[i].chip[1];
+
+                        int chip1Lane = xMapForNode(sfChip1, bb);
+                        int chip2Lane = xMapForNode(sfChip2, bb);
+
+
+                        if ((ch[CHIP_L].yStatus[bb] != -1 && ch[CHIP_L].yStatus[bb] != path[i].net))
+                        {
+                            
+                            continue;
+                        }
+
+                        if (ch[bb].xStatus[chip1Lane] == path[i].net || ch[bb].xStatus[chip1Lane] == -1)
+                        {
+                            
+                            path[i].altPathNeeded = false;
+                            path[i].chip[2] = bb;
+                            path[i].x[2] = chip1Lane;
+                            path[i].y[2] = 0;
+
+                            path[i].y[0] = bb;
+                            path[i].x[0] = xMapForNode(path[i].node1,path[i].chip[0]);
+
+                            path[i].y[1] = bb;
+                            path[i].x[1] = xMapForNode(path[i].node2,path[i].chip[1]);
+
+                            ch[sfChip1].xStatus[chip1Lane] = path[i].net;
+                            ch[sfChip1].yStatus[bb] = path[i].net;
+
+
+                            ch[sfChip2].xStatus[chip2Lane] = path[i].net;
+                            ch[sfChip2].yStatus[bb] = path[i].net;
+
+                            ch[bb].xStatus[chip1Lane] = path[i].net;
+                            ch[bb].yStatus[0] = path[i].net;
+
+                        }
+
+
+                    }
+                } else {
+                for (int bb = 0; bb < 8; bb++) // this is a long winded way to do this but it's at least slightly readable
+                    {
+                        int sfChip1 = path[i].chip[0];
+                        int sfChip2 = path[i].chip[1];
+
+                        int chip1Lane = xMapForNode(sfChip1, bb);
+                        int chip2Lane = xMapForNode(sfChip2, bb);
+                       
+
+
+                        if (bb == 7 && giveUpOnL == 0 && swapped == 0)
+                        {
+                            bb = 0;
+                            giveUpOnL = 0;
+                            swapped = 1;
+                            swapDuplicateNode(i);
+                        }else if (bb == 7 && giveUpOnL == 0 && swapped == 1)
+                        {
+                            bb = 0;
+                            giveUpOnL = 1;
+                        }
+
+                        if ((ch[CHIP_L].yStatus[bb] != -1 && ch[CHIP_L].yStatus[bb] != path[i].net) && giveUpOnL == 0)
+                        {
+                            
+                            continue;
+                        }
+
+                            if (ch[bb].xStatus[chip1Lane] == path[i].net || ch[bb].xStatus[chip1Lane] == -1)
+                            {
+                                if (ch[bb].xStatus[chip2Lane] == path[i].net || ch[bb].xStatus[chip2Lane] == -1)
+                                {
+                                
+                                if (giveUpOnL == 0)
+                                {
+                                    ch[CHIP_L].yStatus[bb] = path[i].net;
+                                path[i].y[2] = 0;
+                                path[i].y[3] = 0;
+                                } else{
+                                    Serial.println("Gave up on L");
+                                path[i].y[2] = -2;
+                                path[i].y[3] = -2;
+                                }
+
+                                    ch[bb].xStatus[chip1Lane] = path[i].net;
+                                    ch[bb].xStatus[chip2Lane] = path[i].net;
+
+                                    path[i].chip[2] = bb;
+                                    path[i].x[2] = chip1Lane;
+                                    path[i].x[3] = chip2Lane;
+
+
+                                    path[i].altPathNeeded = false;
+
+                                    path[i].x[0] = xMapForNode(path[i].node1, path[i].chip[0]);
+                                    path[i].x[1] = xMapForNode(path[i].node2, path[i].chip[1]);
+
+                                    path[i].y[0] = bb;
+                                    path[i].y[1] = bb;
+
+                                    if (debugNTCC2)
+                                    {
+                                        Serial.print(i);
+                                        Serial.print("  chip[2]: ");
+                                        Serial.print(chipNumToChar(path[i].chip[2]));
+
+                                        Serial.print("  y[2]: ");
+                                        Serial.print(path[i].y[2]);
+
+                                        Serial.print("  y[3]: ");
+                                        Serial.print(path[i].y[3]);
+
+                                        Serial.print(" \n\r");
+                                    }
+                                    foundHop = 1;
+                                    //break;
+                                }
+
+                            }
+                        
+
+                        
+                    }
+
+                    for (int bb = 0; bb < 8; bb++) // this will connect to a random breadboard row, add a test to make sure nothing is connected
+                    {
+                        int sfChip1 = path[i].chip[0];
+                        int sfChip2 = path[i].chip[1];
+
+                        int chip1Lane = xMapForNode(sfChip1, bb);
+                        int chip2Lane = xMapForNode(sfChip2, bb);
+                       
+
+ 
+                            if ((ch[bb].xStatus[chip1Lane] == path[i].net || ch[bb].xStatus[chip1Lane] == -1) && foundHop == 0)
+                            {
+                                if (ch[bb].xStatus[chip2Lane] == path[i].net || ch[bb].xStatus[chip2Lane] == -1)
+                                {
+                                    
+
+                                    ch[bb].xStatus[chip1Lane] = path[i].net;
+                                    ch[bb].xStatus[chip2Lane] = path[i].net;
+
+                                    path[i].chip[2] = bb;
+                                    path[i].x[2] = chip1Lane;
+                                    path[i].x[3] = chip2Lane;
+
+                                    path[i].y[2] = -2;
+                                    path[i].y[3] = -2;
+                                    path[i].altPathNeeded = false;
+
+                                    path[i].x[0] = xMapForNode(path[i].node1, path[i].chip[0]);
+                                    path[i].x[1] = xMapForNode(path[i].node2, path[i].chip[1]);
+
+                                    path[i].y[0] = bb;
+                                    path[i].y[1] = bb;
+
+                                    if (debugNTCC2)
+                                    {
+                                        Serial.print(i);
+                                        Serial.print("  chip[2]: ");
+                                        Serial.print(chipNumToChar(path[i].chip[2]));
+
+                                        Serial.print("  y[2]: ");
+                                        Serial.print(path[i].y[2]);
+
+                                        Serial.print("  y[3]: ");
+                                        Serial.print(path[i].y[3]);
+
+                                        Serial.print(" \n\r");
+                                    }
+                                    foundHop = 1;
+                                   // break;
+                                }
+
+                            
+                        
+
+                        }
+                    }
+
+
+
+                }
+
+
+                    /*
+                    Serial.print("swapped");
+                    int xNode1 = xMapForNode(path[i].node1, path[i].chip[0]);//i dont think this does anything
+                    int altChip;
+
+
+                    for (int s = 0; s < 26; s++)
+                    {
+                        if (duplucateSFnodes[s][0] == path[i].chip[0] && duplucateSFnodes[s][1] == xNode1)
+                        {
+                            altChip = duplucateSFnodes[s][2];
+                            xNode1 = duplucateSFnodes[s][3];
+                        }
+                    }
+                    for (int bb = 0; bb < 8; bb++)
+                    {                                    // this is a long winded way to do this but it's at least slightly readable
+                            int sfChip1 = altChip;
+                            int sfChip2 = path[i].chip[0];
+
+                            int chip1Lane = xMapForNode(sfChip1, bb);
+                            int chip2Lane = xMapForNode(sfChip2, bb);
+
+                            if (ch[CHIP_L].yStatus[bb] == path[i].net || ch[CHIP_L].yStatus[bb] == -1)
+                            {
+                                if (ch[bb].xStatus[chip1Lane] == path[i].net || ch[bb].xStatus[chip1Lane] == -1)
+                                {
+                                    if (ch[bb].xStatus[chip2Lane] == path[i].net || ch[bb].xStatus[chip2Lane] == -1)
+                                    {
+                                        ch[CHIP_L].yStatus[bb] = path[i].net;
+
+                                        ch[bb].xStatus[chip1Lane] = path[i].net;
+                                        ch[bb].xStatus[chip2Lane] = path[i].net;
+
+                                        path[i].chip[2] = bb;
+                                        path[i].x[2] = chip1Lane;
+                                        path[i].x[3] = chip2Lane;
+
+                                        path[i].y[2] = 0;
+                                        path[i].y[3] = 0;
+                                        path[i].altPathNeeded = false;
+
+                                        path[i].x[0] = xMapForNode(path[i].node1, path[i].chip[0]);
+                                        path[i].x[1] = xMapForNode(path[i].node2, path[i].chip[1]);
+
+                                        path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
+                                        path[i].y[1] = yMapForNode(path[i].node2, path[i].chip[1]);
+
+                                        if (debugNTCC2)
+                                        {
+                                            Serial.print(i);
+                                        
+                                            Serial.print(" Swapped  chip[2]: ");
+                                            Serial.print(chipNumToChar(path[i].chip[2]));
+
+                                            Serial.print("  y[2]: ");
+                                            Serial.print(path[i].y[2]);
+
+                                            Serial.print("  y[3]: ");
+                                            Serial.print(path[i].y[3]);
+                                        }
+                                    }
+                                }
+                            }
+
+
+                    }
+*/
+                    
+                    
+
+
+
+
+                    }
+
+
+
+
+
+
+
+                
                 break;
             }
-            }
+            
         }
     }
-    printPathsCompact();
-    printChipStatus();
+
+    //printPathsCompact();
+    //printChipStatus();
 }
+
+void resolveUncommittedHops(void)
+{
+    //prefer adcs and stuff for sf chips
+    for (int i = 0; i < numberOfPaths; i++)
+    {
+
+        for (int j = 0; j < 6; j++)
+        {
+            if (path[i].x[j] == -1)
+            {
+                break;
+            }
+            if (path[i].x[j] == -2)
+            {
+       
+                for (int k = 0; k < 4; k++)
+                {
+                    if (path[i].x[k] == -2)
+                    {
+                        for( int l = 0; l < 16; l++)
+                        {
+                            if (ch[path[i].chip[j]].xStatus[l] == -1 && ch[path[i].chip[k]].yStatus[l] == -1)
+                            {
+                                path[i].x[k] = l;
+                                path[i].x[j] = l;
+                                
+                                ch[path[i].chip[k]].xStatus[l] = path[i].net;
+                                Serial.print ("resolved uncommitted hop");
+                                Serial.print (i);
+                                Serial.print ("  ");
+                                Serial.print (k);
+                                Serial.print ("  ");
+                                Serial.print (l);
+                                Serial.print ("  ");
+                                Serial.print (path[i].chip[k]);
+                                Serial.print ("  ");
+                                Serial.print (path[i].net);
+                                Serial.println ("  ");
+
+                                break;
+                            }
+                        }
+       
+                    }
+                }
+                
+            }
+        }
+        for (int j = 0; j < 6; j++)
+        {
+            if (path[i].x[j] == -1)
+            {
+                break;
+            }
+            if (path[i].y[j] == -2)
+            {
+       
+                for (int k = 0; k < 4; k++)
+                {
+                    if (path[i].y[k] == -2)
+                    {
+                        for( int l = 0; l < 16; l++)
+                        {
+                            if (ch[path[i].chip[j]].yStatus[l] == -1 && ch[path[i].chip[k]].yStatus[l] == -1)
+                            {
+                                path[i].y[k] = l;
+                                path[i].y[j] = l;
+                                
+                                ch[path[i].chip[k]].yStatus[l] = path[i].net;
+                                Serial.print ("resolved uncommitted hop");
+                                Serial.print (i);
+                                Serial.print ("  ");
+                                Serial.print (k);
+                                Serial.print ("  ");
+                                Serial.print (l);
+                                Serial.print ("  ");
+                                Serial.print (path[i].chip[k]);
+                                Serial.print ("  ");
+                                Serial.print (path[i].net);
+                                Serial.println ("  ");
+
+                                break;
+                            }
+                        }
+       
+                    }
+                }
+                
+            }
+        }
+
+
+
+
+    }
+printPathsCompact();
+
+}
+
+
+void swapDuplicateNode(int pathIndex)
+{
+    for (int i = 0; i < 26; i++)
+    {
+        if (duplucateSFnodes[i][0] == path[pathIndex].chip[1] && duplucateSFnodes[i][1] == path[pathIndex].x[1])
+        {
+            path[pathIndex].chip[1] = duplucateSFnodes[i][2];
+            path[pathIndex].x[1] = duplucateSFnodes[i][3];
+        }
+    }
+
+}
+
 
 void printPathsCompact(void)
 {
 
-    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpthType\t\tchipL\tchip3\tx2\ty2\tx3\ty3\n\r");
+    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpthType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\tchip3\tx4\ty4\tx5\ty5\n\r");
     for (int i = 0; i < numberOfPaths; i++)
     {
         Serial.print(i);
@@ -970,17 +1693,31 @@ void printPathsCompact(void)
             Serial.print(" \t");
             Serial.print(path[i].y[3]);
         }
+                if (path[i].chip[3] != -1)
+        {
+            Serial.print(" \t");
+            Serial.print(chipNumToChar(path[i].chip[3]));
+            Serial.print(" \t");
+            Serial.print(path[i].x[4]);
+            Serial.print(" \t");
+            Serial.print(path[i].y[4]);
+            Serial.print(" \t");
+            Serial.print(path[i].x[5]);
+            Serial.print(" \t");
+            Serial.print(path[i].y[5]);
+        }
 
         Serial.println(" ");
     }
+        Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpthType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\tchip3\tx4\ty4\tx5\ty5\n\r");
 }
 
 void printChipStatus(void)
 {
-    Serial.println("chip\tX\t\t\t\ty");
+    Serial.println("\n\rchip\t0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15\t\t0    1    2    3    4    5    6    7");
     for (int i = 0; i < 12; i++)
     {
-       int spaces = 0;
+        int spaces = 0;
         Serial.print(chipNumToChar(i));
         Serial.print("\t");
         for (int j = 0; j < 16; j++)
@@ -993,11 +1730,10 @@ void printChipStatus(void)
             }
             Serial.print(" ");
             spaces = 0;
-            
         }
         Serial.print("\t");
         for (int j = 0; j < 8; j++)
-{
+        {
             spaces += printNodeOrName(ch[i].yStatus[j]);
 
             for (int k = 0; k < 4 - spaces; k++)
@@ -1007,7 +1743,10 @@ void printChipStatus(void)
             Serial.print(" ");
             spaces = 0;
         }
-
+        if (i == 7)
+        {
+                Serial.print("\n\n\rchip\t0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15\t\t0    1    2    3    4    5    6    7");
+        }
         Serial.println(" ");
     }
 }
@@ -1741,12 +2480,22 @@ void clearChipsOnPathToNegOne(void)
             path[i].node2 = -1;
             path[i].net = -1;
         }
+        for (int c = 0; c < 4; c++)
+        {
+            path[i].chip[c] = -1;
+
+        }
+
+        for (int c = 0; c < 6; c++)
+        {
+           
+            path[i].x[c] = -1;
+            path[i].y[c] = -1;
+
+        }
 
         for (int c = 0; c < 3; c++)
         {
-            path[i].chip[c] = -1;
-            path[i].x[c] = -1;
-            path[i].y[c] = -1;
 
             path[i].candidates[c][0] = -1;
             path[i].candidates[c][1] = -1;

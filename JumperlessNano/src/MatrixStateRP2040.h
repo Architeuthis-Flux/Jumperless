@@ -85,6 +85,35 @@ const int8_t reversePinMap[110];// = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D
 };
 extern struct nanoStatus nano;
 
+const int duplucateSFnodes[26][4] = {  // [] [sf chip1,  x pin1, sf chip2, x pin2]
+{CHIP_I,0,CHIP_K,0},
+{CHIP_J,1,CHIP_K,1},
+{CHIP_I,2,CHIP_K,2},
+{CHIP_J,2,CHIP_K,4},
+{CHIP_I,3,CHIP_K,5},
+{CHIP_J,3,CHIP_K,3},
+{CHIP_I,4,CHIP_L,12},
+{CHIP_J,4,CHIP_K,6},
+{CHIP_I,5,CHIP_K,7},
+{CHIP_J,5,CHIP_L,13},
+{CHIP_J,6,CHIP_K,8},
+{CHIP_I,7,CHIP_K,9},
+{CHIP_I,8,CHIP_K,13},
+{CHIP_J,8,CHIP_K,10},
+{CHIP_I,9,CHIP_K,11},
+{CHIP_J,9,CHIP_K,12},
+{CHIP_J,10,CHIP_K,14},
+{CHIP_I,12,CHIP_L,7},
+{CHIP_J,12,CHIP_L,6},
+{CHIP_I,13,CHIP_L,2},
+{CHIP_J,13,CHIP_L,3},
+{CHIP_J,14,CHIP_L,14},
+{CHIP_I,15,CHIP_J,15},
+{CHIP_I,15,CHIP_L,15},
+{CHIP_J,15,CHIP_L,15},
+{CHIP_K,15,CHIP_L,4},
+};
+
 //see the comments at the end for a more nicely formatted version that's not in struct initalizers
 enum pathType {BBtoBB, BBtoNANO, NANOtoNANO, BBtoSF, NANOtoSF, BBtoBBL, NANOtoBBL, SFtoSF, SFtoBBL, BBLtoBBL};
 
@@ -97,8 +126,8 @@ struct pathStruct{
   int net; 
 
   int chip[4];
-  int x[4];
-  int y[4];
+  int x[6];
+  int y[6];
   int candidates[3][3]; //[node][candidate]
   int altPathNeeded;
   enum pathType pathType;

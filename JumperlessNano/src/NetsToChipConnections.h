@@ -62,6 +62,11 @@ void resolveAltPaths(void);
 
 void printChipStatus(void);
 
+void duplicateSFnets (void);
+
+void swapDuplicateNode (int);
+
+void resolveUncommittedHops(void);
 
 
 
