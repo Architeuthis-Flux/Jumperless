@@ -34,14 +34,15 @@
 #define CS_F 11
 #define CS_G 12
 #define CS_H 13
+
 #define CS_I 20
 #define CS_J 21
 #define CS_K 22
 #define CS_L 23
 
-#define DATAPIN 14
+#define DATAPIN 19
 #define RESETPIN 24
-#define CLKPIN 15
+#define CLKPIN 18
 
 #define UART0_TX 0
 #define UART0_RX 1

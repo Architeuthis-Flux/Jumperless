@@ -29,55 +29,34 @@ unsigned long timeToSort = 0;
 bool debugNTCC = false;
 bool debugNTCC2 = true;
 
-/*
-sort paths by net
 
-find start and end chips - update chipStatus struct there
-
-
-
-
-
-
-
-
-
-for each path
-    find start and end chips
-    resolve chip candidates
-    sort chips least to most crowded
-    assign chips to path
-    update bbToSfLanes
-    update chipsLeastToMostCrowded
-    update sfChipsLeastToMostCrowded
-
-
-
-
-
-
-*/
 
 void sortPathsByNet(void) // not actually sorting, just copying the bridges and nets back from netStruct so they're both in the same order
 {
     timeToSort = micros();
     printBridgeArray();
-
-    for (int i = 0; i < MAX_BRIDGES; i++)
+    numberOfNets = 0;
+    for (int i = 0; i < MAX_NETS; i++)
     {
-        if (net[i].number == 0)
+        if (net[i].number != 0 && net[i].number != -1)
         {
-            numberOfNets = i;
-            break;
+            numberOfNets++;
+            // break;
         }
     }
 
     for (int i = 0; i < MAX_BRIDGES; i++)
     {
-        if (path[i].node1 == 0 && path[i].node2 == 0)
+
+        if (path[i].node1 != 0 && path[i].node2 != 0)
         {
-            numberOfPaths = i;
-            break;
+            numberOfPaths++;
+
+            // break;
+        }
+        else if (path[i].node1 == 0 && path[i].node2 == 0)
+        {
+            // break;
         }
     }
     // printPathArray();
@@ -86,15 +65,21 @@ void sortPathsByNet(void) // not actually sorting, just copying the bridges and 
     Serial.println(numberOfNets);
     int pathIndex = 0;
 
-    for (int j = 1; j <= numberOfPaths; j++)
+    for (int j = 1; j <= MAX_NETS; j++)
     {
 
-        for (int k = 0; k < MAX_BRIDGES; k++)
+        if (net[j].number == 0)
+        {
+            break;
+            // continue;
+        }
+
+        for (int k = 0; k < MAX_NODES; k++)
         {
             if (net[j].bridges[k][0] == 0)
             {
-
                 break;
+                // continue;
             }
             else
             {
@@ -110,16 +95,16 @@ void sortPathsByNet(void) // not actually sorting, just copying the bridges and 
                     numberOfUniqueNets++;
                 }
 
-                // Serial.print("path[");
-                // Serial.print(pathIndex);
-                // Serial.print("] net: ");
-                // Serial.println(path[pathIndex].net);
+                Serial.print("path[");
+                Serial.print(pathIndex);
+                Serial.print("] net: ");
+                Serial.println(path[pathIndex].net);
                 pathIndex++;
             }
         }
     }
 
-    newBridgeLength = pathIndex;
+    newBridgeLength = numberOfPaths;
     numberOfPaths = pathIndex;
 
     Serial.print("number unique of nets: ");
@@ -261,16 +246,16 @@ void commitPaths(void)
                 Serial.print("xMapL1c1: ");
                 Serial.println(xMapL1c1);
             }
-
+            // changed to not stack paths for redundant connections
             if ((xMapL1c0 != -1) && ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net) // check if lane 1 shares a net first so it should prefer sharing lanes
             {
                 freeLane = 1;
             }
-            else if ((ch[path[i].chip[0]].xStatus[xMapL0c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL0c0] == path[i].net) // lanes will alway be taken together, so only check chip 1
+            else if ((ch[path[i].chip[0]].xStatus[xMapL0c0] == -1)) // || ch[path[i].chip[0]].xStatus[xMapL0c0] == path[i].net) // lanes will alway be taken together, so only check chip 1
             {
                 freeLane = 0;
             }
-            else if ((xMapL1c0 != -1) && ((ch[path[i].chip[0]].xStatus[xMapL1c0] == -1) || ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net))
+            else if ((xMapL1c0 != -1) && ((ch[path[i].chip[0]].xStatus[xMapL1c0] == -1))) // || ch[path[i].chip[0]].xStatus[xMapL1c0] == path[i].net))
             {
                 freeLane = 1;
             }
@@ -1564,40 +1549,6 @@ void resolveUncommittedHops(void)
         }
         else
         {
-            /*
-
-                         for (int chip = 0; chip < 4; chip++)
-                        {
-                            int freeY = -1;
-
-                            if (path[i].chip[chip] != -1)
-                            {
-
-                            for (int freeYsearch = 0; freeYsearch < 8; freeYsearch++)
-                             {
-
-                                if (ch[path[i].chip[chip]].yStatus[freeYsearch] == -1)
-                                {
-                                        freeY = freeYsearch;
-                                        break;
-                                }
-
-                             }
-
-                                for (int y = 0 ; y< 6; y++)
-                                {
-                                    if (path[i].y[y] == -2)
-                                    {
-                                        path[i].y[y] = freeY;
-                                        ch[path[i].chip[chip]].yStatus[freeY] = path[i].net;
-
-                                    }
-                                }
-
-                            }
-                       }
-
-            */
         }
     }
 
@@ -2339,7 +2290,7 @@ void printPathArray(void) // this also prints candidates and x y
     Serial.print("\n\r");
     int tabs = 0;
     int lineCount = 0;
-    for (int i = 0; i < newBridgeLength; i++)
+    for (int i = 0; i < numberOfPaths; i++)
     {
         tabs += Serial.print(i);
         Serial.print("  ");

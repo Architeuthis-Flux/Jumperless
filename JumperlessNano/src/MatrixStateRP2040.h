@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "JumperlessDefinesRP2040.h"
+#include "LEDs.h"
 
 
 struct netStruct{ 
@@ -13,7 +14,7 @@ const char *name; // human readable "Net 3"
 
 int8_t nodes[MAX_NODES] = {};//maybe make this smaller and allow nets to just stay connected currently 64x64 is 4 Kb
 
-int8_t bridges[MAX_NODES/2][2]; //either store them here or in one long array that references the net
+int8_t bridges[MAX_NODES][2]; //either store them here or in one long array that references the net
 
 int8_t specialFunction = -1; // store #defined number for that special function -1 for regular net
 
@@ -23,7 +24,7 @@ int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net tha
 
 uint8_t priority = 0; //priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
 
-uint32_t color; //color of the net in hex
+rgbColor color; //color of the net in hex
 };
 
 extern struct netStruct net[MAX_NETS];

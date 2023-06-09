@@ -12,8 +12,8 @@ int8_t newNode2 = -1;
 int foundNode1Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 int foundNode2Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 
- //struct pathStruct path[MAX_BRIDGES]; // node1, node2, net, chip[3], x[3], y[3]
- int newBridge[MAX_BRIDGES][3]; // node1, node2, net
+// struct pathStruct path[MAX_BRIDGES]; // node1, node2, net, chip[3], x[3], y[3]
+int newBridge[MAX_BRIDGES][3]; // node1, node2, net
 int newBridgeLength = 0;
 int newBridgeIndex = 0;
 unsigned long timeToNM;
@@ -61,7 +61,7 @@ void getNodesToConnect() // read in the nodes you'd like to connect
         {
             searchExistingNets(newNode1, newNode2);
         }
-        //printBridgeArray();
+        // printBridgeArray();
 
         newBridgeIndex++; // don't increment this until after the search because we're gonna use it as an index to store the nets
         // if (i < 7)
@@ -76,7 +76,7 @@ void getNodesToConnect() // read in the nodes you'd like to connect
     if (debugNM)
         Serial.println("done");
 
-        sortPathsByNet();
+    sortPathsByNet();
 }
 
 int searchExistingNets(int node1, int node2) // search through existing nets for all nodes that match either one of the new nodes (so it will be added to that net)
@@ -226,7 +226,7 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
 
 void combineNets(int foundNode1Net, int foundNode2Net)
 {
-    
+
     if (checkDoNotIntersectsByNet(foundNode1Net, foundNode2Net) == 1)
     {
         int swap = 0;
@@ -313,8 +313,6 @@ void combineNets(int foundNode1Net, int foundNode2Net)
         }
     }
 }
-
-
 
 void deleteNet(int netNumber) // make sure to check special function nets and clear connections to it
 {
@@ -430,7 +428,7 @@ void addNodeToNet(int netToAddNode, int node)
             return;
         }
     }
-    
+
     net[netToAddNode].nodes[newNodeIndex] = node;
 }
 
@@ -486,7 +484,6 @@ int findFirstUnusedNodeIndex(int netNumber) // search for a free net[]
 
 int checkDoNotIntersectsByNet(int netToCheck1, int netToCheck2) // If you're searching DNIs by net, there won't be any valid ways to make a new net with both nodes, so its skipped
 {
-    
 
     for (int i = 0; i <= MAX_DNI; i++)
     {
@@ -519,7 +516,6 @@ int checkDoNotIntersectsByNet(int netToCheck1, int netToCheck2) // If you're sea
                     Serial.print(" due to Do Not Intersect rules, skipping\n\r");
                 path[newBridgeIndex].net = -1;
                 return 0;
-                
             }
         }
         // if(debugNM) Serial.println (" ");
@@ -550,7 +546,7 @@ int checkDoNotIntersectsByNet(int netToCheck1, int netToCheck2) // If you're sea
                     Serial.print(netToCheck1);
                 if (debugNM)
                     Serial.print(" due to Do Not Intersect rules, skipping\n\r");
-                path[newBridgeIndex].net = -1;  
+                path[newBridgeIndex].net = -1;
                 return 0;
             }
         }
@@ -777,13 +773,11 @@ void listSpecialNets()
 
 void printBridgeArray(void)
 {
-//Serial.print("\n\n\r");
-    //Serial.print("newBridgeIndex = ");
-    //Serial.println(newBridgeIndex);
+
     Serial.print("\n\r");
     int tabs = 0;
     int lineCount = 0;
-    for (int i = 0; i < newBridgeLength; i++)
+    for (int i = 0; i < numberOfPaths; i++)
     {
         tabs += Serial.print(i);
         if (i < 10)
@@ -802,11 +796,11 @@ void printBridgeArray(void)
         tabs += printNodeOrName(path[i].net);
         tabs += Serial.print("],");
         lineCount++;
-        //Serial.print(tabs);
+        // Serial.print(tabs);
         for (int i = 0; i < 24 - (tabs); i++)
         {
             Serial.print(" ");
-        } 
+        }
         tabs = 0;
 
         if (lineCount == 5)
@@ -814,13 +808,17 @@ void printBridgeArray(void)
             Serial.print("\n\r");
             lineCount = 0;
         }
- 
     }
-    if(debugNMtime) Serial.println("\n\r");
-    if(debugNMtime) timeToNM = millis() - timeToNM;
-    if(debugNMtime) Serial.print("\n\rtook ");
-    if(debugNMtime) Serial.print(timeToNM);
-    if(debugNMtime) Serial.print("ms to run net manager\n\r");
+    if (debugNMtime)
+        Serial.println("\n\r");
+    if (debugNMtime)
+        timeToNM = millis() - timeToNM;
+    if (debugNMtime)
+        Serial.print("\n\rtook ");
+    if (debugNMtime)
+        Serial.print(timeToNM);
+    if (debugNMtime)
+        Serial.print("ms to run net manager\n\r");
 }
 
 int printNodeOrName(int node) // returns number of characters printed (for tabs)
@@ -839,7 +837,7 @@ int printNodeOrName(int node) // returns number of characters printed (for tabs)
         return Serial.print(node);
     }
 }
- char same[12] = "           ";
+char same[12] = "           ";
 const char *definesToChar(int defined) // converts the internally used #defined numbers into human readable strings
 {
 
@@ -863,7 +861,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
     }
     else
     {
-       
+
         itoa(defined, same, 10);
         return same;
     }
