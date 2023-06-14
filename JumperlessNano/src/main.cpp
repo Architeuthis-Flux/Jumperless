@@ -7,6 +7,9 @@
 #include "NetsToChipConnections.h"
 #include "LEDs.h"
 #include "CH446Q.h"
+#include "Peripherals.h"
+#include <Wire.h>
+#include <Adafruit_MCP4725.h>
 
 // nanoStatus nano;
 const char *definesToChar(int); // i really need to find a way to not need to forward declare fuctions with this setup, i hate it
@@ -16,14 +19,20 @@ const char *definesToChar(int); // i really need to find a way to not need to fo
 void setup()
 {
 
-  initCH446Q();
 
+  initCH446Q();
+  initADC();
+   initDAC();
+   initINA219();
   Serial.begin(115200);
 
   initLEDs();
   LittleFS.begin();
-  delay(3000);
+  //delay(3000);
+  //rainbowy(255,253,100);
+  parseWokwiFileToNodeFile();
   openNodeFile();
+  //while(1);
 
 }
 
@@ -36,16 +45,25 @@ void loop()
   listSpecialNets();
   listNets();
   printBridgeArray();
-
+//rainbowy(255,30,100);
   bridgesToPaths();
   assignNetColors();
-  
-  delay(3000);
+  //showNets();
+ 
+  //delay(3000);
+    sendAllPaths();
+   
+   int i = 0;
   while (1)
   {
+    //sendAllPaths();
 
-    sendAllPaths();
+ //dacSine(1);
 
-    delay(1200);
+    //setDac0_5V(3.3);
+waveGen();
+    //
+    //dacTriangle();
+    //delay(1200);
   }
 }

@@ -2,11 +2,13 @@ bridges
 {
 10-33,
 23-57,
-}
-
-special functions //these are connected first so DNIs will be applied to all the nets
-{
 20-SUPPLY_3V3,
 58-GND,
+57-DAC0_5V,
+47-I_P,
+45-I_N,
+DAC1_8V-36,
+ADC3_8V-2,
+ADC0_5V-DAC0_5V,
 }
     

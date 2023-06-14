@@ -2,7 +2,7 @@
 
 #define DEBUG_FILEPARSING 1
 #define TIME_FILEPARSING 1
-#define DEBUG_NETMANAGER 1
+#define DEBUG_NETMANAGER 0
 #define TIME_NETMANAGER 1
 
 #define MAX_NETS 64
@@ -40,9 +40,9 @@
 #define CS_K 22
 #define CS_L 23
 
-#define DATAPIN 19
+//#define DATAPIN 14
 #define RESETPIN 24
-#define CLKPIN 18
+//#define CLKPIN 15
 
 #define UART0_TX 0
 #define UART0_RX 1
@@ -55,10 +55,10 @@
 
 #define LED_DATA_OUT 6
 
-#define ADC0_5V 26
-#define ADC1_5V 27
-#define ADC2_5V 28
-#define ADC3_8V 29
+#define ADC0_PIN 26
+#define ADC1_PIN 27
+#define ADC2_PIN 28
+#define ADC3_PIN 29
 
 #define T_RAIL_POS 31
 #define T_RAIL_NEG 0
@@ -169,6 +169,12 @@
 
 #define CURRENT_SENSE_PLUS  108
 #define CURRENT_SENSE_MINUS  109
+
+#define ADC0_5V 110
+#define ADC1_5V 111
+#define ADC2_5V 112
+#define ADC3_8V 113
+
 
 
 #define EMPTY_NET 127

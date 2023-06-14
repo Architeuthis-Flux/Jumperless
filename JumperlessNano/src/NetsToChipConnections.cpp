@@ -27,7 +27,7 @@ int pathsWithCandidatesIndex = 0;
 unsigned long timeToSort = 0;
 
 bool debugNTCC = false;
-bool debugNTCC2 = true;
+bool debugNTCC2 = false;
 
 
 
@@ -1213,8 +1213,28 @@ void resolveAltPaths(void)
 
                     for (int bb = 0; bb < 8; bb++) // this is a long winded way to do this but it's at least slightly readable
                     {
+                        Serial.print("! ");
                         int sfChip1 = path[i].chip[0];
                         int sfChip2 = path[i].chip[1];
+
+                        if (sfChip1 == CHIP_L && sfChip2 == CHIP_L)
+                        {
+                            path[i].altPathNeeded = false;
+
+
+                            path[i].x[0] = xMapForNode(path[i].node1, path[i].chip[0]);
+                            path[i].x[1] = xMapForNode(path[i].node2, path[i].chip[1]);
+                            path[i].y[0] = -2;
+                            path[i].y[1] = -2;
+                            
+                            //ch[CHIP_L].xStatus[path[i].x[0]] = path[i].net;
+                            //ch[CHIP_L].xStatus[path[i].x[1]] = path[i].net;
+
+
+
+
+                        }
+        
 
                         int chip1Lane = xMapForNode(sfChip1, bb);
                         int chip2Lane = xMapForNode(sfChip2, bb);
@@ -1749,7 +1769,7 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
             }
             break;
         }
-        case GND ... CURRENT_SENSE_MINUS:
+        case GND ... ADC3_8V:
         {
 
             Serial.print("special function candidate chips: ");
@@ -1914,7 +1934,7 @@ void assignPathType(int pathIndex)
     {
         path[pathIndex].nodeType[0] = NANO;
     }
-    else if (path[pathIndex].node1 >= GND && path[pathIndex].node1 <= CURRENT_SENSE_MINUS)
+    else if (path[pathIndex].node1 >= GND && path[pathIndex].node1 <= ADC3_8V)
     {
         path[pathIndex].nodeType[0] = SF;
     }
@@ -1932,12 +1952,16 @@ void assignPathType(int pathIndex)
     {
         path[pathIndex].nodeType[1] = NANO;
     }
-    else if (path[pathIndex].node2 >= GND && path[pathIndex].node2 <= CURRENT_SENSE_MINUS)
+    else if (path[pathIndex].node2 >= GND && path[pathIndex].node2 <= ADC3_8V)
     {
         path[pathIndex].nodeType[1] = SF;
     }
 
     if ((path[pathIndex].nodeType[0] == NANO && path[pathIndex].nodeType[1] == SF))
+    {
+        path[pathIndex].pathType = NANOtoSF;
+    }
+    else if ((path[pathIndex].nodeType[0] == SF && path[pathIndex].nodeType[1] == SF))
     {
         path[pathIndex].pathType = NANOtoSF;
     }

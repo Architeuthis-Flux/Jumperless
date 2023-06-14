@@ -8,7 +8,7 @@ Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 rgbColor netColors[MAX_NETS] = {0};
 
 uint8_t saturation = 254;
-uint8_t brightness = BRIGHTNESS;
+uint8_t brightness = 254;
 
 void initLEDs(void)
 {
@@ -130,7 +130,7 @@ void assignNetColors(void)
     }
     leds.show();
 
-    delay(1);
+    
     int skipSpecialColors = 0;
     uint8_t hue = 0;
 
@@ -194,7 +194,7 @@ void assignNetColors(void)
         {
         }
 
-        hsvColor netHsv = {hue, saturation, brightness};
+        hsvColor netHsv = {hue, saturation, 255};
         netColors[i] = HsvToRgb(netHsv);
 
         // leds.setPixelColor(i, netColors[i]);
@@ -225,7 +225,9 @@ uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b)
     return (uint32_t)r << 16 | (uint32_t)g << 8 | b;
 }
 
-void lightUpNet(int netNumber, int node, int onOff)
+
+
+void lightUpNet(int netNumber, int node, int onOff , int brightness2)
 {
 
     if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] < 62)
@@ -243,7 +245,9 @@ void lightUpNet(int netNumber, int node, int onOff)
                 {
                     if (onOff == 1)
                     {
-                        uint32_t color = packRgb(net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b);
+
+                        uint32_t color = packRgb((net[netNumber].color.r * brightness2) >> 8, (net[netNumber].color.g * brightness2) >> 8, (net[netNumber].color.b * brightness2) >> 8);
+                        ///Serial.println(color);
                         leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
                     }
                     else
@@ -259,6 +263,16 @@ void lightUpNet(int netNumber, int node, int onOff)
     }
 }
 
+
+void lightUpNode(int node)
+{
+
+    leds.setPixelColor(nodesToPixelMap[node], 0xffffff);
+
+
+
+
+}
 void showNets(void)
 {
 

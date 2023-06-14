@@ -12,6 +12,11 @@ int8_t newNode2 = -1;
 int foundNode1Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 int foundNode2Net = 0; // netNumbers where that node is, a node can only be in 1 net (except current sense, we'll deal with that separately)
 
+
+
+    int foundNode1inSpecialNet = foundNode1Net;
+    int foundNode2inSpecialNet = foundNode2Net;
+
 // struct pathStruct path[MAX_BRIDGES]; // node1, node2, net, chip[3], x[3], y[3]
 int newBridge[MAX_BRIDGES][3]; // node1, node2, net
 int newBridgeLength = 0;
@@ -85,8 +90,8 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
     foundNode1Net = 0;
     foundNode2Net = 0;
 
-    int foundNode1inSpecialNet = 0;
-    int foundNode2inSpecialNet = 0;
+     foundNode1inSpecialNet = node1;
+     foundNode2inSpecialNet = node2;
 
     for (int i = 1; i < MAX_NETS; i++)
     {
@@ -232,8 +237,36 @@ void combineNets(int foundNode1Net, int foundNode2Net)
         int swap = 0;
         if ((foundNode2Net <= 7 && foundNode1Net <= 7))
         {
+            for (int i = 0; i < MAX_DNI; i++)
+            {
+                for (int j = 0; j < MAX_DNI; j++)
+                {
+                if ((net[foundNode1Net].doNotIntersectNodes[i] == foundNode1Net || net[foundNode2Net].doNotIntersectNodes[j] == foundNode2Net) && (net[foundNode1Net].doNotIntersectNodes[i] != -1 && net[foundNode2Net].doNotIntersectNodes[j] != -1))
+                {
+
+                    if (debugNM)
+                        Serial.print("can't combine Special Nets\n\r"); // maybe have it add a bridge between them if it's allowed?
+
+                    path[newBridgeIndex].net = -1;
+                    return;
+                }
+                }
+
+
+            }
+            addNodeToNet(foundNode1Net, newNode2);
+            addNodeToNet(foundNode2Net, newNode1);
+            addBridgeToNet(foundNode1Net, newNode1, newNode2);
+           addBridgeToNet(foundNode2Net, newNode1, newNode2);
+
+
             if (debugNM)
-                Serial.print("can't combine Special Nets, skipping\n\r"); // maybe have it add a bridge between them if it's allowed?
+                Serial.print("can't combine Special Nets\n\r"); // maybe have it add a bridge between them if it's allowed?
+
+
+
+
+
             path[newBridgeIndex].net = -1;
         }
         else
@@ -843,7 +876,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
 
     const char *defNanoToChar[26] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "RESET", "AREF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"};
 
-    const char *defSpecialToChar[12] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG"};
+    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3"};
 
     const char *emptyNet[] = {"EMPTY_NET", "?"};
 
@@ -851,7 +884,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
     {
         return defNanoToChar[defined - 70];
     }
-    else if (defined >= 100 && defined <= 110)
+    else if (defined >= 100 && defined <= ADC3_8V)
     {
         return defSpecialToChar[defined - 100];
     }

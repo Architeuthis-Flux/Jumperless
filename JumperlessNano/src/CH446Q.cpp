@@ -5,15 +5,15 @@
 #include "LEDs.h"
 #include "Peripherals.h"
 #include "JumperlessDefinesRP2040.h"
-// #include <SPI.h>
-// #include "pico/stdlib.h"
+
 #include "hardware/pio.h"
 
-// #include "hardware/clocks.h"
-// #include "ch446.pio.h"
 #include "spi.pio.h"
 #include "pio_spi.h"
-// #include "ch446_spi.pio.h"
+
+#define MYNAMEISERIC 0  //on the board I sent to eric, the data and clock lines are bodged to GPIO 18 and 19. To allow for using hardware SPI
+
+
 
 int chipToPinArray[12] = {CS_A, CS_B, CS_C, CS_D, CS_E, CS_F, CS_G, CS_H, CS_I, CS_J, CS_K, CS_L};
 PIO pio = pio0;
@@ -119,8 +119,18 @@ void isrFromPio(void)
 void initCH446Q(void)
 {
 
-  uint dat = 19;
-  uint clk = 18;
+  uint dat = 14;
+  uint clk = 15;
+
+
+if (MYNAMEISERIC)
+{
+  dat = 18;
+  clk = 19;
+
+
+} 
+
   uint cs = 7;
 
   irq_add_shared_handler(PIO0_IRQ_0, isrFromPio, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
@@ -175,16 +185,20 @@ void sendAllPaths(void) // should we sort them by chip? for now, no
 
   for (int i = 0; i < numberOfPaths; i++)
   {
+
+
     sendPath(i, 1);
 
-    delay(1200);
+    
+
+    //delay(120);
   }
-  for (int i = numberOfPaths; i >= 0; i--)
+  /*for (int i = numberOfPaths; i >= 0; i--)
   {
     sendPath(i, 0);
 
     delay(800);
-  }
+  }*/
 }
 
 void sendPath(int i, int setOrClear)
@@ -211,8 +225,8 @@ void sendPath(int i, int setOrClear)
           continue;
         }
 
-        lightUpNet(path[i].net, path[i].node1, setOrClear);
-        lightUpNet(path[i].net, path[i].node2, setOrClear);
+        lightUpNet(path[i].net, path[i].node1, setOrClear,255);
+        lightUpNet(path[i].net, path[i].node2, setOrClear,255);
 
         chYdata = path[i].y[chip];
         chXdata = path[i].x[chip];

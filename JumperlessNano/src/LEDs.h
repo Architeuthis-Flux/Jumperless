@@ -8,7 +8,7 @@
 
 #define LED_PIN 25
 #define LED_COUNT 160
-#define BRIGHTNESS 220
+#define BRIGHTNESS 50
 
 extern Adafruit_NeoPixel leds;
 
@@ -53,8 +53,8 @@ void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
 
-void lightUpNet (int netNumber, int node = -1, int onOff = 1);//-1 means all nodes (default)
-
+void lightUpNet (int netNumber, int node = -1, int onOff = 1, int brightness = BRIGHTNESS);//-1 means all nodes (default)
+void lightUpNode (int node);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
 

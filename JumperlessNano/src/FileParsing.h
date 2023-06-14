@@ -3,7 +3,9 @@
 
 
 //this just opens the file, takes out all the bullshit, and then populates the newBridge array
-
+void parseWokwiFileToNodeFile();
+void changeWokwiDefinesToJumperless ();
+void writeToNodeFile(void);
 
 void openNodeFile();
 
