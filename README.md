@@ -6,45 +6,15 @@ This is a new revision of [breadWare](https://github.com/Architeuthis-Flux/bread
 
 That repo has a lot more info that generally applies to this one too, so go read that if you'd like to know more about this thing. 
 
-I'd like to basically rewrite that whole codebase from scratch because it's kind of a mess. So the new stuff will go here. 
+I'm basically rewriting that whole codebase from scratch because it's kind of a mess. So the new stuff will go here. 
 
 ## Here's the general vague roadmap (for anyone who wants to contribute):
 
-Matrix interface code (Dumb Mode) - done
+An Arduino library for commanding the RP2040
 
+A circuitPython library to do connection stuff.
 
-Storage of the current state - started but needs a lot more work
-
-
-Pathfinding - started minutes ago
- 
-   --Hardware safety checks (throw an error if you try to connect power directly to ground)- not started
- 
-   --Path Redundancy/priority - not started
-  
-  
-Coming up with a format to send commands - mused upon but not decided
- 
-   --Command input parsing (UART) - not started
-  
-   --Command input parsing (I2C) - not started
-
-
-Power Supply control (needs HW revision or just remove the DAC/Opamp entirely)- not started
-
-
-
-   *Everything above will be running on the AVR32DD32 controller chip, below is external interface stuff*
-
-
-
-Making an Arduino library for the Master - not started
-
-
-(optional) Writing a python library to form and send UART commands
-
-
-(optional) GUI for making connections
+(optional) a custom GUI for making connections
 
 (optional) Component placement sensing or just a simple way to define part locations
 
