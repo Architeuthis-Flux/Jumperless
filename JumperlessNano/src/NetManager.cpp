@@ -5,6 +5,7 @@
 #include "MatrixStateRP2040.h"
 #include "SafeString.h"
 #include "NetsToChipConnections.h"
+#include <EEPROM.h>
 
 int8_t newNode1 = -1;
 int8_t newNode2 = -1;
@@ -22,25 +23,20 @@ int newBridge[MAX_BRIDGES][3]; // node1, node2, net
 int newBridgeLength = 0;
 int newBridgeIndex = 0;
 unsigned long timeToNM;
-static bool debugNM;
-static bool debugNMtime;
+
+bool debugNM = EEPROM.read(DEBUG_NETMANAGERADDRESS);
+bool debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
+
+
 
 void getNodesToConnect() // read in the nodes you'd like to connect
 {
     timeToNM = millis();
-    if (DEBUG_NETMANAGER == 1)
-        debugNM = true;
-    else
-        debugNM = false;
-    if (TIME_NETMANAGER == 1)
-        debugNMtime = true;
-    else
-        debugNMtime = false;
 
     if (debugNM)
         Serial.println("\n\n\rconnecting nodes into nets\n\r");
 
-    newBridgeIndex = 0;
+    //newBridgeIndex = 0;
     for (int i = 0; i < newBridgeLength; i++)
     {
         newNode1 = path[i].node1;
@@ -58,7 +54,7 @@ void getNodesToConnect() // read in the nodes you'd like to connect
 
         // do some error checking
 
-        if (newNode1 == 0 || newNode2 == 0)
+        if (newNode1 <= 0 || newNode2 <= 0)
         {
             path[i].net = -1;
         }
@@ -72,11 +68,13 @@ void getNodesToConnect() // read in the nodes you'd like to connect
         // if (i < 7)
         // {
         if (debugNM)
-            listSpecialNets();
+            //listSpecialNets();
         // }
 
         if (debugNM)
-            listNets();
+        {
+            //listNets();
+        }
     }
     if (debugNM)
         Serial.println("done");
@@ -95,14 +93,14 @@ int searchExistingNets(int node1, int node2) // search through existing nets for
 
     for (int i = 1; i < MAX_NETS; i++)
     {
-        if (net[i].number == 0) // stops searching if it gets to an unallocated net
+        if (net[i].number <= 0) // stops searching if it gets to an unallocated net
         {
             break;
         }
 
         for (int j = 0; j < MAX_NODES; j++)
         {
-            if (net[i].nodes[j] == 0)
+            if (net[i].nodes[j] <= 0)
             {
                 break;
             }
@@ -457,8 +455,9 @@ void addNodeToNet(int netToAddNode, int node)
             if (debugNM)
                 Serial.print(netToAddNode);
             if (debugNM)
-                Serial.print(", skipping\n\r");
+                Serial.print(", still adding to net\n\r");
             return;
+            //break;
         }
     }
 
@@ -469,7 +468,7 @@ int findFirstUnusedNetIndex() // search for a free net[]
 {
     for (int i = 0; i < MAX_NETS; i++)
     {
-        if (net[i].nodes[0] == 0)
+        if (net[i].nodes[0] <= 0)
         {
             if (debugNM)
                 Serial.print("found unused Net ");
@@ -626,17 +625,17 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
     }
     else
     {
-        Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tDo Not Intersects");
+        Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tColor\t\tDo Not Intersects");
 
         int tabs = 0;
         for (int i = 8; i < MAX_NETS; i++)
         {
-            if (net[i].number == 0) // stops searching if it gets to an unallocated net
+            if (net[i].number == 0 || net[i].nodes[0] == -1) // stops searching if it gets to an unallocated net
             {
                 // Serial.print("Done listing nets");
                 break;
             }
-
+   
             Serial.print("\n\r");
             Serial.print(i);
             Serial.print("\t");
@@ -644,7 +643,7 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
             Serial.print("\t\t");
             Serial.print(net[i].number);
             Serial.print("\t\t");
-
+            
             tabs = 0;
             for (int j = 0; j < MAX_NODES; j++)
             {
@@ -694,6 +693,9 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
             {
                 Serial.print("\t");
             }
+            /*
+                    Serial.print(net[i].colorName);
+Serial.print("\t\t");
 
             for (int j = 0; j < MAX_DNI; j++)
             {
@@ -710,14 +712,15 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
                     tabs += Serial.print(",");
                 }
             }
+            */
         }
     }
-    Serial.print("\n\n\n\r");
+    Serial.print("\n\r");
 }
 
 void listSpecialNets()
 {
-    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tDo Not Intersects");
+    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges");//\t\t\t\tColor\t\tDo Not Intersects");
     int tabs = 0;
     for (int i = 0; i < 8; i++)
     {
@@ -784,6 +787,9 @@ void listSpecialNets()
         {
             Serial.print("\t");
         }
+/*
+        Serial.print(net[i].colorName);
+Serial.print("\t\t");
 
         for (int j = 0; j < MAX_DNI; j++)
         {
@@ -799,7 +805,7 @@ void listSpecialNets()
 
                 tabs += Serial.print(",");
             }
-        }
+        }*/
     }
     Serial.print("\n\r");
 }
@@ -836,7 +842,7 @@ void printBridgeArray(void)
         }
         tabs = 0;
 
-        if (lineCount == 5)
+        if (lineCount == 4)
         {
             Serial.print("\n\r");
             lineCount = 0;
@@ -898,6 +904,23 @@ const char *definesToChar(int defined) // converts the internally used #defined 
         itoa(defined, same, 10);
         return same;
     }
+}
+
+void clearAllPaths (void)
+{
+    digitalWrite(RESETPIN, HIGH);
+    delay(1);
+    digitalWrite(RESETPIN, LOW);
+
+    for (int i = 0; i < MAX_BRIDGES; i++)
+    {
+        path[i].node1 = 0;
+        path[i].node2 = 0;
+        path[i].net = 0;
+        
+    }
+
+
 }
 /*
 

@@ -9,7 +9,8 @@
 extern int newBridge[MAX_BRIDGES][3]; // node1, node2, net
 extern int newBridgeLength;
 extern int newBridgeIndex;
-
+extern bool debugNM;
+extern bool debugNMtime;
 
 
 void writeJSONtoFile();

@@ -18,7 +18,7 @@
 
 #define DAC_RESOLUTION 9
 
-uint16_t freq[3] = {1, 1, 0};
+float freq[3] = {1, 1, 0};
 uint32_t period[3] = {0, 0, 0};
 uint32_t halvePeriod[3] = {0, 0, 0};
 
@@ -223,7 +223,7 @@ void refillTable(int amplitude, int offset, int dac)
   //int offsetCorr = 0;
   if (dac == 0)
   {
-offset = amplitude / 2;
+//offset = amplitude / 2;
   }
 
   for (int i = 0; i < 360; i++)
@@ -307,7 +307,7 @@ void waveGen(void)
   mode[2] = 's';
   int dacOn[3] = {0, 0, 0};
   int amplitude[3] = {4095, 4140, 0};
-  int offset[3] = {1, 1932, 2047};
+  int offset[3] = {2047, 1932, 2047};
   int calib[3] = {-10, 100, 0};
 
 
@@ -323,11 +323,11 @@ void waveGen(void)
   Serial.println("\ta = set amplitude (p-p)\tw = sawtooth\t\t* = frequency*2\n\r");
   Serial.println("\to = set offset\t\tt = triangle\t\t/ = frequency/2\n\r");
   Serial.println("\tv = voltage\t\tr = random\t\t \n\r");
-  Serial.println("\th = show this menu\t\t\t \n\r");
+  Serial.println("\th = show this menu\tx = exit\t\t \n\r");
 
 
 
-  period[activeDac] = 1e6 / freq[activeDac];
+  period[activeDac] = 1e6 / (freq[activeDac]/10);
   halvePeriod[activeDac] = period[activeDac] / 2;
   int chars = 0;
 
@@ -376,10 +376,25 @@ chars += Serial.print(adc0Reading);
         switch (c)
         {
         case '+':
+          if (freq[activeDac] >= 1.0)
+          {
+
           freq[activeDac]++;
+          } else {
+            freq[activeDac] += 0.1;
+          }
           break;
         case '-':
+
+          if (freq[activeDac] > 1.0)
+          {
           freq[activeDac]--;
+          } else if (freq[activeDac] > 0.1){
+            freq[activeDac] -= 0.1;
+          } else {
+            freq[activeDac] = 0.0;
+          }
+
           break;
         case '*':
           freq[activeDac] *= 2;
@@ -457,6 +472,9 @@ chars += Serial.print(adc0Reading);
 
           mode[activeDac] = c;
           break;
+
+          case 'x':
+          return;
         default:
           break;
         }
@@ -538,9 +556,9 @@ chars += Serial.print(adc0Reading);
       {
 
         if (t < halvePeriod[activeDac])
-          dac0_5V.setValue(t * amplitude[activeDac] / halvePeriod[activeDac]);
+          dac0_5V.setValue(((t * amplitude[activeDac])  / halvePeriod[activeDac] )+ offset[activeDac]);
         else
-          dac0_5V.setValue((period[activeDac] - t) * amplitude[activeDac] / halvePeriod[activeDac]);
+          dac0_5V.setValue((((period[activeDac] - t) * (amplitude[activeDac]) / halvePeriod[activeDac])+offset[activeDac]));
       }
       else if (activeDac == 1 && dacOn[activeDac] == 1)
       {
@@ -565,13 +583,13 @@ chars += Serial.print(adc0Reading);
         dac1_8V.setValue(offset[activeDac]);
       break;
     case 'h': // high
-      Serial.println("\n\r\t\t\t\t     waveGen\t\n\n\r\toptions\t\t\twaves\t\t\tadjust frequency\n\r");
-      Serial.println("\t5 = dac 0 0-5V (toggle)\tq = square\t\t+ = frequency++\n\r");
-      Serial.println("\t8 = dac 1 +-8V (toggle)\ts = sine\t\t- = frequency--\n\r");
-      Serial.println("\ta = set amplitude\tw = sawtooth\t\t* = frequency*2\n\r");
-      Serial.println("\to = set offset\t\tt = stair\t\t/ = frequency/2\n\r");
-      Serial.println("\tv = voltageGen menu\tr = random\t\t0-9 = frequency_\n\r");
-      Serial.println("\th = show this menu\tz = triangle\t\tc = frequency = 0\n\r");
+  Serial.println("\n\r\t\t\t\t     waveGen\t\n\n\r\toptions\t\t\twaves\t\t\tadjust frequency\n\r");
+  Serial.println("\t5/0 = dac 0 0-5V (togg)\tq = square\t\t+ = frequency++\n\r");
+  Serial.println("\t8/1 = dac 1 +-8V (togg)\ts = sine\t\t- = frequency--\n\r");
+  Serial.println("\ta = set amplitude (p-p)\tw = sawtooth\t\t* = frequency*2\n\r");
+  Serial.println("\to = set offset\t\tt = triangle\t\t/ = frequency/2\n\r");
+  Serial.println("\tv = voltage\t\tr = random\t\t \n\r");
+  Serial.println("\th = show this menu\tx = exit\t\t \n\r");
       mode[activeDac] = mode[2];
       break;
     case 'm': // mid
@@ -606,6 +624,15 @@ chars += Serial.print(adc0Reading);
           while (Serial.available() == 0)
             ;
           a = Serial.read();
+
+                    if (a == '.')
+          {
+            while (Serial.available() == 0)
+              ;
+
+            a = Serial.read();
+          }
+
           if (a >= 48 && a <= 57)
           {
             Serial.print((char)a);
@@ -638,7 +665,7 @@ chars += Serial.print(adc0Reading);
         while (Serial.available() == 0)
           ;
         aC = Serial.read();
-        if (aC == 'a')
+        if (aC == 'o')
           aC = Serial.read();
         a = aC;
 
@@ -658,6 +685,7 @@ chars += Serial.print(adc0Reading);
           {
             while (Serial.available() == 0)
               ;
+
             a = Serial.read();
           }
 
@@ -690,7 +718,7 @@ chars += Serial.print(adc0Reading);
       int newOffset = 0;
       int input = 0;
       char aC = 0;
-      int a = 0;
+      int o = 0;
       if (activeDac == 0)
       {
 
@@ -698,25 +726,37 @@ chars += Serial.print(adc0Reading);
         while (Serial.available() == 0)
           ;
         aC = Serial.read();
-        if (aC == 'a')
+        if (aC == 'o')
           aC = Serial.read();
-        a = aC;
+
+        o = aC;
 
         Serial.print(aC);
 
-        if (a >= 48 && a <= 53)
+
+        if (o >= 48 && o <= 53)
         {
 
-          input = a - 48;
+          input = o - 48;
           newOffset = input * 819;
           Serial.print(".");
           while (Serial.available() == 0)
             ;
-          a = Serial.read();
-          if (a >= 48 && a <= 57)
+          o = Serial.read();
+
+          if (o == '.')
           {
-            Serial.print((char)a);
-            input = a - 48;
+            while (Serial.available() == 0)
+              ;
+
+            o = Serial.read();
+          }
+
+
+          if (o >= 48 && o <= 57)
+          {
+            Serial.print((char)o);
+            input = o - 48;
             newOffset += input * 81.9;
 
             offset[activeDac] = newOffset;
@@ -748,14 +788,14 @@ chars += Serial.print(adc0Reading);
           aC = Serial.read();
         }
 
-        a = aC;
+        o = aC;
 
         Serial.print(aC);
 
-        if (a >= 48 && a <= 55)
+        if (o >= 48 && o <= 55)
         {
 
-          input = a - 48;
+          input = o - 48;
           newOffset = input * 276;
 
           if (input == '7')
@@ -768,18 +808,18 @@ chars += Serial.print(adc0Reading);
             Serial.print(".");
             while (Serial.available() == 0)
               ;
-            a = Serial.read();
-            if (a == '.')
+            o = Serial.read();
+            if (o == '.')
             {
               while (Serial.available() == 0)
                 ;
-              a = Serial.read();
+              o = Serial.read();
             }
 
-            if (a >= 48 && a <= 57)
+            if (o >= 48 && o <= 57)
             {
-              Serial.print((char)a);
-              input = a - 48;
+              Serial.print((char)o);
+              input = o - 48;
               newOffset += input * 27.6;
             }
           }

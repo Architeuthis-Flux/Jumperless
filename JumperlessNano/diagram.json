@@ -5,52 +5,27 @@
   "parts": [
     { "type": "wokwi-breadboard-half", "id": "bb1", "top": -694.2, "left": -141.2, "attrs": {} },
     { "type": "wokwi-arduino-nano", "id": "nano", "top": -791, "left": -62.59, "attrs": {} },
-    {
-      "type": "wokwi-led",
-      "id": "led1",
-      "top": -675.6,
-      "left": -82.6,
-      "attrs": { "color": "red" }
-    },
+    { "type": "wokwi-led", "id": "led1", "top": -666, "left": -92.2, "attrs": { "color": "red" } },
     {
       "type": "wokwi-resistor",
       "id": "r1",
-      "top": -600.85,
-      "left": -57.6,
+      "top": -629.65,
+      "left": 19.2,
       "attrs": { "value": "1000" }
     },
-    { "type": "wokwi-gnd", "id": "gnd1", "top": -1036.8, "left": -77.4, "attrs": {} },
-    { "type": "wokwi-vcc", "id": "vcc1", "top": -901.13, "left": 98.33, "attrs": {} }
+    { "type": "wokwi-gnd", "id": "gnd1", "top": -671.42, "left": 210.03, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": -757.34, "left": 201.2, "attrs": {} }
   ],
   "connections": [
-    [ "bb1:15b.j", "nano:12", "gold", [ "v0" ] ],
-    [ "bb1:19b.j", "nano:9", "green", [ "h93.92", "v-248.6" ] ],
-    [ "nano:A2", "bb1:tn.8", "orange", [ "v0" ] ],
-    [ "r1:2", "bb1:13t.a", "green", [ "v0" ] ],
-    [ "bb1:17t.d", "nano:A5", "purple", [ "v0" ] ],
-    [ "r1:1", "bb1:7t.c", "green", [ "v0" ] ],
-    [ "bb1:9b.g", "bb1:9b.i", "green", [ "v0" ] ],
-    [ "bb1:20t.c", "bb1:23t.c", "green", [ "v0" ] ],
-    [ "bb1:5b.j", "bb1:11b.j", "green", [ "v0" ] ],
-    [ "bb1:13b.i", "bb1:14t.d", "limegreen", [ "v0" ] ],
-    [ "bb1:bn.10", "gnd1:GND", "black", [ "v0" ] ],
-    [ "vcc1:VCC", "bb1:tp.19", "red", [ "v191.81", "h-4.49" ] ],
-    [ "bb1:22t.c", "bb1:tn.18", "green", [ "v0" ] ],
-    [ "bb1:tn.1", "bb1:bn.1", "green", [ "h-35.16", "v174" ] ],
-    [ "bb1:tp.1", "bb1:bp.2", "green", [ "h-74.06", "v174" ] ],
-    [ "nano:3", "nano:1", "green", [ "v0" ] ],
-    [ "nano:GND.1", "bb1:tn.17", "black", [ "v0" ] ],
-    [ "nano:AREF", "bb1:tp.6", "green", [ "v0" ] ],
-    [ "bb1:1b.j", "bb1:3b.h", "green", [ "v0" ] ],
-    [ "nano:5V", "bb1:tp.16", "red", [ "v0" ] ],
-    [ "nano:3.3V", "bb1:tn.7", "green", [ "v0" ] ],
-    [ "nano:VIN", "bb1:tn.19", "red", [ "v0" ] ],
-    [ "led1:A", "bb1:7t.b", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:6t.b", "", [ "$bb" ] ],
-    [ "bb1:bn.15", "bb1:18b.j", "green", [ "v0" ] ],
-    [ "nano:GND.1", "bb1:bn.16", "black", [ "v0" ] ],
-    [ "gnd1:GND", "bb1:tn.3", "black", [ "v0" ] ],
-    [ "bb1:6t.c", "bb1:tp.2", "green", [ "v0" ] ]
+    [ "vcc1:VCC", "bb1:tp.25", "red", [ "v18.96", "h-49.2" ] ],
+    [ "led1:A", "bb1:6t.c", "", [ "$bb" ] ],
+    [ "led1:C", "bb1:5t.c", "", [ "$bb" ] ],
+    [ "r1:1", "bb1:15t.c", "", [ "$bb" ] ],
+    [ "r1:2", "bb1:21t.c", "", [ "$bb" ] ],
+    [ "bb1:15t.e", "bb1:6t.e", "black", [ "v11.61", "h-84.29" ] ],
+    [ "bb1:21t.a", "bb1:tn.18", "black", [ "v0" ] ],
+    [ "bb1:5t.d", "bb1:tp.2", "red", [ "h-18.93", "v-67.5" ] ],
+    [ "gnd1:GND", "bb1:tn.25", "black", [ "v0" ] ]
   ],
   "dependencies": {}
 }

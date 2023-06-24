@@ -248,7 +248,7 @@ void sendPath(int i, int setOrClear)
 
         // delayMicroseconds(50);
 
-        delayMicroseconds(30);
+        delayMicroseconds(20);
 
         pio_sm_put(pio, sm, chAddress);
 

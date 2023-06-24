@@ -2,13 +2,33 @@
 #include <Adafruit_NeoPixel.h>
 #include "NetsToChipConnections.h"
 #include "MatrixStateRP2040.h"
+#include <EEPROM.h>
 
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 rgbColor netColors[MAX_NETS] = {0};
 
 uint8_t saturation = 254;
-uint8_t brightness = 254;
+uint8_t brightness = BRIGHTNESS;
+
+bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+
+    rgbColor specialNetColors[8] =
+        {{00, 00, 00},
+         {0x00, 0xFF, 0x30},
+         {0xFF, 0x41, 0x14},
+         {0xFF, 0x10, 0x40},
+         {0xFF, 0x78, 0xaa},
+         {0xFF, 0x40, 0x78},
+         {0xFF, 0xff, 0xff},
+         {0xff, 0xFF, 0xff}};
+
+    rgbColor railColors[4] =
+        {
+            {0xFF, 0x41, 0x14},
+            {0x00, 0xFF, 0x30},
+            {0xFF, 0x00, 0x40},
+            {0x00, 0xFF, 0x30}};
 
 void initLEDs(void)
 {
@@ -17,6 +37,8 @@ void initLEDs(void)
     leds.show();  // Turn OFF all pixels ASAP
     leds.setBrightness(BRIGHTNESS);
 }
+
+
 
 void colorWipe(uint32_t color, int wait)
 {
@@ -48,11 +70,22 @@ void rainbowy(int saturation, int brightness, int wait)
     }
 }
 
+void clearLEDs(void)
+{
+    for (int i = 0; i < 59; i++)
+    { // For each pixel in strip...
+    
+        leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)
+                     //  Update strip to match
+    }
+    leds.show(); 
+}
+
 void assignNetColors(void)
 {
     // numberOfNets = 60;
 
-    uint16_t colorDistance = 255 / numberOfNets;
+    uint16_t colorDistance = (255 / (numberOfNets-2));
 
     /* rgbColor specialNetColors[8] =
          {0x000000,
@@ -64,36 +97,25 @@ void assignNetColors(void)
           0xFFC8C8,
           0xC8FFC8};
  */
-    rgbColor specialNetColors[8] =
-        {{00, 00, 00},
-         {0x00, 0xFF, 0x30},
-         {0xFF, 0x41, 0x14},
-         {0xFF, 0x10, 0x40},
-         {0xFF, 0x78, 0x00},
-         {0xFF, 0x40, 0x78},
-         {0xFF, 0xC8, 0xC8},
-         {0xC8, 0xFF, 0xC8}};
 
-    rgbColor railColors[4] =
-        {
-            {0xFF, 0x41, 0x14},
-            {0x00, 0xFF, 0x30},
-            {0xFF, 0x00, 0x40},
-            {0x00, 0xFF, 0x30}};
-
-    Serial.print("colorDistance: ");
+if (debugLEDs)
+{
+    Serial.print("\n\rcolorDistance: ");
     Serial.print(colorDistance);
     Serial.print("\n\r");
     Serial.print("numberOfNets: ");
     Serial.print(numberOfNets);
     Serial.print("\n\rassigning net colors\n\r");
-
+    Serial.print("\n\rNet\t\tR\tG\tB\t\tH\tS\tV");
+}
     for (int i = 0; i < 8; i++)
     {
         hsvColor netHsv = RgbToHsv(specialNetColors[i]);
 
         netColors[i] = specialNetColors[i];
         net[i].color = netColors[i];
+        if (debugLEDs)
+{
         Serial.print("\n\r");
         Serial.print(net[i].name);
         Serial.print("\t");
@@ -108,6 +130,7 @@ void assignNetColors(void)
         Serial.print(netHsv.s);
         Serial.print("\t");
         Serial.print(netHsv.v);
+}
     }
 
     for (int i = 0; i < 5; i++)
@@ -130,9 +153,9 @@ void assignNetColors(void)
     }
     leds.show();
 
-    
+
     int skipSpecialColors = 0;
-    uint8_t hue = 0;
+    uint8_t hue = 8;
 
     for (int i = 8; i < numberOfNets; i++)
     {
@@ -142,7 +165,7 @@ void assignNetColors(void)
 
         int foundColor = 0;
 
-        for (uint8_t hueScan = ((i - 8) * colorDistance); hueScan < 255; hueScan += (colorDistance))
+        for (uint8_t hueScan =  hue+(colorDistance/4) ; hueScan <= 254; hueScan += (colorDistance))
         {
             for (int k = 0; k < 8; k++)
             {
@@ -150,7 +173,7 @@ void assignNetColors(void)
 
                 if (hueScan > snColor.h)
                 {
-                    if (hueScan - snColor.h < colorDistance)
+                    if (hueScan - snColor.h < colorDistance/2)
                     {
                         skipSpecialColors = 1;
                         // Serial.print("skipping special color: ");
@@ -160,7 +183,7 @@ void assignNetColors(void)
                         break;
                     }
                 }
-                else if (snColor.h - hueScan < colorDistance)
+                else if (snColor.h - hueScan < colorDistance/2)
                 {
                     skipSpecialColors = 1;
                     // continue;
@@ -188,13 +211,17 @@ void assignNetColors(void)
                 hue = hueScan;
                 break;
             }
-            // hue = hueScan;
+
+            if (i == numberOfNets && foundColor == 0)
+            {
+                //hueScan = 0;
+            }
         }
         if (foundColor == 0)
         {
         }
 
-        hsvColor netHsv = {hue, saturation, 255};
+        hsvColor netHsv = {hue, saturation, BRIGHTNESS};
         netColors[i] = HsvToRgb(netHsv);
 
         // leds.setPixelColor(i, netColors[i]);
@@ -202,20 +229,25 @@ void assignNetColors(void)
         net[i].color.r = netColors[i].r;
         net[i].color.g = netColors[i].g;
         net[i].color.b = netColors[i].b;
+        if (debugLEDs)
+{
+    
         Serial.print("\n\r");
         Serial.print(net[i].name);
         Serial.print("\t\t");
-        Serial.print(net[i].color.r, HEX);
+        Serial.print(net[i].color.r, DEC);
         Serial.print("\t");
-        Serial.print(net[i].color.g, HEX);
+        Serial.print(net[i].color.g, DEC);
         Serial.print("\t");
-        Serial.print(net[i].color.b, HEX);
+        Serial.print(net[i].color.b, DEC);
         Serial.print("\t\t");
         Serial.print(hue);
         Serial.print("\t");
         Serial.print(saturation);
         Serial.print("\t");
         Serial.print(brightness);
+     
+}
     }
 }
 
@@ -273,6 +305,36 @@ void lightUpNode(int node)
 
 
 }
+
+void lightUpRail(int rail, int onOff, int brightness2)
+{
+for (int j = 0; j < 4; j++)
+{
+    if (j == rail || rail == -1)
+    {
+    for (int i = 0; i < 5; i++)
+    {
+  
+            if (onOff == 1)
+            {
+                 uint32_t color = packRgb((railColors[j].r * brightness2) >> 8, (railColors[j].g * brightness2) >> 8, (railColors[j].b * brightness2) >> 8);
+                 
+                 //Serial.println(color,HEX);
+                leds.setPixelColor(railsToPixelMap[j][i], color);
+            }
+            else
+            {
+                leds.setPixelColor(railsToPixelMap[j][i], 0);
+            }
+        
+    }
+    }
+}
+    leds.show();
+    delay(1);
+
+}
+
 void showNets(void)
 {
 

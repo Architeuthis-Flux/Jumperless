@@ -9,6 +9,11 @@ extern int numberOfUniqueNets;
 extern int numberOfNets;
 extern int numberOfPaths;
 
+extern bool debugNTCC;
+extern bool debugNTCC2;
+
+void clearAllNTCC(void);
+
 void sortPathsByNet(void);  
 void bridgesToPaths(void);
 

@@ -25,6 +25,8 @@ int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net tha
 uint8_t priority = 0; //priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
 
 rgbColor color; //color of the net in hex
+
+char *colorName; //name of the color
 };
 
 extern struct netStruct net[MAX_NETS];

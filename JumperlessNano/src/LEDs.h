@@ -7,11 +7,11 @@
 #include "NetsToChipConnections.h"
 
 #define LED_PIN 25
-#define LED_COUNT 160
-#define BRIGHTNESS 50
+#define LED_COUNT 80
+#define BRIGHTNESS 120
 
 extern Adafruit_NeoPixel leds;
-
+extern bool debugLEDs;
 typedef struct rgbColor
 {
     unsigned char r;
@@ -47,13 +47,14 @@ const int pixelsToRails[20] = {B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B
 extern rgbColor netColors[MAX_NETS];
 
 void initLEDs(void);
-
+void clearLEDs(void);
 void colorWipe(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
+void lightUpRail (int railNumber, int onOff = 1, int brightness = BRIGHTNESS);
 
-void lightUpNet (int netNumber, int node = -1, int onOff = 1, int brightness = BRIGHTNESS);//-1 means all nodes (default)
+void lightUpNet (int netNumber = -1 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS);//-1 means all nodes (default)
 void lightUpNode (int node);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
