@@ -1,0 +1,3 @@
+([('jumperlesswokwibridge',
+   '/Users/kevinsanto/JumperlessWokwiBridge/dist/jumperlesswokwibridge',
+   'EXECUTABLE')],)
