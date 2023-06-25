@@ -8,7 +8,7 @@
 #include <Arduino.h>
 
 
-SerialPIO ardUart(0, 1, 64);
+//SerialPIO ardUart(0, 1, 64);
 void initArduino (void)
 {
 
@@ -16,10 +16,10 @@ void initArduino (void)
 //Serial1.setTX(1);
 
 
-pinMode (1, OUTPUT);
-pinMode (0, INPUT);
-ardUart.begin(115200);
-ardUart.println("hello from arduino");
+//pinMode (1, OUTPUT);
+//pinMode (0, INPUT);
+//ardUart.begin(115200);
+//ardUart.println("hello from arduino");
 
 
 
@@ -31,5 +31,5 @@ ardUart.println("hello from arduino");
 void arduinoPrint (void)
 {
 
-    ardUart.println("fuck");
+    //ardUart.println("fuck");
 }
