@@ -11,6 +11,7 @@
 #include <Wire.h>
 #include <Adafruit_MCP4725.h>
 #include <EEPROM.h>
+#include "ArduinoStuff.h"
 
 //https://wokwi.com/projects/367384677537829889
 
@@ -21,7 +22,8 @@ const char *definesToChar(int); // i really need to find a way to not need to fo
 void setup()
 {
 EEPROM.begin(256);
-
+initArduino();
+  
 debugFlagInit();
   initCH446Q();
   initADC();
@@ -99,9 +101,15 @@ void loop()
   char input;
   unsigned long timer = 0;
 
+//initArduino();
+  //
 
 
+  
 menu:
+
+arduinoPrint();
+
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
