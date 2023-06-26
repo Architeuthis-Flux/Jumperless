@@ -2,50 +2,81 @@
 #include "JumperlessDefinesRP2040.h"
 #include "NetManager.h"
 #include "MatrixStateRP2040.h"
-#include "LittleFS.h"
-#include "FileParsing.h"
+
 #include "NetsToChipConnections.h"
 #include "LEDs.h"
-#include "CH446Q.h"
+// #include "CH446Q.h"
 #include "Peripherals.h"
 #include <Wire.h>
 #include <Adafruit_MCP4725.h>
+// #include <EEPROM.h>
+// #include "ArduinoStuff.h"
+
+
+
+#define PIOSTUFF 1 //comment these out to remove them
+#define EEPROMSTUFF 1
+#define FSSTUFF 1
+
+
+
+#ifdef EEPROMSTUFF
 #include <EEPROM.h>
-#include "ArduinoStuff.h"
+#endif
 
-//https://wokwi.com/projects/367384677537829889
 
+
+#ifdef PIOSTUFF
+#include "CH446Q.h"
+#endif
+
+
+
+#include "FileParsing.h"
+
+#ifdef FSSTUFF
+#include "LittleFS.h"
+
+#endif
+
+// https://wokwi.com/projects/367384677537829889
 
 // nanoStatus nano;
 const char *definesToChar(int); // i really need to find a way to not need to forward declare fuctions with this setup, i hate it
 
 void setup()
 {
-EEPROM.begin(256);
-initArduino();
-  
-debugFlagInit();
+  //
+  // initArduino();
+#ifdef EEPROMSTUFF
+  EEPROM.begin(256);
+
+  debugFlagInit();
+#endif
+#ifdef PIOSTUFF
   initCH446Q();
+#endif
+
   initADC();
   initDAC();
   initINA219();
   Serial.begin(115200);
 
   initLEDs();
+
+#ifdef FSSTUFF
   LittleFS.begin();
+#endif
 
-  
-
-   
   lightUpRail(-1, 1, 220);
 
-    if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 0)
+  // if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 0)
+  //{
+#ifdef FSSTUFF
+  if (LittleFS.exists("/nodeFile.txt"))
   {
-
-if (LittleFS.exists("/nodeFile.txt"))
-{
-  delay(20);
-        openNodeFile();
+    delay(20);
+    openNodeFile();
     getNodesToConnect();
 
     Serial.println("\n\n\rnetlist\n\n\r");
@@ -62,28 +93,32 @@ if (LittleFS.exists("/nodeFile.txt"))
     Serial.print(numberOfPaths);
 
     assignNetColors();
-
+#ifdef PIOSTUFF
     sendAllPaths();
-} else {
-  while (Serial.available() > 0)
-  { 
-    Serial.read();
-    delay(1);
+#endif
   }
-  
-  delay(20);
-}
-  } else 
+  else
   {
+    while (Serial.available() > 0)
+    {
+      Serial.read();
+      delay(1);
+    }
+
     delay(20);
   }
-
+  //} else
+  // {
+  //   delay(20);
+  //}
 
   // rainbowy(255,253,100);
   // parseWokwiFileToNodeFile();
-  //openNodeFile();
+  // openNodeFile();
   // while(1);
-  lastCommandRead();
+  // lastCommandRead();
+
+#endif
 }
 
 void loop()
@@ -101,14 +136,12 @@ void loop()
   char input;
   unsigned long timer = 0;
 
-//initArduino();
+  // initArduino();
   //
 
-
-  
 menu:
 
-arduinoPrint();
+  // arduinoPrint();
 
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
@@ -122,21 +155,21 @@ arduinoPrint();
   Serial.print("\tr = reset\n\r");
   Serial.print("\n\r");
 
-  if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 1)
-  {
+  // if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 1)
+  //{
 
-    input = EEPROM.read(LASTCOMMANDADDRESS);
-  }
-  else
-  {
-    while (Serial.available() == 0)
-      ;
+  //  input = EEPROM.read(LASTCOMMANDADDRESS);
+  //}
+  // else
+  //{
+  while (Serial.available() == 0)
+    ;
 
-    input = Serial.read();
-  }
+  input = Serial.read();
+  //}
   if (input != 'l')
   {
-    lastCommandWrite(input);
+    // lastCommandWrite(input);
   }
 
   Serial.print(input);
@@ -145,21 +178,21 @@ arduinoPrint();
   switch (input)
   {
   case 'l':
-    lastCommandRead();
+    // lastCommandRead();
     break;
 
   case 'n':
-    lastCommandWrite(input);
+    // lastCommandWrite(input);
     Serial.print("\n\n\rnetlist\n\n\r");
     listSpecialNets();
     listNets();
     break;
   case 'b':
-    lastCommandWrite(input);
+    // lastCommandWrite(input);
     printBridgeArray();
     break;
   case 'w':
-    lastCommandWrite(input);
+    // lastCommandWrite(input);
     waveGen();
     break;
   case 'm':
@@ -169,22 +202,24 @@ arduinoPrint();
   case 'f':
     digitalWrite(RESETPIN, HIGH);
 
-    
     clearAllNTCC();
     clearLEDs();
     digitalWrite(RESETPIN, LOW);
 
     timer = millis();
-     savePreformattedNodeFile ();
-    
+#ifdef FSSTUFF
+    savePreformattedNodeFile();
+
     openNodeFile();
     getNodesToConnect();
+#endif
 
     bridgesToPaths();
     assignNetColors();
 
+#ifdef PIOSTUFF
     sendAllPaths();
-
+#endif
 
     Serial.print("\n\n\r");
     Serial.print("took ");
@@ -195,28 +230,28 @@ arduinoPrint();
 
   case 'u':
 
-  //case '{':
+    // case '{':
 
-    
     digitalWrite(RESETPIN, HIGH);
     delay(1);
-    //clearNodeFile();
+    // clearNodeFile();
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
     clearLEDs();
-    
 
-    //EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-    //EEPROM.commit();
+    // EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
+    // EEPROM.commit();
 
     timer = millis();
-     //savePreformattedNodeFile ();
+// savePreformattedNodeFile ();
+#ifdef FSSTUFF
+
     parseWokwiFileToNodeFile();
-    //lastCommandWrite(input);
+    // lastCommandWrite(input);
     openNodeFile();
     getNodesToConnect();
-
-     Serial.println("\n\n\rnetlist\n\n\r");
+#endif
+    Serial.println("\n\n\rnetlist\n\n\r");
     // listSpecialNets();
     // listNets();
     // printBridgeArray();
@@ -224,8 +259,9 @@ arduinoPrint();
     bridgesToPaths();
     assignNetColors();
 
+#ifdef PIOSTUFF
     sendAllPaths();
-
+#endif
 
     Serial.print("\n\n\r");
     Serial.print("took ");
@@ -235,15 +271,20 @@ arduinoPrint();
     break;
 
   case 't':
-  clearNodeFile();
+#ifdef FSSTUFF
+    clearNodeFile();
+#endif
+
+#ifdef EEPROMSTUFF
     lastCommandWrite(input);
 
     runCommandAfterReset('t');
+#endif
 
-
+#ifdef FSSTUFF
     openNodeFile();
     getNodesToConnect();
-
+#endif
     Serial.println("\n\n\rnetlist\n\n\r");
 
     bridgesToPaths();
@@ -258,100 +299,105 @@ arduinoPrint();
     Serial.print(numberOfPaths);
 
     assignNetColors();
-
+#ifdef PIOSTUFF
     sendAllPaths();
-
-    EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-    EEPROM.commit();
+#endif
+    // EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
+    // EEPROM.commit();
     break;
 
   case 'r':
-    EEPROM.commit();
+    // EEPROM.commit();
     digitalWrite(RESETPIN, HIGH);
     delay(1);
+#ifdef FSSSTUFF
     clearNodeFile();
+#endif
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
     leds.clear();
     leds.show();
 
-    AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
+    // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
 
     break;
-/*
-  case '{':
+    /*
+      case '{':
 
-      lastCommandWrite(input);
+          lastCommandWrite(input);
 
-    runCommandAfterReset('u');
+        runCommandAfterReset('u');
 
-    //lastCommandWrite('{');
-    parseWokwiFileToNodeFile();
-    getNodesToConnect();
+        //lastCommandWrite('{');
+        parseWokwiFileToNodeFile();
+        getNodesToConnect();
 
-    Serial.println("\n\n\rnetlist\n\r");
-    listSpecialNets();
-    listNets();
-    // printBridgeArray();
+        Serial.println("\n\n\rnetlist\n\r");
+        listSpecialNets();
+        listNets();
+        // printBridgeArray();
 
-    bridgesToPaths();
-    assignNetColors();
+        bridgesToPaths();
+        assignNetColors();
 
-    sendAllPaths();
+        sendAllPaths();
 
-    EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-    EEPROM.commit();
-    break;
-*/
+        EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
+        EEPROM.commit();
+        break;
+    */
   case 'd':
-  debugFlagInit();
-    lastCommandWrite(input);
+  {
+    // debugFlagInit();
+    // lastCommandWrite(input);
+
+  debugFlags:
+    Serial.print("\n\r0.   all off");
+    Serial.print("\n\r9.   all on");
+    Serial.print("\n\ra-z. exit\n\r");
+
+    Serial.print("\n\r1. file parsing           =    ");
+    // Serial.print(debugFP);
+    Serial.print("\n\r2. file parsing time      =    ");
+    // Serial.print(debugFPtime);
+
+    Serial.print("\n\r3. net manager            =    ");
+    Serial.print(debugNM);
+    Serial.print("\n\r4. net manager time       =    ");
+    Serial.print(debugNMtime);
+
+    Serial.print("\n\r5. chip connections       =    ");
+    Serial.print(debugNTCC);
+    Serial.print("\n\r6. chip conns alt paths   =    ");
+    Serial.print(debugNTCC2);
+    Serial.print("\n\r7. LEDs                   =    ");
+    Serial.print(debugLEDs);
+
+    Serial.print("\n\n\r");
+
+    while (Serial.available() == 0)
+      ;
+
+    int toggleDebug = Serial.read();
+    toggleDebug -= '0';
+
+    if (toggleDebug >= 0 && toggleDebug <= 9)
     {
-    debugFlags:
-      Serial.print("\n\r0.   all off");
-      Serial.print("\n\r9.   all on");
-      Serial.print("\n\ra-z. exit\n\r");
-
-      Serial.print("\n\r1. file parsing           =    ");
-      Serial.print(debugFP);
-      Serial.print("\n\r2. file parsing time      =    ");
-      Serial.print(debugFPtime);
-
-      Serial.print("\n\r3. net manager            =    ");
-      Serial.print(debugNM);
-      Serial.print("\n\r4. net manager time       =    ");
-      Serial.print(debugNMtime);
-
-      Serial.print("\n\r5. chip connections       =    ");
-      Serial.print(debugNTCC);
-      Serial.print("\n\r6. chip conns alt paths   =    ");
-      Serial.print(debugNTCC2);
-      Serial.print("\n\r7. LEDs                   =    ");
-      Serial.print(debugLEDs);
-
-      Serial.print("\n\n\r");
-
-      while (Serial.available() == 0)
-        ;
-
-      int toggleDebug = Serial.read();
-      toggleDebug -= '0';
-
-      if (toggleDebug >= 0 && toggleDebug <= 9)
-      {
-      debugFlagSet(toggleDebug);
+      // debugFlagSet(toggleDebug);
       goto debugFlags;
-      } else {
-      break;
-      }
     }
+    else
+    {
+      break;
+    }
+  }
 
   default:
     while (Serial.available() > 0)
-  { 
-    int f = Serial.read();
-    delayMicroseconds(100);
-  }
+    {
+      int f = Serial.read();
+      delayMicroseconds(100);
+    }
 
     break;
   }

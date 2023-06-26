@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "NetsToChipConnections.h"
 #include "MatrixStateRP2040.h"
-#include <EEPROM.h>
+
 
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -11,7 +11,13 @@ rgbColor netColors[MAX_NETS] = {0};
 uint8_t saturation = 254;
 uint8_t brightness = BRIGHTNESS;
 
-bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+bool debugLEDs = 1;
+
+#ifdef EEPROMSTUFF
+ debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+#endif
+
+
 
     rgbColor specialNetColors[8] =
         {{00, 00, 00},
