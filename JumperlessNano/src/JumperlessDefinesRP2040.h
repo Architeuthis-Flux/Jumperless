@@ -1,3 +1,7 @@
+#define PIOSTUFF 1 //comment these out to remove them
+#define EEPROMSTUFF 1
+#define FSSTUFF 1
+
 
 
 #define DEBUG_FILEPARSINGADDRESS 32

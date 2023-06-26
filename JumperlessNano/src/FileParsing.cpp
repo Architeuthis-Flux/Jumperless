@@ -668,8 +668,12 @@ void parseStringToBridges(void)
 
 void debugFlagInit(void)
 {
+
+   #ifdef EEPROMSTUFF
 debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
+
+
 
 debugNM = EEPROM.read(DEBUG_NETMANAGERADDRESS);
 debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
@@ -677,9 +681,20 @@ debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
 debugNTCC = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
 debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
-debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+//debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+    #else
 
+    debugFP = 1;
+    debugFPtime = 1;
 
+    debugNM = 1;
+    debugNMtime = 1;
+
+    debugNTCC = 1;
+    debugNTCC2 = 1;
+
+   // debugLEDs = 1;
+#endif
 
 }
 

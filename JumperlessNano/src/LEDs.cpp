@@ -4,6 +4,8 @@
 #include "MatrixStateRP2040.h"
 
 
+
+
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 rgbColor netColors[MAX_NETS] = {0};
@@ -11,10 +13,13 @@ rgbColor netColors[MAX_NETS] = {0};
 uint8_t saturation = 254;
 uint8_t brightness = BRIGHTNESS;
 
-bool debugLEDs = 1;
+
 
 #ifdef EEPROMSTUFF
- debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+#include <EEPROM.h>
+ bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+ #else
+ bool debugLEDs = 1;
 #endif
 
 
@@ -78,7 +83,7 @@ void rainbowy(int saturation, int brightness, int wait)
 
 void clearLEDs(void)
 {
-    for (int i = 0; i < 59; i++)
+    for (int i = 0; i < 60; i++)
     { // For each pixel in strip...
     
         leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)

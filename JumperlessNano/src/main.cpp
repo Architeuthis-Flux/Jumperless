@@ -1,3 +1,5 @@
+
+
 #include <Arduino.h>
 #include "JumperlessDefinesRP2040.h"
 #include "NetManager.h"
@@ -14,9 +16,7 @@
 
 
 
-#define PIOSTUFF 1 //comment these out to remove them
-#define EEPROMSTUFF 1
-#define FSSTUFF 1
+
 
 
 
@@ -48,10 +48,12 @@ void setup()
 {
   //
   // initArduino();
+debugFlagInit();
+
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
 
-  debugFlagInit();
+  
 #endif
 #ifdef PIOSTUFF
   initCH446Q();
@@ -72,7 +74,7 @@ void setup()
 
   // if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 0)
   //{
-#ifdef FSSTUFF
+#ifdef FSSTUFF5
   if (LittleFS.exists("/nodeFile.txt"))
   {
     delay(20);
@@ -208,6 +210,7 @@ menu:
 
     timer = millis();
 #ifdef FSSTUFF
+    clearNodeFile();
     savePreformattedNodeFile();
 
     openNodeFile();
@@ -234,7 +237,9 @@ menu:
 
     digitalWrite(RESETPIN, HIGH);
     delay(1);
-    // clearNodeFile();
+    #ifdef FSSTUFF
+    clearNodeFile();
+    #endif
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
     clearLEDs();
@@ -348,7 +353,7 @@ menu:
     */
   case 'd':
   {
-    // debugFlagInit();
+    debugFlagInit();
     // lastCommandWrite(input);
 
   debugFlags:
@@ -357,9 +362,9 @@ menu:
     Serial.print("\n\ra-z. exit\n\r");
 
     Serial.print("\n\r1. file parsing           =    ");
-    // Serial.print(debugFP);
+    Serial.print(debugFP);
     Serial.print("\n\r2. file parsing time      =    ");
-    // Serial.print(debugFPtime);
+    Serial.print(debugFPtime);
 
     Serial.print("\n\r3. net manager            =    ");
     Serial.print(debugNM);
@@ -383,7 +388,9 @@ menu:
 
     if (toggleDebug >= 0 && toggleDebug <= 9)
     {
-      // debugFlagSet(toggleDebug);
+      #ifdef EEPROMSTUFF
+      debugFlagSet(toggleDebug);
+      #endif
       goto debugFlags;
     }
     else
