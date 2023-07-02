@@ -10,14 +10,9 @@
 // #include "CH446Q.h"
 #include "Peripherals.h"
 #include <Wire.h>
-#include <Adafruit_MCP4725.h>
+
 // #include <EEPROM.h>
 // #include "ArduinoStuff.h"
-
-
-
-
-
 
 
 #ifdef EEPROMSTUFF
@@ -114,7 +109,7 @@ debugFlagInit();
   //   delay(20);
   //}
 
-  // rainbowy(255,253,100);
+
   // parseWokwiFileToNodeFile();
   // openNodeFile();
   // while(1);
@@ -140,7 +135,7 @@ void loop()
 
   // initArduino();
   //
-
+//rainbowy(255,145,100);
 menu:
 
   // arduinoPrint();
