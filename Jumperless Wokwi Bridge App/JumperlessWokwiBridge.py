@@ -5,9 +5,10 @@ import requests
 import json
 import serial
 import time
+#import pyduinocli
 
 import serial.tools.list_ports
-
+debug = True
 
 
 portSelected = 0
@@ -18,11 +19,12 @@ while portSelected == False:
     
     ports = serial.tools.list_ports.comports()
     i = 0
-    for port, desc, hwid in sorted(ports):
+    for port, desc, hwid in ports:
             i = i + 1
             print("{}: {} [{}]".format(i, port, desc))
             
     selection = input ("\n\n\rSelect the port connected to your Jumperless   ('r' to rescan)\n\n\r")
+    #selection = "3"
     if selection.isdigit() == True and int(selection) <= i:
         portName = ports[int(selection) - 1].device
         portSelected = True
@@ -70,18 +72,36 @@ while True:
 
     d = json.loads(stringex)
 
+    
+    
+    c = d['props']['pageProps']['p']['files'][0]['content']
+    
+    l = d['props']['pageProps']['p']['files'][2]['content']
+
     d = d['props']['pageProps']['p']['files'][1]['content']
+    
+    
 
     f = json.loads(d)
 
-    
-    
-
-    stringified = str(f)
-    
+#    cf = json.loads(c)
     
 
-    if lastDiagram != stringified:
+    diagram = str(d)
+    sketch = str(c)
+    libraries = str(l)
+    
+    if debug == True:
+        print("\n\n\rdiagram.json\n\r")
+        print(diagram)
+        
+        print("\n\n\rsketch.ino\n\r")
+        print(sketch)
+        
+        print("\n\n\rlibraries.txt\n\r")
+        print(libraries)
+
+    if lastDiagram != diagram:
         
 
         
@@ -96,6 +116,11 @@ while True:
             
             conn1 = str(f["connections"][i][0])
             
+            if conn1.startswith('pot1:SIG'):
+                conn1 = "106"
+            elif conn1.startswith('pot2:SIG'):
+                conn1 = "107"
+                           
             
             if conn1.startswith("bb1:") == True:
                 periodIndex = conn1.find('.')
@@ -150,7 +175,11 @@ while True:
             
             conn2 = str(f["connections"][i][1])
             
-
+            if conn2.startswith('pot1:SIG'):
+                conn2 = "106"
+            elif conn2.startswith('pot2:SIG'):
+                conn2 = "107"
+               
       
             if conn2.startswith("bb1:") == True:
                 periodIndex = conn2.find('.')
@@ -212,7 +241,7 @@ while True:
                 
         p = (p + "}\n{\n}")
         
-        lastDiagram = stringified
+        lastDiagram = diagram
 
 
         ser.write('f'.encode())
@@ -224,6 +253,6 @@ while True:
         #print (p)
         
     else:
-        time.sleep(0.5)
+        time.sleep(.5)
 
 
