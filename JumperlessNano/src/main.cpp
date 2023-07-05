@@ -19,13 +19,9 @@
 #include <EEPROM.h>
 #endif
 
-
-
 #ifdef PIOSTUFF
 #include "CH446Q.h"
 #endif
-
-
 
 #include "FileParsing.h"
 
@@ -33,6 +29,8 @@
 #include "LittleFS.h"
 
 #endif
+
+
 
 // https://wokwi.com/projects/367384677537829889
 
@@ -42,12 +40,14 @@ const char *definesToChar(int); // i really need to find a way to not need to fo
 void setup()
 {
   //
+
+  //
   // initArduino();
 debugFlagInit();
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
-
+debugFlagInit();
   
 #endif
 #ifdef PIOSTUFF
@@ -59,65 +59,24 @@ debugFlagInit();
   initINA219();
   Serial.begin(115200);
 
-  initLEDs();
+  
 
 #ifdef FSSTUFF
   LittleFS.begin();
 #endif
-
-  lightUpRail(-1, 1, 220);
-
-  // if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 0)
-  //{
-#ifdef FSSTUFF5
-  if (LittleFS.exists("/nodeFile.txt"))
-  {
-    delay(20);
-    openNodeFile();
-    getNodesToConnect();
-
-    Serial.println("\n\n\rnetlist\n\n\r");
-
-    bridgesToPaths();
-
-    listSpecialNets();
-    listNets();
-    printBridgeArray();
-    Serial.print("\n\n\r");
-    Serial.print(numberOfNets);
-
-    Serial.print("\n\n\r");
-    Serial.print(numberOfPaths);
-
-    assignNetColors();
-#ifdef PIOSTUFF
-    sendAllPaths();
-#endif
-  }
-  else
-  {
-    while (Serial.available() > 0)
-    {
-      Serial.read();
-      delay(1);
-    }
-
-    delay(20);
-  }
-  //} else
-  // {
-  //   delay(20);
-  //}
+setDac0_5V(0.0);
+  
 
 
-  // parseWokwiFileToNodeFile();
-  // openNodeFile();
-  // while(1);
-  // lastCommandRead();
-
-#endif
 }
 
+void setup1()
+{
+
+initLEDs();
+lightUpRail(-1, 1, 220);
+
+}
 void loop()
 {
 
@@ -139,7 +98,7 @@ void loop()
 menu:
 
   // arduinoPrint();
-
+  delay(10);
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
@@ -352,6 +311,7 @@ menu:
     // lastCommandWrite(input);
 
   debugFlags:
+
     Serial.print("\n\r0.   all off");
     Serial.print("\n\r9.   all on");
     Serial.print("\n\ra-z. exit\n\r");
@@ -379,14 +339,20 @@ menu:
       ;
 
     int toggleDebug = Serial.read();
+    Serial.write(toggleDebug);
     toggleDebug -= '0';
-
+//Serial.print(toggleDebug);
     if (toggleDebug >= 0 && toggleDebug <= 9)
     {
+      
       #ifdef EEPROMSTUFF
       debugFlagSet(toggleDebug);
       #endif
+
+       delay(10);
+       
       goto debugFlags;
+     
     }
     else
     {
@@ -411,4 +377,17 @@ menu:
 
     // waveGen();
   }
+}
+
+void loop1()
+{
+if (showLEDsCore2 == 1)
+{
+leds.show();
+delayMicroseconds(900);
+showLEDsCore2 = 0;
+}
+
+
+
 }

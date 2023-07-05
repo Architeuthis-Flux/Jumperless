@@ -12,6 +12,10 @@
 
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
+
+extern int showLEDsCore2;
+
+
 typedef struct rgbColor
 {
     unsigned char r;
@@ -45,7 +49,7 @@ const int pixelsToRails[20] = {B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B
 
 
 extern rgbColor netColors[MAX_NETS];
-
+struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift);
 void initLEDs(void);
 void clearLEDs(void);
 void colorWipe(uint32_t color, int wait);
@@ -54,7 +58,7 @@ void showNets(void);
 void assignNetColors (void);
 void lightUpRail (int railNumber, int onOff = 1, int brightness = BRIGHTNESS);
 
-void lightUpNet (int netNumber = -1 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS);//-1 means all nodes (default)
+void lightUpNet (int netNumber = -1 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
 void lightUpNode (int node);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);

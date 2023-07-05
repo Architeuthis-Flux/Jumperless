@@ -13,6 +13,7 @@ rgbColor netColors[MAX_NETS] = {0};
 uint8_t saturation = 254;
 uint8_t brightness = BRIGHTNESS;
 
+int showLEDsCore2 = 0;
 
 
 #ifdef EEPROMSTUFF
@@ -29,8 +30,8 @@ uint8_t brightness = BRIGHTNESS;
          {0x00, 0xFF, 0x30},
          {0xFF, 0x41, 0x14},
          {0xFF, 0x10, 0x40},
-         {0xFF, 0x78, 0xaa},
-         {0xFF, 0x40, 0x78},
+         {0xeF, 0x78, 0x7a},
+         {0xeF, 0x40, 0x7f},
          {0xFF, 0xff, 0xff},
          {0xff, 0xFF, 0xff}};
 
@@ -45,7 +46,7 @@ void initLEDs(void)
 {
     pinMode(LED_PIN, OUTPUT);
     leds.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-    leds.show();  // Turn OFF all pixels ASAP
+    showLEDsCore2 = 1; // Turn OFF all pixels ASAP
     leds.setBrightness(BRIGHTNESS);
 }
 
@@ -58,7 +59,7 @@ void colorWipe(uint32_t color, int wait)
     { // For each pixel in strip...
 
         leds.setPixelColor(i, color); //  Set pixel's color (in RAM)
-        leds.show();                  //  Update strip to match
+        showLEDsCore2 = 1;                 //  Update strip to match
         delay(wait);                  //  Pause for a moment
     }
 }
@@ -76,7 +77,7 @@ void rainbowy(int saturation, int brightness, int wait)
         leds.rainbow(firstPixelHue, 1, saturation, brightness, true);
         // Above line is equivalent to:
         // strip.rainbow(firstPixelHue, 1, 255, 255, true);
-        leds.show(); // Update strip with new contents
+        showLEDsCore2 = 1;// Update strip with new contents
         delay(wait); // Pause for a moment
     }
 }
@@ -89,7 +90,7 @@ void clearLEDs(void)
         leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)
                      //  Update strip to match
     }
-    leds.show(); 
+    showLEDsCore2 = 1;
 }
 
 void assignNetColors(void)
@@ -162,7 +163,7 @@ if (debugLEDs)
         leds.setPixelColor(railsToPixelMap[3][i], railColors[3]); // bottom negative rail
  */
     }
-    leds.show();
+    showLEDsCore2 = 1;
 
 
     int skipSpecialColors = 0;
@@ -270,7 +271,7 @@ uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b)
 
 
 
-void lightUpNet(int netNumber, int node, int onOff , int brightness2)
+void lightUpNet(int netNumber, int node, int onOff , int brightness2, int hueShift)
 {
 
     if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] < 62)
@@ -289,8 +290,20 @@ void lightUpNet(int netNumber, int node, int onOff , int brightness2)
                     if (onOff == 1)
                     {
 
-                        uint32_t color = packRgb((net[netNumber].color.r * brightness2) >> 8, (net[netNumber].color.g * brightness2) >> 8, (net[netNumber].color.b * brightness2) >> 8);
-                        ///Serial.println(color);
+
+
+                        uint32_t color;
+                        
+
+                        if (hueShift != 0)
+                        {
+                            struct rgbColor colorToShift = {net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b};
+                            struct rgbColor shiftedColor = shiftHue(colorToShift, hueShift);
+                            color = packRgb((shiftedColor.r * brightness2) >> 8, (shiftedColor.g * brightness2) >> 8, (shiftedColor.b * brightness2) >> 8);
+                        } else {
+                        color = packRgb((net[netNumber].color.r * brightness2) >> 8, (net[netNumber].color.g * brightness2) >> 8, (net[netNumber].color.b * brightness2) >> 8);        
+                        } 
+
                         leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
                     }
                     else
@@ -301,9 +314,37 @@ void lightUpNet(int netNumber, int node, int onOff , int brightness2)
             }
         }
 
-        leds.show();
-        delay(1);
+        showLEDsCore2 = 1;
+
     }
+}
+
+struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift)
+
+{
+
+
+struct hsvColor colorToShiftHsv = RgbToHsv(colorToShift);
+
+
+colorToShiftHsv.h = colorToShiftHsv.h + hueShift;
+
+if (colorToShiftHsv.h > 255)
+{
+    colorToShiftHsv.h = colorToShiftHsv.h - 255;
+}
+
+struct rgbColor colorToShiftRgb = HsvToRgb(colorToShiftHsv);
+
+
+
+return colorToShiftRgb;
+
+
+
+
+
+
 }
 
 
@@ -341,7 +382,7 @@ for (int j = 0; j < 4; j++)
     }
     }
 }
-    leds.show();
+    showLEDsCore2 = 1;
     delay(1);
 
 }
@@ -357,7 +398,7 @@ void showNets(void)
             leds.setPixelColor(bbPixelToNodesMap[net[i].nodes[j]], color);
         }
     }
-    leds.show();
+    showLEDsCore2 = 1;
 }
 
 rgbColor HsvToRgb(hsvColor hsv)

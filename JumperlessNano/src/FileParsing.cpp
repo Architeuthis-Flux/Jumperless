@@ -870,7 +870,10 @@ void debugFlagSet(int flag)
         break;
     }
     }
+    delay(2);
     EEPROM.commit();
+    delay(5);
+    return;
 }
 
 void runCommandAfterReset(char command)

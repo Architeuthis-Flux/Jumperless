@@ -625,7 +625,7 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
     }
     else
     {
-        Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges\t\t\t\tColor\t\tDo Not Intersects");
+        Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges");
 
         int tabs = 0;
         for (int i = 8; i < MAX_NETS; i++)
