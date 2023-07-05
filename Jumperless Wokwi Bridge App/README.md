@@ -9,7 +9,7 @@ Running this on MacOS should be as simple as clicking the app (it should be in y
 
 If you'd like to use my 555 circuit that I've been using for testing, here's the link:
 
-[https://wokwi.com/projects/367384677537829889](https://wokwi.com/projects/367384677537829889)
+[https://wokwi.com/projects/369024970682423297](https://wokwi.com/projects/369024970682423297)
 
 It also does the translation from the diagram.json format to the super-simplistic nodeFile format in the script to make it a little bit snappier on the updates. Doing all the parsing on the chip (mainly from LittleFS operations) was taking like a quarter of a second and it was bugging me.
 
