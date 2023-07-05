@@ -1798,7 +1798,7 @@ void swapDuplicateNode(int pathIndex)
 void printPathsCompact(void)
 {
 
-    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpthType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\tchip3\tx4\ty4\tx5\ty5\n\r");
+    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpathType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\n\r");
     for (int i = 0; i < numberOfPaths; i++)
     {
         Serial.print(i);
@@ -1862,7 +1862,7 @@ void printPathsCompact(void)
 
         Serial.println(" ");
     }
-    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpthType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\tchip3\tx4\ty4\tx5\ty5\n\r");
+    Serial.println("\n\rpath\tnet\tnode1\ttype\tchip0\tx0\ty0\tnode2\ttype\tchip1\tx1\ty1\taltPath\tsameChp\tpathType\t\tchipL\tchip2\tx2\ty2\tx3\ty3\n\r");
 }
 
 void printChipStatus(void)

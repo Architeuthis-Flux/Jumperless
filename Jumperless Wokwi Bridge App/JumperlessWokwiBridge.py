@@ -60,7 +60,7 @@ justChecked = 0
 reading = 0
 
 
-def check_presence(correct_port, interval=.25):
+def check_presence(correct_port, interval=.15):
     global ser
     global justreconnected
     global serialconnected
@@ -112,62 +112,22 @@ def check_presence(correct_port, interval=.25):
 
 
 import threading
-port_controller = threading.Thread(target=check_presence, args=(portName, .25,), daemon=True)
+port_controller = threading.Thread(target=check_presence, args=(portName, .15,), daemon=True)
 #port_controller.daemon(True)
 port_controller.start()
 
 
 
-def waitForReconnect():
-    global ser
-    global justChecked
-    global serialconnected
-    serialconnected = 0
     
-    portNotFound = 1
-    
-    
-    while (portNotFound == 1):
-         portFound = 0       
-               
-         for port in serial.tools.list_ports.comports():
-            
-            if portName in port.device:
-                
-                portFound = 1
-                #print (port.device)
-            
-
-            
-            if portFound >= 1:
-                ser = serial.Serial(portName, 115200, timeout= None)
-                justChecked = 1
-                serialconnected = 1
-                time.sleep(0.05)
-                justChecked = 0
-                portNotFound = 0
-
-                
-                
-            else:
-                justreconnected = 1
-                justChecked = 0
-                serialconnected = 0
-
-                ser.close()
-                portNotFound = 1
-                time.sleep(.05)
-        
-    
-    
+#555 project
     
 #https://wokwi.com/projects/369024970682423297
     
 
 
 #the website URL
-url_link = "https://wokwi.com/projects/369024970682423297"
-#url_link = input('\n\n\rPaste the link to you Wokwi project here:\n\n\r')
+#url_link = "https://wokwi.com/projects/369024970682423297"
+url_link = input('\n\n\rPaste the link to you Wokwi project here:\n\n\r')
 
 
 while True:
@@ -239,7 +199,7 @@ def serialTermIn():
 
         except:
             portNotFound = 1
-            print("!!!!!!")
+            print("Disconnected")
             while (portNotFound == 1):
                 portFound = 0        
                        
@@ -365,9 +325,14 @@ while True:
         #ser = serial.Serial(portName, 460800, timeout=0.050)
         
     while (justreconnected == 1):
-        time.sleep(.001)
-        if serialconnected == 1:
+        time.sleep(.01)
+        lastDiagram = '-1'
+        if (serialconnected == 1):
+            print ('Reconnected')
             break
+    else:
+        justreconnected = 0
+        
             
     if (serialconnected == 1):      
             
@@ -414,10 +379,10 @@ while True:
          
          
                      
-        if (justreconnected == 1):
-            print ('Reconnected')
+        #if (justreconnected == 1):
+            
         
-            lastDiagram = '-1'
+            
             #print (lastDiagram)
             #time.sleep(1.8)
         
@@ -573,14 +538,14 @@ while True:
                 ser.write(p.encode())
                 
             except:
-                #continue
-                waitForReconnect()
+                continue
+                #waitForReconnect()
                 
-                ser.write('f'.encode())
+                #ser.write('f'.encode())
                 
-                time.sleep(0.05)
+                #time.sleep(0.05)
 
-                ser.write(p.encode())
+                #ser.write(p.encode())
                 
             #print (p)
             

@@ -43,7 +43,7 @@ void setup()
 
   //
   // initArduino();
-debugFlagInit();
+//debugFlagInit();
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
@@ -72,7 +72,7 @@ setDac0_5V(0.0);
 
 void setup1()
 {
-
+//delay(100);
 initLEDs();
 lightUpRail(-1, 1, 220);
 
@@ -103,10 +103,10 @@ menu:
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
   Serial.print("\tw = waveGen\n\r");
-  Serial.print("\tm = measure current/voltage\n\r");
+  //Serial.print("\tm = measure current/voltage\n\r");
   Serial.print("\tf = load formatted nodeFile\n\r");
-  Serial.print("\tu = upload new Wokwi diagram\n\r");
-  Serial.print("\tt = reset and load nodeFile.txt\n\r");
+  Serial.print("\tp = paste new Wokwi diagram\n\r");
+  //Serial.print("\tt = reset and load nodeFile.txt\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset\n\r");
   Serial.print("\n\r");
@@ -178,14 +178,16 @@ menu:
     sendAllPaths();
 #endif
 
+    if (debugNMtime)
+    {
     Serial.print("\n\n\r");
     Serial.print("took ");
     Serial.print(millis() - timer);
     Serial.print("ms");
-
+    }
     break;
 
-  case 'u':
+  case 'p':
 
     // case '{':
 
@@ -222,11 +224,13 @@ menu:
     sendAllPaths();
 #endif
 
+    if (debugNMtime)
+    {
     Serial.print("\n\n\r");
     Serial.print("took ");
     Serial.print(millis() - timer);
     Serial.print("ms");
-
+    }
     break;
 
   case 't':
@@ -275,8 +279,8 @@ menu:
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
     leds.clear();
-    leds.show();
-
+    //leds.show();
+    showLEDsCore2 = 1;
     // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
 
     break;
@@ -384,7 +388,7 @@ void loop1()
 if (showLEDsCore2 == 1)
 {
 leds.show();
-delayMicroseconds(900);
+delayMicroseconds(1200);
 showLEDsCore2 = 0;
 }
 

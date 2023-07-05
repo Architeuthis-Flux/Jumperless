@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "NetsToChipConnections.h"
 #include "MatrixStateRP2040.h"
+#include "fileParsing.h"
 
 
 
@@ -18,7 +19,9 @@ int showLEDsCore2 = 0;
 
 #ifdef EEPROMSTUFF
 #include <EEPROM.h>
- bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+ bool debugLEDs = 1; //EEPROM.read(DEBUG_LEDSADDRESS);
+ 
+
  #else
  bool debugLEDs = 1;
 #endif
@@ -44,9 +47,22 @@ int showLEDsCore2 = 0;
 
 void initLEDs(void)
 {
+    debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+    if (debugLEDs != 0 && debugLEDs != 1)
+    {
+        debugLEDs = 1;
+    }
+    EEPROM.write(DEBUG_LEDSADDRESS, debugLEDs);
+    EEPROM.commit();
+
+
+    delay(80);
     pinMode(LED_PIN, OUTPUT);
+    delay(2);
     leds.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+    delay(2);
     showLEDsCore2 = 1; // Turn OFF all pixels ASAP
+    delay(4);
     leds.setBrightness(BRIGHTNESS);
 }
 
@@ -119,6 +135,7 @@ if (debugLEDs)
     Serial.print(numberOfNets);
     Serial.print("\n\rassigning net colors\n\r");
     Serial.print("\n\rNet\t\tR\tG\tB\t\tH\tS\tV");
+    delay(3);
 }
     for (int i = 0; i < 8; i++)
     {
@@ -142,6 +159,7 @@ if (debugLEDs)
         Serial.print(netHsv.s);
         Serial.print("\t");
         Serial.print(netHsv.v);
+        delay(3);
 }
     }
 
@@ -258,7 +276,7 @@ if (debugLEDs)
         Serial.print(saturation);
         Serial.print("\t");
         Serial.print(brightness);
-     
+     delay(3);
 }
     }
 }

@@ -681,7 +681,9 @@ debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
 debugNTCC = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
 debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
-//debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+
+
     #else
 
     debugFP = 1;
@@ -695,6 +697,33 @@ debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
    // debugLEDs = 1;
 #endif
+
+
+
+if (debugFP != 0 && debugFP != 1)
+    EEPROM.write(DEBUG_FILEPARSINGADDRESS, 1);
+
+if (debugFPtime != 0 && debugFPtime != 1)
+    EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
+
+if (debugNM != 0 && debugNM != 1)
+    EEPROM.write(DEBUG_NETMANAGERADDRESS, 1);
+
+if (debugNMtime != 0 && debugNMtime != 1)
+    EEPROM.write(TIME_NETMANAGERADDRESS, 1);
+
+if (debugNTCC != 0 && debugNTCC != 1)
+    EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 1);
+
+if (debugNTCC2 != 0 && debugNTCC2 != 1)
+    EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 1);
+
+if (debugLEDs != 0 && debugLEDs != 1)
+    EEPROM.write(DEBUG_LEDSADDRESS, 1);
+
+EEPROM.commit();
+delay(5);
+    
 
 }
 
@@ -870,9 +899,9 @@ void debugFlagSet(int flag)
         break;
     }
     }
-    delay(2);
+    delay(4);
     EEPROM.commit();
-    delay(5);
+    delay(8);
     return;
 }
 
