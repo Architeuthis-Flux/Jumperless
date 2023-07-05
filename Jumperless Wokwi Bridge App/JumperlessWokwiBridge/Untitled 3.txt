@@ -1,0 +1,41 @@
+m 2 2 l 0 21 c 7 3 16 0 16 0 v -21 c -10 -3 -16 0 -16 0 c 0 3 16 3 16 0 c 0 3 -16 3 -16 0
+
+
+<div class="react-draggable react-draggable-dragged" style=""><wokwi-led class="diagram-part_diagramItem__ZeYe_ diagram-part_selectable__N65pi diagram-part_editMode__gIx0Q" id="led1" data-draggable="true" wokwi-controller="wokwi-led" color="red" style="top: -675.6px; left: -101.8px; transform: rotate(0deg); text-rendering: geometricprecision;"></wokwi-led></div
+
+
+
+
+
+
+<div class="led-container">
+        <svg width="40" height="50" version="1.2" viewBox="-10 -5 35.456 39.618" xmlns="http://www.w3.org/2000/svg" transform="scale(1 1)">
+          <filter id="light1" x="-0.8" y="-0.8" height="2.2" width="2.8">
+            <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+          </filter>
+          <filter id="light2" x="-0.8" y="-0.8" height="2.2" width="2.8">
+            <feGaussianBlur stdDeviation="4"></feGaussianBlur>
+          </filter>
+          <rect x="2.5099" y="20.382" width="2.1514" height="9.8273" fill="#8c8c8c"></rect>
+          <path d="m12.977 30.269c0-1.1736-0.86844-2.5132-1.8916-3.4024-0.41616-0.3672-1.1995-1.0015-1.1995-1.4249v-5.4706h-2.1614v5.7802c0 1.0584 0.94752 1.8785 1.9462 2.7482 0.44424 0.37584 1.3486 1.2496 1.3486 1.7694" fill="#8c8c8c"></path>
+
+          <path d="m -1 2 l 0 21 c 7 3 16 0 16 0 v -21 c -10 -3 -16 0 -16 0 c 0 3 16 3 16 0 c 0 3 -16 3 -16 0" opacity="1"></path>
+          
+          
+          
+          
+          
+          
+          <g fill="#ffffff">
+            
+            <path d="m -.50 2.9 l 0 18 c 0 1 3 3 5 3 v -17 c 0 -2 0 0 -5 -4" opacity=".5"></path>
+            
+          </g>
+          <g class="light" style="display: none">
+            <ellipse cx="8" cy="10" rx="10" ry="10" filter="url(#light2)" fill="#ff8080" style="opacity: 1"></ellipse>
+            <ellipse cx="8" cy="10" rx="2" ry="2" fill="white" filter="url(#light1)"></ellipse>
+            <ellipse cx="8" cy="10" rx="3" ry="3" fill="white" filter="url(#light1)" style="opacity: 1"></ellipse>
+          </g>
+        </svg>
+        <span class="led-label"><!--?lit$4127798886$--></span>
+      </div>

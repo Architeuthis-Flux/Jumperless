@@ -21,8 +21,6 @@ a = Analysis(
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
-# you should change the path to the .icns file unless your name is the same as mine
-
 exe = EXE(
     pyz,
     a.scripts,
@@ -37,36 +35,17 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch=x86_64,
+    target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
     icon=['/Users/kevinsanto/JumperlessWokwiBridge/icon.icns'],
 )
-
-#I'm not sure this part does anything but some person on Github says it worked so whatever
-## Make app bundle double-clickable
-import plistlib
-from pathlib import Path
-app_path = Path(app.name)
-
-# read Info.plist
-with open(app_path / 'Contents/Info.plist', 'rb') as f:
-    pl = plistlib.load(f)
-
-# write Info.plist
-with open(app_path / 'Contents/Info.plist', 'wb') as f:
-    pl['CFBundleExecutable'] = 'wrapper'
-    plistlib.dump(pl, f)
-
-# write new wrapper script
-shell_script = """#!/bin/bash
-dir=$(dirname $0)
-open -a Terminal file://${dir}/%s""" % app.appname
-with open(app_path / 'Contents/MacOS/wrapper', 'w') as f:
-    f.write(shell_script)
-
-# make it executable
-(app_path  / 'Contents/MacOS/wrapper').chmod(0o755)
+app = BUNDLE(
+    exe,
+    name='jumperlesswokwibridge.app',
+    icon='/Users/kevinsanto/JumperlessWokwiBridge/icon.icns',
+    bundle_identifier=None,
+)
