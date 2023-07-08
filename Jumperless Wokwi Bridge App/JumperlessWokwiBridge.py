@@ -34,20 +34,35 @@ lastDiagram = 1
 print("\n\r")
 
 while portSelected == False:
-    
+    autodetected = -1
     ports = serial.tools.list_ports.comports()
     i = 0
     for port, desc, hwid in ports:
         i = i + 1
         print("{}: {} [{}]".format(i, port, desc))
-            
-    selection = input ("\n\n\rSelect the port connected to your Jumperless   ('r' to rescan)\n\n\r")
-    #selection = "3"
-    if selection.isdigit() == True and int(selection) <= i:
-        portName = ports[int(selection) - 1].device
-        portSelected = True
+        if desc == "Jumperless":
+            autodetected = i
+    selection = -1
+    
+    if autodetected != -1:
+        selection = autodetected
+        print ("\n\n\rAutodetected Jumperless at",end=" ")
         print(ports[int(selection) - 1].device)
+        
+        
+        portName = ports[int(selection) - 1].device
+        
+        portSelected = True
         serialconnected = 1
+        
+    else:
+        selection = input ("\n\n\rSelect the port connected to your Jumperless   ('r' to rescan)\n\n\r")
+    #selection = "3"
+        if selection.isdigit() == True and int(selection) <= i:
+            portName = ports[int(selection) - 1].device
+            portSelected = True
+            print(ports[int(selection) - 1].device)
+            serialconnected = 1
     #print(0 in ports)
     
 

@@ -7,8 +7,34 @@
 #include "NetsToChipConnections.h"
 
 #define LED_PIN 25
-#define LED_COUNT 80
-#define BRIGHTNESS 120
+#define LED_COUNT 111
+#define BRIGHTNESS 50
+#define RAILBRIGHTNESS 55
+#define SPECIALNETBRIGHTNESS 60
+
+// #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
+ #define PCBREDSHIFTBLUE -25    //extra hue shift to offset the hue shift through pcb
+ #define PCBGREENSHIFTBLUE -25
+ #define PCBBLUESHIFTBLUE 42
+
+
+#define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
+#define PCBREDSHIFTPINK -18    //extra hue shift to offset the hue shift through pcb
+#define PCBGREENSHIFTPINK -25
+#define PCBBLUESHIFTPINK 35
+
+// #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
+//  #define PCBREDSHIFTBLUE 0    //extra hue shift to offset the hue shift through pcb
+//  #define PCBGREENSHIFTBLUE 0
+//  #define PCBBLUESHIFTBLUE 0
+
+
+// #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
+// #define PCBREDSHIFTPINK 0    //extra hue shift to offset the hue shift through pcb
+// #define PCBGREENSHIFTPINK 0
+// #define PCBBLUESHIFTPINK 0
+// #define PCBHUESHIFT 0
+
 
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
@@ -32,11 +58,35 @@ typedef struct hsvColor
     unsigned char v;
 } hsvColor;
 
-const int nodesToPixelMap[69] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
-                                    30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61};
+const int numbers[120]         = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
+                                    31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
+                                    61,62,63,64,65,66,67,68,69,
+                                    70,71,72,73,74,75,76,77,78,79,
+                                    80,81,82,83,84,85,86,87,88,89,
+                                    90,91,92,93,94,95,96,97,98,99,
+                                    100,101,102,103,104,105,106,107,108,109,
+                                    110,111,112,113,114,115,116,117,118,119};
 
-const int  bbPixelToNodesMap[62] = { 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
-                                    32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61};
+
+const int nodesToPixelMap[120] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
+                                    30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,
+                                    0,0,0,0,0,0,0,
+
+                                    81,80,84,85,86,87,88,89,90,91,92,93,94,
+                                    95,82,97,98,99,100,101,102,103,104,105,106,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+
+                                    };
+
+const int  bbPixelToNodesMap[120] = { 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
+                                    32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,
+                                    0,0,0,0,0,0,0,0,0,
+                                    0,0,0,0,0,0,0,0,0,
+                                    NANO_D1, NANO_D0, NANO_RESET, GND, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11, NANO_D12,
+                                    NANO_D13, SUPPLY_3V3, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7, SUPPLY_5V, NANO_RESET, GND, SUPPLY_5V
+                                    
+                                    };
+
+
 
 const int railsToPixelMap[4][5] =  {{70,73,74,77,78},//top positive rail
                                    {71,72,75,76,79},//top negative rail 
@@ -49,17 +99,18 @@ const int pixelsToRails[20] = {B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B
 
 
 extern rgbColor netColors[MAX_NETS];
-struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift);
+struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int brightnessShift = 0, int saturationShift = 0);
 void initLEDs(void);
 void clearLEDs(void);
 void colorWipe(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
-void lightUpRail (int railNumber, int onOff = 1, int brightness = BRIGHTNESS);
+void lightUpRail (int railNumber, int onOff = 1, int brightness = RAILBRIGHTNESS);
 
 void lightUpNet (int netNumber = -1 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
 void lightUpNode (int node);
+rgbColor pcbColorCorrect (rgbColor colorToCorrect);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
 

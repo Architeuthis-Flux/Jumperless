@@ -224,9 +224,20 @@ void sendPath(int i, int setOrClear)
         {
           continue;
         }
+// delayMicroseconds(800);
+//         netNumberC2 = path[i].net;
+//         onOffC2 = setOrClear;
+//         nodeC2 = path[i].node1;
+//         lightUpNetCore2 = 1;
 
-        lightUpNet(path[i].net, path[i].node1, setOrClear,255);
-        lightUpNet(path[i].net, path[i].node2, setOrClear,255);
+//         delayMicroseconds(800);
+
+//         nodeC2 = path[i].node2;
+//         lightUpNetCore2 = 1;
+
+
+        lightUpNet(path[i].net, path[i].node1, setOrClear);
+        lightUpNet(path[i].net, path[i].node2, setOrClear);
 
         chYdata = path[i].y[chip];
         chXdata = path[i].x[chip];

@@ -30,6 +30,7 @@
 
 #endif
 
+int sendAllPathsCore2 = 0;
 
 
 // https://wokwi.com/projects/367384677537829889
@@ -50,9 +51,7 @@ void setup()
 debugFlagInit();
   
 #endif
-#ifdef PIOSTUFF
-  initCH446Q();
-#endif
+
 
   initADC();
   initDAC();
@@ -73,28 +72,35 @@ setDac0_5V(0.0);
 void setup1()
 {
 //delay(100);
+
+#ifdef PIOSTUFF
+  initCH446Q();
+#endif
+
 initLEDs();
-lightUpRail(-1, 1, 220);
+lightUpRail(-1, 1);
 
 }
 void loop()
 {
 
-  // getNodesToConnect();
-  // bridgesToPaths();
-  // assignNetColors();
 
-  // sendAllPaths();
-
-  // examples
-
-  // add connection
   char input;
   unsigned long timer = 0;
 
   // initArduino();
   //
-//rainbowy(255,145,100);
+//rainbowy(255,125,30);
+// while(1)
+// {
+// for (int i = 0; i < 30; i++)
+// { Serial.println(80+i);
+//   lightUpNode(80+i);
+//   showLEDsCore2 = 1;
+  
+//   //delay(500);
+// }
+// }
 menu:
 
   // arduinoPrint();
@@ -175,7 +181,9 @@ menu:
     assignNetColors();
 
 #ifdef PIOSTUFF
-    sendAllPaths();
+sendAllPathsCore2 = 1;
+    
+    //sendAllPaths();
 #endif
 
     if (debugNMtime)
@@ -221,6 +229,7 @@ menu:
     assignNetColors();
 
 #ifdef PIOSTUFF
+
     sendAllPaths();
 #endif
 
@@ -284,31 +293,7 @@ menu:
     // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
 
     break;
-    /*
-      case '{':
 
-          lastCommandWrite(input);
-
-        runCommandAfterReset('u');
-
-        //lastCommandWrite('{');
-        parseWokwiFileToNodeFile();
-        getNodesToConnect();
-
-        Serial.println("\n\n\rnetlist\n\r");
-        listSpecialNets();
-        listNets();
-        // printBridgeArray();
-
-        bridgesToPaths();
-        assignNetColors();
-
-        sendAllPaths();
-
-        EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-        EEPROM.commit();
-        break;
-    */
   case 'd':
   {
     debugFlagInit();
@@ -376,21 +361,32 @@ menu:
 
   goto menu;
 
-  while (1)
-  {
 
-    // waveGen();
-  }
 }
+
+
+
 
 void loop1()
 {
+
 if (showLEDsCore2 == 1)
 {
+  delayMicroseconds(9200);
 leds.show();
-delayMicroseconds(1200);
+delayMicroseconds(9200);
 showLEDsCore2 = 0;
 }
+
+
+if (sendAllPathsCore2 == 1)
+{
+  delayMicroseconds(9200);
+sendAllPaths();
+delayMicroseconds(9200);
+sendAllPathsCore2 = 0;
+}
+
 
 
 
