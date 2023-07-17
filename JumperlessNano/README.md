@@ -1,8 +1,3 @@
-The code is still a work in progress, but you can upload it to a Raspberry Pi Pico and mess with it.
-
-Currently the part that's nearly finished is the logic for loading nets from a file, combining, deleting, adding nodes and bridges while respecting the Do Not Intersect rules (so you can't connect power to gnd and stuff)
-
-If you don't feel like loading this onto a Pico to see the output, here is what it currently outputs with a tester nodeFile.txt
 
 ```
 
