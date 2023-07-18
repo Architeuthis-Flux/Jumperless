@@ -7,7 +7,7 @@ https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/400c624a-a441-4f
 
 Using a bunch of analog crosspoint switches wired together into one bigger switch, this breadboard makes real, hardware connections between any points on the board or the Arduino Nano header at the top via software command, instead of needing to use jumper wires.
 ![IMG_3580](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/3bd5be34-cf55-41ca-ad52-e8c9f27a0faf)
-
+##### Note: all the images here are Rev 1 without the LEDs around the Nano Header
 Jumperless also has a ton of voltage/current sensing so the RGB LEDs underneath each row can show a ton of information about what's going on with your circuit. 2 buffered high-current DACs (one 0-5V and one ±8V), 4 buffered and level-shifted 12-bit ADCs (3 are 0-5V and 1 for ±8V), 2 INA219 current and voltage measurement ICs, and 4 GPIO to simulate digital or analog signals that can be routed to anywhere on the breadboard or the Arduino Nano header.
 
 
