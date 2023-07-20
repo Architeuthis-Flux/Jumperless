@@ -10,9 +10,9 @@
 // #include "CH446Q.h"
 #include "Peripherals.h"
 #include <Wire.h>
-
+#include <Adafruit_NeoPixel.h>
 // #include <EEPROM.h>
-// #include "ArduinoStuff.h"
+#include "ArduinoStuff.h"
 
 
 #ifdef EEPROMSTUFF
@@ -30,7 +30,7 @@
 
 #endif
 
-int sendAllPathsCore2 = 0;
+volatile int sendAllPathsCore2 = 0;
 
 
 // https://wokwi.com/projects/367384677537829889
@@ -43,7 +43,9 @@ void setup()
   //
 
   //
-  // initArduino();
+  pinMode(2,INPUT);
+  pinMode(3,INPUT);
+ //initArduino();
 //debugFlagInit();
 
 #ifdef EEPROMSTUFF
@@ -78,7 +80,14 @@ void setup1()
 #endif
 
 initLEDs();
-lightUpRail(-1, 1);
+//delay(100);
+
+
+
+lightUpRail();
+//delay(100);
+startupColors();
+
 
 }
 void loop()
@@ -87,10 +96,18 @@ void loop()
 
   char input;
   unsigned long timer = 0;
+// while (1)
+// {
 
+
+
+// delay(5000);
+
+
+// }
   // initArduino();
   //
-//rainbowy(255,125,30);
+//while (1) rainbowBounce(30);
 // while(1)
 // {
 // for (int i = 0; i < 30; i++)
@@ -102,9 +119,12 @@ void loop()
 // }
 // }
 menu:
-
-  // arduinoPrint();
-  delay(10);
+  // while (1)
+  // {
+  //  arduinoPrint();
+  // delay(10);
+  // }
+  showLEDsCore2 = 1;
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
@@ -153,13 +173,28 @@ menu:
     // lastCommandWrite(input);
     printBridgeArray();
     break;
-  case 'w':
-    // lastCommandWrite(input);
-    waveGen();
-    break;
+
   case 'm':
     // measureCurrent();
     break;
+  case 'w':
+    // lastCommandWrite(input);
+    if (waveGen() == 1)
+    {
+      break;
+    }
+    //break;
+  case 'a':
+  {
+    resetArduino();
+    uploadArduino();
+
+
+
+
+  }
+
+
 
   case 'f':
     digitalWrite(RESETPIN, HIGH);
@@ -179,6 +214,7 @@ menu:
 
     bridgesToPaths();
     assignNetColors();
+    showNets();
 
 #ifdef PIOSTUFF
 sendAllPathsCore2 = 1;
@@ -194,6 +230,9 @@ sendAllPathsCore2 = 1;
     Serial.print("ms");
     }
     break;
+
+
+
 
   case 'p':
 
@@ -279,18 +318,19 @@ sendAllPathsCore2 = 1;
     break;
 
   case 'r':
+  resetArduino();
     // EEPROM.commit();
-    digitalWrite(RESETPIN, HIGH);
-    delay(1);
-#ifdef FSSSTUFF
-    clearNodeFile();
-#endif
-    digitalWrite(RESETPIN, LOW);
-    clearAllNTCC();
-    leds.clear();
-    //leds.show();
-    showLEDsCore2 = 1;
-    // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
+//     digitalWrite(RESETPIN, HIGH);
+//     delay(1);
+// #ifdef FSSSTUFF
+//     clearNodeFile();
+// #endif
+//     digitalWrite(RESETPIN, LOW);
+//     clearAllNTCC();
+//     leds.clear();
+//     //leds.show();
+//     showLEDsCore2 = 1;
+//     // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
 
     break;
 
@@ -358,7 +398,7 @@ sendAllPathsCore2 = 1;
 
     break;
   }
-
+//leds.show();
   goto menu;
 
 
@@ -372,6 +412,7 @@ void loop1()
 
 if (showLEDsCore2 == 1)
 {
+  showNets();
   delayMicroseconds(9200);
 leds.show();
 delayMicroseconds(9200);

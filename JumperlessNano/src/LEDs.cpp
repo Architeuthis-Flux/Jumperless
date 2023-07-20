@@ -55,9 +55,9 @@ void initLEDs(void)
     EEPROM.write(DEBUG_LEDSADDRESS, debugLEDs);
 
     pinMode(LED_PIN, OUTPUT);
-    delay(20);
+    delay(30);
     leds.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-    delay(20);
+    delay(30);
     showLEDsCore2 = 1; // Turn OFF all pixels ASAP
     delay(40);
     leds.setBrightness(BRIGHTNESS);
@@ -358,7 +358,6 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
             testNeg = colorToShiftRgb.r;
             testNeg -= abs(PCBREDSHIFTBLUE);
 
-
             if (testNeg < 0)
             {
                 colorToShiftRgb.r = 0;
@@ -386,8 +385,6 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
             testNeg = colorToShiftRgb.g;
             testNeg -= abs(PCBGREENSHIFTBLUE);
 
-
-
             if (testNeg < 0)
             {
                 colorToShiftRgb.g = 0;
@@ -397,42 +394,39 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
                 colorToShiftRgb.g = colorToShiftRgb.g - abs(PCBGREENSHIFTBLUE);
             }
         }
+        else
+        {
+            colorToShiftRgb.g = colorToShiftRgb.g + abs(PCBGREENSHIFTBLUE);
+            if (colorToShiftRgb.g > 254)
+            {
+                colorToShiftRgb.g = 254;
+            }
+        }
+
+        if (PCBBLUESHIFTBLUE < 0)
+        {
+
+            testNeg = colorToShiftRgb.b;
+
+            testNeg -= abs(PCBBLUESHIFTBLUE);
+
+            if (testNeg < 0)
+            {
+                colorToShiftRgb.b = 0;
+            }
             else
             {
-                colorToShiftRgb.g = colorToShiftRgb.g + abs(PCBGREENSHIFTBLUE);
-                if (colorToShiftRgb.g > 254)
-                {
-                    colorToShiftRgb.g = 254;
-                }
-            }
-
-            if (PCBBLUESHIFTBLUE < 0)
-            {
-
-                testNeg = colorToShiftRgb.b;
-
-                testNeg -= abs(PCBBLUESHIFTBLUE);
-
-
-                if (testNeg < 0)
-                {
-                    colorToShiftRgb.b = 0;
-                }
-                else
-                {
                 colorToShiftRgb.b = colorToShiftRgb.b - abs(PCBBLUESHIFTBLUE);
-                }
-
             }
-            else
+        }
+        else
+        {
+            colorToShiftRgb.b = colorToShiftRgb.b + abs(PCBBLUESHIFTBLUE);
+            if (colorToShiftRgb.b > 254)
             {
-                colorToShiftRgb.b = colorToShiftRgb.b + abs(PCBBLUESHIFTBLUE);
-                if (colorToShiftRgb.b > 254)
-                {
-                    colorToShiftRgb.b = 254;
-                }
+                colorToShiftRgb.b = 254;
             }
-        
+        }
 
         // Serial.print("\t\tShifted.r: ");
 
@@ -442,8 +436,8 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
         // Serial.print("\tShifted.b: ");
         // Serial.println(colorToShiftRgb.b);
         // Serial.print("\n\n\r");
-    } 
-        else if (colorToShiftHsv.h >= 150 && colorToShiftHsv.h < 255)
+    }
+    else if (colorToShiftHsv.h >= 150 && colorToShiftHsv.h < 255)
     {
 
         // Serial.print("hue: ");
@@ -459,7 +453,6 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
         {
             testNeg = colorToShiftRgb.r;
             testNeg -= abs(PCBREDSHIFTPINK);
-
 
             if (testNeg < 0)
             {
@@ -488,8 +481,6 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
             testNeg = colorToShiftRgb.g;
             testNeg -= abs(PCBGREENSHIFTPINK);
 
-
-
             if (testNeg < 0)
             {
                 colorToShiftRgb.g = 0;
@@ -499,44 +490,39 @@ struct rgbColor pcbColorCorrect(rgbColor colorToShift)
                 colorToShiftRgb.g = colorToShiftRgb.g - abs(PCBGREENSHIFTPINK);
             }
         }
+        else
+        {
+            colorToShiftRgb.g = colorToShiftRgb.g + abs(PCBGREENSHIFTPINK);
+            if (colorToShiftRgb.g > 254)
+            {
+                colorToShiftRgb.g = 254;
+            }
+        }
+
+        if (PCBBLUESHIFTPINK < 0)
+        {
+
+            testNeg = colorToShiftRgb.b;
+
+            testNeg -= abs(PCBBLUESHIFTPINK);
+
+            if (testNeg < 0)
+            {
+                colorToShiftRgb.b = 0;
+            }
             else
             {
-                colorToShiftRgb.g = colorToShiftRgb.g + abs(PCBGREENSHIFTPINK);
-                if (colorToShiftRgb.g > 254)
-                {
-                    colorToShiftRgb.g = 254;
-                }
-            }
-
-            if (PCBBLUESHIFTPINK < 0)
-            {
-
-                testNeg = colorToShiftRgb.b;
-
-                testNeg -= abs(PCBBLUESHIFTPINK);
-
-
-                if (testNeg < 0)
-                {
-                    colorToShiftRgb.b = 0;
-                }
-                else
-                {
                 colorToShiftRgb.b = colorToShiftRgb.b - abs(PCBBLUESHIFTPINK);
-                }
-
             }
-            else
+        }
+        else
+        {
+            colorToShiftRgb.b = colorToShiftRgb.b + abs(PCBBLUESHIFTPINK);
+            if (colorToShiftRgb.b > 254)
             {
-                colorToShiftRgb.b = colorToShiftRgb.b + abs(PCBBLUESHIFTPINK);
-                if (colorToShiftRgb.b > 254)
-                {
-                    colorToShiftRgb.b = 254;
-                }
+                colorToShiftRgb.b = 254;
             }
-        
-
-
+        }
     }
     return colorToShiftRgb;
 }
@@ -580,9 +566,12 @@ void lightUpNode(int node)
     leds.setPixelColor(node, 0);
 }
 
-void lightUpRail(int rail, int onOff, int brightness2)
+void lightUpRail( int logo, int rail, int onOff, int brightness2)
 {
+    if (logo == -1)
+    {
     leds.setPixelColor(110, 0xaa0011);
+    }
 
     leds.setPixelColor(83, packRgb((railColors[1].r * brightness2) >> 8, (railColors[1].g * brightness2) >> 8, (railColors[1].b * brightness2) >> 8));
     leds.setPixelColor(108, packRgb((railColors[1].r * brightness2) >> 8, (railColors[1].g * brightness2) >> 8, (railColors[1].b * brightness2) >> 8));
@@ -619,11 +608,7 @@ void showNets(void)
 
     for (int i = 0; i < numberOfNets; i++)
     {
-        for (int j = 0; j < numberOfPaths; j++)
-        {
-            uint32_t color = packRgb(net[i].color.r, net[i].color.g, net[i].color.b);
-            leds.setPixelColor(bbPixelToNodesMap[net[i].nodes[j]], color);
-        }
+        lightUpNet();
     }
     showLEDsCore2 = 1;
 }
@@ -739,21 +724,170 @@ void colorWipe(uint32_t color, int wait)
 void rainbowy(int saturation, int brightness, int wait)
 {
 
-    for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256)
+    hsvColor hsv;
+    int bounce = 0;
+    int offset = 1;
+
+    for (long j = 0; j < 60; j += 1)
     {
-        // strip.rainbow() can take a single argument (first pixel hue) or
-        // optionally a few extras: number of rainbow repetitions (default 1),
-        // saturation and value (brightness) (both 0-255, similar to the
-        // ColorHSV() function, default 255), and a true/false flag for whether
-        // to apply gamma correction to provide 'truer' colors (default true).
-        leds.rainbow(firstPixelHue, 1, saturation, brightness, true);
-        // Above line is equivalent to:
-        // strip.rainbow(firstPixelHue, 1, 255, 255, true);
-        showLEDsCore2 = 1; // Update strip with new contents
-        delay(wait);       // Pause for a moment
+
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            float huef;
+            float i2 = i;
+            float j2 = j;
+
+            //huef = ((i * j)) * 0.1f; //*254.1;
+            // hsv.h = (j*(i*j))%255;
+             //hsv.h = (j*(int((sin(j+i)*4))))%254;
+            //
+            huef = sinf((i2 * (j2)) * 3.0f);//*(sinf((j2*i2))*19.0);
+            hsv.h = ((int)(huef)) % 254;
+
+            hsv.s = 254;
+            hsv.v = 80;
+            rgbColor rgb = HsvToRgb(hsv);
+            uint32_t rgbPacked = packRgb(rgb.r, rgb.g, rgb.b);
+            // rgbPacked = rgbPacked * i
+            leds.setPixelColor((i + offset) % LED_COUNT, rgbPacked);
+        }
+
+        offset += 1;
+        // offset = offset % 80;
+        showLEDsCore2 = 1;
+        delayMicroseconds((wait * 1000)); //*((j/20.0)));
     }
 }
 
+
+void startupColors(void)
+{
+    hsvColor hsv;
+    int bounce = 0;
+    int offset = 1;
+    int fade = 0;
+    int done = 0;
+
+    for (long j = 4; j < 162; j += 2)
+    {
+        if (j < BRIGHTNESS/3)
+        {
+            fade = j*3;
+        }
+        else
+        {
+            int fadeout = j - BRIGHTNESS;
+            if (fadeout < 0)
+            {
+                fadeout = 0;
+            }
+            if (fadeout > BRIGHTNESS)
+            {
+                fadeout = BRIGHTNESS;
+                done = 1;
+                Serial.println (j);
+                //break;
+            }
+            fade = BRIGHTNESS - fadeout;
+        }
+
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            float huef;
+            float i2 = i;
+            float j2 = j+50;
+
+            huef = ((i2 * j2)) * 0.1f; //*254.1;
+            // hsv.h = (j*(i*j))%255;
+            // hsv.h = (j*(int((sin(j+i)*4))))%254;
+            hsv.h = ((int)(huef)) % 254;
+            hsv.s = 254;
+            if (((i + offset)% LED_COUNT) == 110)
+            {
+                hsv.v = 160;
+                hsv.h = (88 + j);
+            } else {
+            
+            hsv.v = fade;
+            }
+            rgbColor rgb = HsvToRgb(hsv);
+            uint32_t rgbPacked = packRgb(rgb.r, rgb.g, rgb.b);
+            // rgbPacked = rgbPacked * i
+
+            leds.setPixelColor((i + offset) % LED_COUNT, rgbPacked);
+        }
+
+        offset += 1;
+        // offset = offset % 80;
+        lightUpRail(1);
+        //showLEDsCore2 = 1;
+        leds.show();
+        if (done == 0)
+        {
+          delayMicroseconds((8000)); //*((j/20.0)));
+        } else {
+            break;
+            }
+            //Serial.println(j);
+        
+    }
+    clearLEDs();
+    lightUpRail();
+    //showLEDsCore2 = 1;
+}
+void rainbowBounce(int wait)
+{
+    hsvColor hsv;
+    int bounce = 0;
+    for (long j = 0; j < 40; j += 1)
+    {
+
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            float huef;
+            float i2 = i;
+            float j2 = j;
+
+            huef = sinf((i2 / (j2)) * 1.0f); //*(sinf((j2/i2))*19.0);
+            // hsv.h = (j*(i*j))%255;
+            // hsv.h = (j*(int((sin(j+i)*4))))%254;
+            hsv.h = ((int)(huef * 255)) % 254;
+            hsv.s = 254;
+            hsv.v = 70;
+            rgbColor rgb = HsvToRgb(hsv);
+            uint32_t rgbPacked = packRgb(rgb.r, rgb.g, rgb.b);
+            // rgbPacked = rgbPacked * i
+            leds.setPixelColor(i, rgbPacked);
+        }
+
+        showLEDsCore2 = 1;
+        delayMicroseconds((wait * 1000) * ((j / 20.0)));
+    }
+    for (long j = 40; j >= 0; j -= 1)
+    {
+
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            float huef;
+            float i2 = i;
+            float j2 = j;
+
+            huef = sinf((i2 / (j2)) * 1.0f); //*(sinf((j2/i2))*19.0);
+            // hsv.h = (j*(i*j))%255;
+            // hsv.h = (j*(int((sin(j+i)*4))))%254;
+            hsv.h = ((int)(huef * 255)) % 254;
+            hsv.s = 254;
+            hsv.v = 70;
+            rgbColor rgb = HsvToRgb(hsv);
+            uint32_t rgbPacked = packRgb(rgb.r, rgb.g, rgb.b);
+            // rgbPacked = rgbPacked * i
+            leds.setPixelColor(i, rgbPacked);
+        }
+
+        showLEDsCore2 = 1;
+        delayMicroseconds((wait * 1000) * ((j / 20.0)));
+    }
+}
 void clearLEDs(void)
 {
     for (int i = 0; i <= LED_COUNT; i++)
@@ -762,7 +896,7 @@ void clearLEDs(void)
         leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)
                                   //  Update strip to match
     }
-lightUpRail(-1,1);
+    lightUpRail();
     // for (int i = 80; i <= 109; i++)
     // { // For each pixel in strip...
     //     if (nodesToPixelMap[i] > NANO_D0 && nodesToPixelMap[i] < NANO_A7)

@@ -20,7 +20,7 @@ void setDac0_5V(float value);
 void setDac1_8V(float value);
 
 void refillTable (int amplitude = 2047, int offset = 2047, int adc = 2);
-void waveGen(void);
+int waveGen(void);
 void GetAdc29Status(int i);
 float readAdc(int channel, int samples = 10);
 

@@ -9,7 +9,8 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "ranges": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "cmath": "cpp"
     },
     "cortex-debug.registerUseNaturalFormat": false,
     "C_Cpp.errorSquiggles": "disabled"

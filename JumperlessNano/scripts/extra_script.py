@@ -8,6 +8,7 @@ def find_jumperless_port_monitor(source, target, env):
     
     import serial.tools.list_ports
     #print(env.dump())
+    counter = 0
     while True:
         autodetected = -1
         ports = serial.tools.list_ports.comports()
@@ -31,6 +32,10 @@ def find_jumperless_port_monitor(source, target, env):
             print("Autodetected jumperless port: " + ports[selection][0])
 
             return ports[selection][0]
+        counter = counter + 1
+        if counter > 30000:
+            #print("timeout")
+            return 'timeout'
         
         
 
@@ -41,6 +46,7 @@ def after_upload(source, target, env):
 
     print("waiting for " + port + " ...")
     import serial
+    counter = 0
     while True:
         try:
             s = serial.Serial(port)
@@ -48,6 +54,11 @@ def after_upload(source, target, env):
             break
         except:
             pass
+        counter = counter + 1
+        if counter > 30000:
+            print("timeout")
+            break
+
 
 env.AddPostAction("upload", after_upload)
 

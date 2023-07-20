@@ -8,9 +8,9 @@
 
 #define LED_PIN 25
 #define LED_COUNT 111
-#define BRIGHTNESS 50
-#define RAILBRIGHTNESS 55
-#define SPECIALNETBRIGHTNESS 60
+#define BRIGHTNESS 80
+#define RAILBRIGHTNESS 75
+#define SPECIALNETBRIGHTNESS 90
 
 // #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
  #define PCBREDSHIFTBLUE -25    //extra hue shift to offset the hue shift through pcb
@@ -18,7 +18,7 @@
  #define PCBBLUESHIFTBLUE 42
 
 
-#define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
+#define PCBEXTINCTION 30 //extra brightness for to offset the extinction through pcb
 #define PCBREDSHIFTPINK -18    //extra hue shift to offset the hue shift through pcb
 #define PCBGREENSHIFTPINK -25
 #define PCBBLUESHIFTPINK 35
@@ -106,14 +106,15 @@ void colorWipe(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
-void lightUpRail (int railNumber, int onOff = 1, int brightness = RAILBRIGHTNESS);
+void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = RAILBRIGHTNESS);
 
-void lightUpNet (int netNumber = -1 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
+void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
 void lightUpNode (int node);
 rgbColor pcbColorCorrect (rgbColor colorToCorrect);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
 
 uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b);
-
+void startupColors(void);
+void rainbowBounce(int wait);
 #endif

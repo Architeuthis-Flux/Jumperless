@@ -180,6 +180,24 @@ if (MYNAMEISERIC)
   digitalWrite(RESETPIN, LOW);
 }
 
+
+
+void resetArduino (void)
+{
+  int lastPath = MAX_BRIDGES - 1;
+  path[lastPath].chip[0] = CHIP_I;
+  path[lastPath].chip[1] = CHIP_I;
+  path[lastPath].x[0] = 11;
+  path[lastPath].y[0] = 0;
+  path[lastPath].x[1] = 15;
+  path[lastPath].y[1] = 0;
+
+  sendPath(lastPath, 1);
+  delay(100);
+ sendPath(lastPath, 0);
+
+
+}
 void sendAllPaths(void) // should we sort them by chip? for now, no
 {
 
@@ -188,19 +206,10 @@ void sendAllPaths(void) // should we sort them by chip? for now, no
 
 
     sendPath(i, 1);
-
-    
-
-    //delay(120);
+    //showLEDsCore2 = 1;
   }
-  /*for (int i = numberOfPaths; i >= 0; i--)
-  {
-    sendPath(i, 0);
 
-    delay(800);
-  }*/
 }
-
 void sendPath(int i, int setOrClear)
 {
 
@@ -259,11 +268,11 @@ void sendPath(int i, int setOrClear)
 
         // delayMicroseconds(50);
 
-        delayMicroseconds(20);
+        delayMicroseconds(30);
 
         pio_sm_put(pio, sm, chAddress);
 
-        delayMicroseconds(30);
+        delayMicroseconds(40);
       }
     }
   }

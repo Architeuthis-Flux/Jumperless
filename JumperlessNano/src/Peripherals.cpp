@@ -32,12 +32,12 @@ uint32_t halvePeriod[3] = {0, 0, 0};
 char mode[3] = {'z', 'z', 'z'};
 
   int dacOn[3] = {0, 0, 0};
-  int amplitude[3] = {4095, 4040, 0};
+  int amplitude[3] = {4095, 3500, 0};
   int offset[3] = {2047, 1932, 2047};
-  int calib[3] = {-10, 100, 0};
+  int calib[3] = {-10, 150, 0};
 
 MCP4725_PICO dac0_5V(5.0);
-MCP4725_PICO dac1_8V(15.0);
+MCP4725_PICO dac1_8V(18.0);
 
 INA219 INA0(0x40);
 INA219 INA1(0x41);
@@ -72,7 +72,8 @@ void initDAC(void)
 {
   // Wire.begin();
   dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 3000, 4, 5);
-  dac0_5V.begin(MCP4725A0_Addr_A00, i2c0, 3000, 4, 5);
+
+  dac0_5V.begin(MCP4725A1_Addr_A00, i2c0, 3000, 4, 5);
 
   //
 delay(1);
@@ -238,7 +239,7 @@ float readAdc(int channel, int samples)
   return adc3Voltage;
 }
 
-void waveGen(void)
+int waveGen(void)
 {
 
   listSpecialNets();
@@ -283,7 +284,7 @@ void waveGen(void)
     // float adc3Voltage = (adc3Reading - 2528) / 220.0; //painstakingly measured
     // float adc0Voltage = ((adc0Reading) / 400.0) - 0.69; //- 0.93; //painstakingly measured
 
-       int adc0Reading = 0;
+      int adc0Reading = 0;
       int brightness0 = 0;
       int hueShift0 = 0;
       
@@ -291,6 +292,7 @@ void waveGen(void)
       if (dacOn[0] == 1)
       {
         adc0Reading = INA1.getBusVoltage_mV();
+        //adc0Reading = dac0_5V.getInputCode();
         adc0Reading = abs(adc0Reading );
         hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
 
@@ -330,9 +332,26 @@ void waveGen(void)
     {
 
        //int adc0Reading = analogRead(26);
+        // if (activeDac == 0)
+        // {
+        // for (int i = 0; i < (analogRead(27)/100); i++)
+        // {
+        // Serial.print('.');
+        
+        // }
+        // Serial.println(' ');
+        // }
+        // else if (activeDac == 1)
+        // {
 
-      //Serial.println(adc1Reading);
-
+        // for (int i = 0; i < (analogRead(29)/100); i++)
+        // {
+        // Serial.print('.');
+        
+        // }
+        // Serial.println(' ');
+        // }
+     
       lastTime = now;
       // Serial.println(count); // show # updates per 0.1 second
       count = 0;
@@ -452,10 +471,21 @@ void waveGen(void)
 
           mode[activeDac] = c;
           break;
+        case '{': 
+        case 'f':
+        {
+          if (mode[0] != 'v')
+          {
+            dac0_5V.setVoltage(0.0);
+          }
+          if (mode[1] != 'v')
+          {
+            dac1_8V.setInputCode(offset[1]);
+          }
+          return 0;
+        }
 
         case 'x':
-        case 'f':
-        case '{':
         {
           if (mode[0] != 'v')
           {
@@ -469,7 +499,7 @@ void waveGen(void)
           }
           
 
-          return;
+          return 1;
 
 
         }

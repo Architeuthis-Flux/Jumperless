@@ -13,7 +13,7 @@ extern int lightUpNetCore2;
 void initCH446Q(void);
 
 void sendAllPaths(void); // should we sort them by chip? for now, no
-
+void resetArduino (void);
 void sendPath(int path, int setOrClear = 1);
 
 void createXYarray(void);
