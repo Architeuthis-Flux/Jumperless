@@ -4,10 +4,16 @@ If you get a Jumperless Kit (or order your own boards with SMD parts assembled)
 The assembly is pretty easy, it's all through hole stuff.
 
 Here's a montage of all the steps to give an overview of what you'll be doing
-https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/2050284a-3e96-4c9a-879f-039811284f40
+
+
+
+https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/656154ef-31c5-4099-a5ea-eef67134b63d
+
 
 If you've gone through the trouble of ordering your own boards and everything, I'd be happy to send you a free set of spring clips, which is the only part with a huge minimum order quantity and having them made was a whole thing.
 
+
+![20230730-88](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4fb673f5-b9dd-47b3-b177-d2e086b27a15)
 
 Your kit will come in ~7 parts:
 
