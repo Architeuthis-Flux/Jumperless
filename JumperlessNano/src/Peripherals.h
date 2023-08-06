@@ -6,7 +6,7 @@
   #include "INA219.h"
 #include <Wire.h>
 
-
+extern int revisionNumber;
 
 void initINA219(void);
 void initADC(void);

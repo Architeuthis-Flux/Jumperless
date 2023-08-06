@@ -14,7 +14,6 @@
 // #include <EEPROM.h>
 #include "ArduinoStuff.h"
 
-
 #ifdef EEPROMSTUFF
 #include <EEPROM.h>
 #endif
@@ -30,177 +29,122 @@
 
 #endif
 
-volatile int sendAllPathsCore2 = 0;
+volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
+
 
 
 // https://wokwi.com/projects/367384677537829889
 
-// nanoStatus nano;
-const char *definesToChar(int); // i really need to find a way to not need to forward declare fuctions with this setup, i hate it
-
 void setup()
 {
-  //
 
-  //
-  pinMode(2,INPUT);
-  pinMode(3,INPUT);
- //initArduino();
-//debugFlagInit();
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  // initArduino();
+  // debugFlagInit();
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
-debugFlagInit();
-  
-#endif
+  debugFlagInit();
 
+#endif
 
   initADC();
   initDAC();
   initINA219();
   Serial.begin(115200);
 
-  
-
 #ifdef FSSTUFF
   LittleFS.begin();
 #endif
-setDac0_5V(0.0);
-  
-
-
+  setDac0_5V(0.0);
 }
 
 void setup1()
 {
-//delay(100);
 
 #ifdef PIOSTUFF
   initCH446Q();
 #endif
 
-initLEDs();
-//delay(100);
+  initLEDs();
 
+  
 
+  startupColors();
 
-lightUpRail();
-//delay(100);
-startupColors();
-
+  lightUpRail();
 
 }
+
 void loop()
 {
 
-
   char input;
   unsigned long timer = 0;
-// while (1)
-// {
 
+   //while (1) rainbowBounce(100); //I uncomment this to test the LEDs on a fresh board
 
-
-// delay(5000);
-
-
-// }
-  // initArduino();
-  //
-//while (1) rainbowBounce(30);
-// while(1)
-// {
-// for (int i = 0; i < 30; i++)
-// { Serial.println(80+i);
-//   lightUpNode(80+i);
-//   showLEDsCore2 = 1;
-  
-//   //delay(500);
-// }
-// }
 menu:
-  // while (1)
-  // {
-  //  arduinoPrint();
-  // delay(10);
-  // }
-  showLEDsCore2 = 1;
+
+  //showLEDsCore2 = 1;
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
   Serial.print("\tw = waveGen\n\r");
-  //Serial.print("\tm = measure current/voltage\n\r");
+  // Serial.print("\tm = measure current/voltage\n\r");
   Serial.print("\tf = load formatted nodeFile\n\r");
   Serial.print("\tp = paste new Wokwi diagram\n\r");
-  //Serial.print("\tt = reset and load nodeFile.txt\n\r");
+  Serial.print("\tl = LED brightness\n\r");
   Serial.print("\td = toggle debug flags\n\r");
-  Serial.print("\tr = reset\n\r");
+  Serial.print("\tr = reset Arduino\n\r");
   Serial.print("\n\r");
 
-  // if (EEPROM.read(CLEARBEFORECOMMANDADDRESS) == 1)
-  //{
-
-  //  input = EEPROM.read(LASTCOMMANDADDRESS);
-  //}
-  // else
-  //{
   while (Serial.available() == 0)
     ;
 
   input = Serial.read();
-  //}
-  if (input != 'l')
-  {
-    // lastCommandWrite(input);
-  }
 
-  Serial.print(input);
+  // Serial.print(input);
   Serial.print("\n\r");
 
   switch (input)
   {
-  case 'l':
-    // lastCommandRead();
-    break;
 
   case 'n':
-    // lastCommandWrite(input);
+
     Serial.print("\n\n\rnetlist\n\n\r");
     listSpecialNets();
     listNets();
     break;
   case 'b':
-    // lastCommandWrite(input);
+
     printBridgeArray();
     break;
 
   case 'm':
-    // measureCurrent();
+
     break;
+
   case 'w':
-    // lastCommandWrite(input);
+
     if (waveGen() == 1)
     {
       break;
     }
-    //break;
+
   case 'a':
   {
-    resetArduino();
-    uploadArduino();
-
-
-
-
+    resetArduino(); // reset works
+    // uploadArduino(); //this is unwritten
   }
-
-
 
   case 'f':
     digitalWrite(RESETPIN, HIGH);
 
     clearAllNTCC();
-    clearLEDs();
+    
+    //showLEDsCore2 = 1;
     digitalWrite(RESETPIN, LOW);
 
     timer = millis();
@@ -213,56 +157,51 @@ menu:
 #endif
 
     bridgesToPaths();
+    clearLEDs();
     assignNetColors();
-    showNets();
+    //showNets();
 
 #ifdef PIOSTUFF
-sendAllPathsCore2 = 1;
-    
-    //sendAllPaths();
+    sendAllPathsCore2 = 1;
+
 #endif
 
     if (debugNMtime)
     {
-    Serial.print("\n\n\r");
-    Serial.print("took ");
-    Serial.print(millis() - timer);
-    Serial.print("ms");
+      Serial.print("\n\n\r");
+      Serial.print("took ");
+      Serial.print(millis() - timer);
+      Serial.print("ms");
     }
     break;
 
-
-
+  case '\n':
+    goto menu;
+    break;
 
   case 'p':
 
-    // case '{':
+    // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
 
     digitalWrite(RESETPIN, HIGH);
     delay(1);
-    #ifdef FSSTUFF
+#ifdef FSSTUFF
     clearNodeFile();
-    #endif
+#endif
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
     clearLEDs();
 
-    // EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-    // EEPROM.commit();
-
     timer = millis();
-// savePreformattedNodeFile ();
+
 #ifdef FSSTUFF
 
     parseWokwiFileToNodeFile();
-    // lastCommandWrite(input);
+
     openNodeFile();
     getNodesToConnect();
 #endif
     Serial.println("\n\n\rnetlist\n\n\r");
-    // listSpecialNets();
-    // listNets();
-    // printBridgeArray();
 
     bridgesToPaths();
     assignNetColors();
@@ -274,10 +213,10 @@ sendAllPathsCore2 = 1;
 
     if (debugNMtime)
     {
-    Serial.print("\n\n\r");
-    Serial.print("took ");
-    Serial.print(millis() - timer);
-    Serial.print("ms");
+      Serial.print("\n\n\r");
+      Serial.print("took ");
+      Serial.print(millis() - timer);
+      Serial.print("ms");
     }
     break;
 
@@ -313,31 +252,21 @@ sendAllPathsCore2 = 1;
 #ifdef PIOSTUFF
     sendAllPaths();
 #endif
-    // EEPROM.write(CLEARBEFORECOMMANDADDRESS, 0);
-    // EEPROM.commit();
+
     break;
 
-  case 'r':
-  resetArduino();
-    // EEPROM.commit();
-//     digitalWrite(RESETPIN, HIGH);
-//     delay(1);
-// #ifdef FSSSTUFF
-//     clearNodeFile();
-// #endif
-//     digitalWrite(RESETPIN, LOW);
-//     clearAllNTCC();
-//     leds.clear();
-//     //leds.show();
-//     showLEDsCore2 = 1;
-//     // AIRCR_Register = 0x5FA0004; // this just hardware resets the rp2040, it would be too much of a pain in the ass to reinitialize everything
+  case 'l':
+    LEDbrightnessMenu();
+    break;
+  
 
+  case 'r':
+    resetArduino();
     break;
 
   case 'd':
   {
     debugFlagInit();
-    // lastCommandWrite(input);
 
   debugFlags:
 
@@ -370,18 +299,17 @@ sendAllPathsCore2 = 1;
     int toggleDebug = Serial.read();
     Serial.write(toggleDebug);
     toggleDebug -= '0';
-//Serial.print(toggleDebug);
+
     if (toggleDebug >= 0 && toggleDebug <= 9)
     {
-      
-      #ifdef EEPROMSTUFF
-      debugFlagSet(toggleDebug);
-      #endif
 
-       delay(10);
-       
+#ifdef EEPROMSTUFF
+      debugFlagSet(toggleDebug);
+#endif
+
+      delay(10);
+
       goto debugFlags;
-     
     }
     else
     {
@@ -393,42 +321,65 @@ sendAllPathsCore2 = 1;
     while (Serial.available() > 0)
     {
       int f = Serial.read();
-      delayMicroseconds(100);
+      delayMicroseconds(50);
     }
 
     break;
   }
-//leds.show();
+
   goto menu;
-
-
 }
+unsigned long logoFlashTimer = 0;
 
 
-
-
-void loop1()
+void loop1() // core 2 handles the LEDs and the CH446Q
 {
 
-if (showLEDsCore2 == 1)
-{
-  showNets();
-  delayMicroseconds(9200);
-leds.show();
-delayMicroseconds(9200);
-showLEDsCore2 = 0;
-}
+//while (1) rainbowBounce(50); //I uncomment this to test the LEDs on a fresh board
+  if (showLEDsCore2 >= 1)
+  {
+    int rails = showLEDsCore2;
+   
+    //showNets();
+    if (rails == 1)
+    {
+ lightUpRail();
+
+    } 
+   delayMicroseconds(5200);
+    
+
+    leds.show();
+    delayMicroseconds(9200);
+    showLEDsCore2 = 0;
+  }
+
+  if (sendAllPathsCore2 == 1)
+  {
+    delayMicroseconds(9200);
+    sendAllPaths();
+    showNets();
+    delayMicroseconds(9200);
+    sendAllPathsCore2 = 0;
+  }
 
 
-if (sendAllPathsCore2 == 1)
-{
-  delayMicroseconds(9200);
-sendAllPaths();
-delayMicroseconds(9200);
-sendAllPathsCore2 = 0;
-}
 
+  if (logoFlash == 2)
+  {
+    logoFlashTimer = millis();
+    logoFlash = 1;
+    
+  } 
 
+  if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 600)
+  {
+    logoFlash = 0;
+    logoFlashTimer = 0;
+    //lightUpRail();
+    leds.setPixelColor(110, 0x550008);
+    leds.show();
+  }
 
 
 }

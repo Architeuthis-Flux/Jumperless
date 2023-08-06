@@ -245,8 +245,8 @@ void sendPath(int i, int setOrClear)
 //         lightUpNetCore2 = 1;
 
 
-        lightUpNet(path[i].net, path[i].node1, setOrClear);
-        lightUpNet(path[i].net, path[i].node2, setOrClear);
+        //lightUpNet(path[i].net, path[i].node1, setOrClear);
+        //lightUpNet(path[i].net, path[i].node2, setOrClear);
 
         chYdata = path[i].y[chip];
         chXdata = path[i].x[chip];

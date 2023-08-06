@@ -9,10 +9,10 @@
 #include "LEDs.h"
 #include <EEPROM.h>
 
-
-
 bool debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 bool debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
+
+
 
 createSafeString(nodeFileString, 1200);
 
@@ -32,28 +32,23 @@ unsigned long timeToFP = 0;
 
 int numConnsJson = 0;
 
-void savePreformattedNodeFile (void)
+void savePreformattedNodeFile(void)
 {
     LittleFS.remove("nodeFile.txt");
 
     nodeFile = LittleFS.open("nodeFile.txt", "w+");
 
-while (Serial.available() == 0)
-{
+    while (Serial.available() == 0)
+    {
+    }
 
-}
-    
-    
-while (Serial.available() > 0)
-{
-    nodeFile.write(Serial.read());
-    delay(1);
-}
-    
+    while (Serial.available() > 0)
+    {
+        nodeFile.write(Serial.read());
+        delay(1);
+    }
+
     nodeFile.close();
-
-
-
 }
 void parseWokwiFileToNodeFile(void)
 {
@@ -108,7 +103,7 @@ void parseWokwiFileToNodeFile(void)
        Serial.println(firstChar);
        Serial.print(firstChar);
     */
-   delay(1);
+    delay(1);
     while (Serial.available() > 0)
     {
         char c = Serial.read();
@@ -214,7 +209,7 @@ void changeWokwiDefinesToJumperless(void)
     {
         if (debugFP)
         {
-        Serial.println(' ');
+            Serial.println(' ');
         }
         for (int j = 0; j < 2; j++)
         {
@@ -345,7 +340,6 @@ void changeWokwiDefinesToJumperless(void)
 void clearNodeFile(void)
 {
     LittleFS.remove("nodeFile.txt");
-
 }
 
 void writeToNodeFile(void)
@@ -410,8 +404,6 @@ void writeToNodeFile(void)
 void openNodeFile()
 {
     timeToFP = millis();
-
-
 
     nodeFile = LittleFS.open("nodeFile.txt", "r");
     if (!nodeFile)
@@ -665,26 +657,26 @@ void parseStringToBridges(void)
         Serial.println("ms to open and parse file\n\r");
 }
 
-
 void debugFlagInit(void)
 {
 
-   #ifdef EEPROMSTUFF
-debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
-debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
+#ifdef EEPROMSTUFF
+    debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
+    debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
 
+    debugNM = EEPROM.read(DEBUG_NETMANAGERADDRESS);
+    debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
 
+    debugNTCC = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
+    debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
-debugNM = EEPROM.read(DEBUG_NETMANAGERADDRESS);
-debugNMtime = EEPROM.read(TIME_NETMANAGERADDRESS);
+    LEDbrightnessRail = EEPROM.read(RAILBRIGHTNESSADDRESS);
+    LEDbrightness = EEPROM.read(LEDBRIGHTNESSADDRESS);
+    LEDbrightnessSpecial = EEPROM.read(SPECIALBRIGHTNESSADDRESS);
 
-debugNTCC = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
-debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
+    debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
 
-debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
-
-
-    #else
+#else
 
     debugFP = 1;
     debugFPtime = 1;
@@ -695,36 +687,50 @@ debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
     debugNTCC = 1;
     debugNTCC2 = 1;
 
-   // debugLEDs = 1;
+    // debugLEDs = 1;
 #endif
 
+    if (debugFP != 0 && debugFP != 1)
+        EEPROM.write(DEBUG_FILEPARSINGADDRESS, 1);
 
+    if (debugFPtime != 0 && debugFPtime != 1)
+        EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
 
-if (debugFP != 0 && debugFP != 1)
-    EEPROM.write(DEBUG_FILEPARSINGADDRESS, 1);
+    if (debugNM != 0 && debugNM != 1)
+        EEPROM.write(DEBUG_NETMANAGERADDRESS, 1);
 
-if (debugFPtime != 0 && debugFPtime != 1)
-    EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
+    if (debugNMtime != 0 && debugNMtime != 1)
+        EEPROM.write(TIME_NETMANAGERADDRESS, 1);
 
-if (debugNM != 0 && debugNM != 1)
-    EEPROM.write(DEBUG_NETMANAGERADDRESS, 1);
+    if (debugNTCC != 0 && debugNTCC != 1)
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 1);
 
-if (debugNMtime != 0 && debugNMtime != 1)
-    EEPROM.write(TIME_NETMANAGERADDRESS, 1);
+    if (debugNTCC2 != 0 && debugNTCC2 != 1)
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 1);
 
-if (debugNTCC != 0 && debugNTCC != 1)
-    EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 1);
+    if (debugLEDs != 0 && debugLEDs != 1)
+        EEPROM.write(DEBUG_LEDSADDRESS, 1);
 
-if (debugNTCC2 != 0 && debugNTCC2 != 1)
-    EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 1);
+    if (LEDbrightnessRail < 0 || LEDbrightnessRail > 200)
+    {
+        EEPROM.write(RAILBRIGHTNESSADDRESS, DEFAULTRAILBRIGHTNESS);
 
-if (debugLEDs != 0 && debugLEDs != 1)
-    EEPROM.write(DEBUG_LEDSADDRESS, 1);
+        LEDbrightnessRail = DEFAULTRAILBRIGHTNESS;
+    }
+    if (LEDbrightness < 0 || LEDbrightness > 200)
+    {
+        EEPROM.write(LEDBRIGHTNESSADDRESS, DEFAULTBRIGHTNESS);
+        LEDbrightness = DEFAULTBRIGHTNESS;
+    }
 
-EEPROM.commit();
-delay(5);
-    
+    if (LEDbrightnessSpecial < 0 || LEDbrightnessSpecial > 200)
+    {
+        EEPROM.write(SPECIALBRIGHTNESSADDRESS, DEFAULTSPECIALNETBRIGHTNESS);
+        LEDbrightnessSpecial = DEFAULTSPECIALNETBRIGHTNESS;
+    }
 
+    EEPROM.commit();
+    delay(5);
 }
 
 void debugFlagSet(int flag)

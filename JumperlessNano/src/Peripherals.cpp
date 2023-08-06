@@ -17,8 +17,11 @@
 #include "pico/cyw43_arch.h"
 
 #include "mcp4725.hpp"
+#include "MCP_DAC.h"
 
 #define DAC_RESOLUTION 9
+
+int revisionNumber = 0;
 
 float freq[3] = {1, 1, 0};
 uint32_t period[3] = {0, 0, 0};
@@ -38,6 +41,10 @@ char mode[3] = {'z', 'z', 'z'};
 
 MCP4725_PICO dac0_5V(5.0);
 MCP4725_PICO dac1_8V(18.0);
+
+MCP_DAC dac_rev3; //A is dac0  B is dac1
+
+
 
 INA219 INA0(0x40);
 INA219 INA1(0x41);
@@ -70,9 +77,11 @@ void initADC(void)
 
 void initDAC(void)
 {
+  
   // Wire.begin();
-  dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 3000, 4, 5);
-
+  if (dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 3000, 4, 5) == true)
+{
+  revisionNumber = 2;
   dac0_5V.begin(MCP4725A1_Addr_A00, i2c0, 3000, 4, 5);
 
   //
@@ -85,7 +94,15 @@ delay(1);
   dac1_8V.setInputCode(offset[1] + calib[1],MCP4725_EEPROM_Mode,MCP4725_PowerDown_Off);
   delay(1);
   dac1_8V.setInputCode(offset[1] + calib[1]);
- 
+} else {
+  revisionNumber = 3;
+  //dac_rev3.begin();
+  setDac0_5V(0.00);
+  setDac1_8V(0.00);
+
+
+
+}
 }
 
 void initINA219(void)
@@ -156,14 +173,25 @@ void dacSine(int resolution)
 
 void setDac0_5V(float voltage)
 {
-
+if (revisionNumber == 2) {
   dac0_5V.setVoltage(voltage);
+} else {
+  int voltageCode = voltage * 4095 / 5;
+  dac_rev3.fastWriteA(voltageCode);
+}
 }
 
 void setDac1_8V(float voltage)
 {
-
+  if (revisionNumber == 2) {
   dac1_8V.setVoltage(voltage);
+  } else {
+
+  int voltageCode = voltage * 4095 / 16;
+  voltageCode = voltageCode + 2048;
+
+  dac_rev3.fastWriteB(voltageCode);
+  }
 }
 
 void refillTable(int amplitude, int offset, int dac)

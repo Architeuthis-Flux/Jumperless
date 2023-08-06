@@ -8,9 +8,9 @@
 
 #define LED_PIN 25
 #define LED_COUNT 111
-#define BRIGHTNESS 80
-#define RAILBRIGHTNESS 75
-#define SPECIALNETBRIGHTNESS 90
+#define DEFAULTBRIGHTNESS 32
+#define DEFAULTRAILBRIGHTNESS 28
+#define DEFAULTSPECIALNETBRIGHTNESS 35
 
 // #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
  #define PCBREDSHIFTBLUE -25    //extra hue shift to offset the hue shift through pcb
@@ -35,11 +35,15 @@
 // #define PCBBLUESHIFTPINK 0
 // #define PCBHUESHIFT 0
 
+    extern volatile uint8_t LEDbrightnessRail;
+    extern volatile uint8_t LEDbrightness;
+    extern volatile uint8_t LEDbrightnessSpecial;
 
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
 
 extern int showLEDsCore2;
+extern int logoFlash;
 
 
 typedef struct rgbColor
@@ -99,20 +103,23 @@ const int pixelsToRails[20] = {B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B
 
 
 extern rgbColor netColors[MAX_NETS];
-struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int brightnessShift = 0, int saturationShift = 0);
+struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int brightnessShift = 0, int saturationShift = 0,int specialFunction = -1);
 void initLEDs(void);
+char LEDbrightnessMenu(void);
 void clearLEDs(void);
 void colorWipe(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
-void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = RAILBRIGHTNESS);
+void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS);
 
-void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = BRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
+void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
 void lightUpNode (int node);
 rgbColor pcbColorCorrect (rgbColor colorToCorrect);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
+void applyBrightness (int brightness);
+rgbColor unpackRgb(uint32_t color);
 
 uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b);
 void startupColors(void);
