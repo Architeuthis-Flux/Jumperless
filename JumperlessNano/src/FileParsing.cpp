@@ -691,25 +691,25 @@ void debugFlagInit(void)
 #endif
 
     if (debugFP != 0 && debugFP != 1)
-        EEPROM.write(DEBUG_FILEPARSINGADDRESS, 1);
+        EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
 
     if (debugFPtime != 0 && debugFPtime != 1)
-        EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
+        EEPROM.write(TIME_FILEPARSINGADDRESS, 0);
 
     if (debugNM != 0 && debugNM != 1)
-        EEPROM.write(DEBUG_NETMANAGERADDRESS, 1);
+        EEPROM.write(DEBUG_NETMANAGERADDRESS, 0);
 
     if (debugNMtime != 0 && debugNMtime != 1)
-        EEPROM.write(TIME_NETMANAGERADDRESS, 1);
+        EEPROM.write(TIME_NETMANAGERADDRESS, 0);
 
     if (debugNTCC != 0 && debugNTCC != 1)
-        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 1);
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 0);
 
     if (debugNTCC2 != 0 && debugNTCC2 != 1)
-        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 1);
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 0);
 
     if (debugLEDs != 0 && debugLEDs != 1)
-        EEPROM.write(DEBUG_LEDSADDRESS, 1);
+        EEPROM.write(DEBUG_LEDSADDRESS, 0);
 
     if (LEDbrightnessRail < 0 || LEDbrightnessRail > 200)
     {

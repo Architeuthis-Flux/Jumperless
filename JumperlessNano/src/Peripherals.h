@@ -16,13 +16,15 @@ void dacSine (int resolution = 9);
 
 void dacTriangle (void);
 
-void setDac0_5V(float value);
-void setDac1_8V(float value);
+void setDac0_5Vvoltage(float value);
+void setDac1_8Vvoltage(float value);
+void setDac0_5VinputCode(uint16_t value);
+void setDac1_8VinputCode(uint16_t value);
 
 void refillTable (int amplitude = 2047, int offset = 2047, int adc = 2);
 int waveGen(void);
 void GetAdc29Status(int i);
-float readAdc(int channel, int samples = 10);
+int readAdc(int channel, int samples = 10);
 
 
 

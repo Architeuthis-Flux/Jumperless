@@ -630,9 +630,12 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                         if (net[netNumber].nodes[j] >= NANO_D0 && net[netNumber].nodes[j] <= NANO_A7)
                         {
                             pcbExtinction = PCBEXTINCTION;
+                            
+                            //Serial.println (brightness2);
                             // hueShift += PCBHUESHIFT;
                             // colorCorrection = 1;
                         }
+                        //pcbExtinction += (brightness2-DEFAULTBRIGHTNESS);
 
                         struct rgbColor colorToShift = {net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b};
 
@@ -647,8 +650,14 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
 
                         if (net[netNumber].specialFunction >= 100 && net[netNumber].specialFunction <= 105)
                         {
-
-                            shiftedColorHsv.v = LEDbrightnessRail;
+                            if (brightness2 != DEFAULTBRIGHTNESS)
+                            {
+                                shiftedColorHsv.v = brightness2;
+                            }
+                            else
+                            {
+                                shiftedColorHsv.v = LEDbrightnessRail;
+                            }
                             shiftedColor = HsvToRgb(shiftedColorHsv);
 
                             color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
@@ -658,7 +667,15 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                         }
                         else if (net[netNumber].specialFunction >= 106 && net[netNumber].specialFunction <= 120)
                         {
-                            shiftedColorHsv.v = LEDbrightnessSpecial;
+                            if (brightness2 != DEFAULTBRIGHTNESS)
+                            {
+                                shiftedColorHsv.v = brightness2;
+                            }
+                            else
+                            {
+                                shiftedColorHsv.v = LEDbrightnessSpecial;
+                            }
+                           
                             shiftedColor = HsvToRgb(shiftedColorHsv);
 
                             color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
@@ -666,7 +683,15 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                         }
                         else
                         {
-                            shiftedColorHsv.v = LEDbrightness;
+                          if (brightness2 != DEFAULTBRIGHTNESS)
+                            {
+                                shiftedColorHsv.v = brightness2;
+                            }
+                            else
+                            {
+                                shiftedColorHsv.v = LEDbrightness;
+                            }
+                            
                             shiftedColor = HsvToRgb(shiftedColorHsv);
 
                             color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);

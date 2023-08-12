@@ -19,6 +19,8 @@
 #include "mcp4725.hpp"
 #include "MCP_DAC.h"
 
+#include <SPI.h>
+
 #define DAC_RESOLUTION 9
 
 int revisionNumber = 0;
@@ -34,17 +36,15 @@ uint32_t halvePeriod[3] = {0, 0, 0};
 // r = random
 char mode[3] = {'z', 'z', 'z'};
 
-  int dacOn[3] = {0, 0, 0};
-  int amplitude[3] = {4095, 3500, 0};
-  int offset[3] = {2047, 1932, 2047};
-  int calib[3] = {-10, 150, 0};
+int dacOn[3] = {0, 0, 0};
+int amplitude[3] = {4095, 3763, 0};
+int offset[3] = {2047, 2380, 2047};
+int calib[3] = {-10, 0, 0};
 
 MCP4725_PICO dac0_5V(5.0);
 MCP4725_PICO dac1_8V(18.0);
 
-MCP_DAC dac_rev3; //A is dac0  B is dac1
-
-
+MCP4822 dac_rev3; // A is dac0  B is dac1
 
 INA219 INA0(0x40);
 INA219 INA1(0x41);
@@ -77,44 +77,63 @@ void initADC(void)
 
 void initDAC(void)
 {
-  
+
   // Wire.begin();
   if (dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 3000, 4, 5) == true)
-{
-  revisionNumber = 2;
-  dac0_5V.begin(MCP4725A1_Addr_A00, i2c0, 3000, 4, 5);
+  {
+    revisionNumber = 2;
 
-  //
-delay(1);
-  dac0_5V.setVoltage(0.00,MCP4725_EEPROM_Mode,MCP4725_PowerDown_Off);
-  delay(1);
-  dac0_5V.setVoltage(0.00);
-  //dac0_5V.setInputCode(0,MCP4725_EEPROM_Mode,MCP4725_PowerDown_Off);
-  delay(1);
-  dac1_8V.setInputCode(offset[1] + calib[1],MCP4725_EEPROM_Mode,MCP4725_PowerDown_Off);
-  delay(1);
-  dac1_8V.setInputCode(offset[1] + calib[1]);
-} else {
-  revisionNumber = 3;
-  //dac_rev3.begin();
-  setDac0_5V(0.00);
-  setDac1_8V(0.00);
+    amplitude[1] = 3500;
 
+    offset[1] = 1932;
 
+    calib[1] = 150;
 
-}
+    dac0_5V.begin(MCP4725A1_Addr_A00, i2c0, 3000, 4, 5);
+
+    //
+    delay(1);
+    dac0_5V.setVoltage(0.00, MCP4725_EEPROM_Mode, MCP4725_PowerDown_Off);
+    delay(1);
+    dac0_5V.setVoltage(0.00);
+    // setDac0_5VinputCode(0,MCP4725_EEPROM_Mode,MCP4725_PowerDown_Off);
+    delay(1);
+    dac1_8V.setInputCode(offset[1] + calib[1], MCP4725_EEPROM_Mode, MCP4725_PowerDown_Off);
+    delay(1);
+    dac1_8V.setInputCode(offset[1] + calib[1]);
+  }
+  else
+  {
+
+    revisionNumber = 3;
+    // dac_rev3.begin();
+
+    // setRX(pin_size_t pin);
+    SPI.setRX(0);
+    SPI.setCS(1);
+    SPI.setSCK(2);
+    SPI.setTX(3);
+    SPI.begin();
+    // dac_rev3.maxValue = 4095;
+    dac_rev3.setGain(2);
+    dac_rev3.begin(1);
+
+    delay(5);
+    setDac0_5Vvoltage(0.00);
+    setDac1_8VinputCode(4095);
+  }
 }
 
 void initINA219(void)
 {
 
   // delay(3000);
-  //Serial.println(__FILE__);
-  //Serial.print("INA219_LIB_VERSION: ");
-  //Serial.println(INA219_LIB_VERSION);
+  // Serial.println(__FILE__);
+  // Serial.print("INA219_LIB_VERSION: ");
+  // Serial.println(INA219_LIB_VERSION);
 
-  //Wire.begin();
-  //Wire.setClock(1000000);
+  // Wire.begin();
+  // Wire.setClock(1000000);
   Wire.begin();
 
   if (!INA0.begin() || !INA1.begin())
@@ -124,8 +143,6 @@ void initINA219(void)
 
   INA0.setMaxCurrentShunt(1, 2);
   INA1.setMaxCurrentShunt(1, 2);
-
-
 
   Serial.println(INA0.setBusVoltageRange(16));
   Serial.println(INA1.setBusVoltageRange(16));
@@ -139,136 +156,127 @@ void dacSine(int resolution)
   case 0 ... 5:
     for (i = 0; i < 32; i++)
     {
-      dac1_8V.setInputCode(DACLookup_FullSine_5Bit[i]);
+      setDac1_8VinputCode(DACLookup_FullSine_5Bit[i]);
     }
     break;
   case 6:
     for (i = 0; i < 64; i++)
     {
-      dac1_8V.setInputCode(DACLookup_FullSine_6Bit[i]);
+      setDac1_8VinputCode(DACLookup_FullSine_6Bit[i]);
     }
     break;
   case 7:
     for (i = 0; i < 128; i++)
     {
-      dac1_8V.setInputCode(DACLookup_FullSine_7Bit[i]);
+      setDac1_8VinputCode(DACLookup_FullSine_7Bit[i]);
     }
     break;
 
   case 8:
     for (i = 0; i < 256; i++)
     {
-      dac1_8V.setInputCode(DACLookup_FullSine_8Bit[i]);
+      setDac1_8VinputCode(DACLookup_FullSine_8Bit[i]);
     }
     break;
 
   case 9 ... 12:
     for (i = 0; i < 512; i++)
     {
-      dac1_8V.setInputCode(DACLookup_FullSine_9Bit[i]);
+      setDac1_8VinputCode(DACLookup_FullSine_9Bit[i]);
     }
     break;
   }
 }
 
-void setDac0_5V(float voltage)
+uint16_t lastInputCode0 = 0;
+uint16_t lastInputCode1 = offset[1] + calib[1];
+
+void setDac0_5Vvoltage(float voltage)
 {
-if (revisionNumber == 2) {
-  dac0_5V.setVoltage(voltage);
-} else {
-  int voltageCode = voltage * 4095 / 5;
-  dac_rev3.fastWriteA(voltageCode);
-}
-}
-
-void setDac1_8V(float voltage)
-{
-  if (revisionNumber == 2) {
-  dac1_8V.setVoltage(voltage);
-  } else {
-
-  int voltageCode = voltage * 4095 / 16;
-  voltageCode = voltageCode + 2048;
-
-  dac_rev3.fastWriteB(voltageCode);
-  }
-}
-
-void refillTable(int amplitude, int offset, int dac)
-{
-  // int offsetCorr = 0;
-  if (dac == 0)
+  if (revisionNumber == 2)
   {
-    // offset = amplitude / 2;
+    dac0_5V.setVoltage(voltage);
   }
-
-  for (int i = 0; i < 360; i++)
+  else
   {
-    if (dac == 0)
-    {
-      sine0[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
-    }
-    else if (dac == 1)
-    {
-      sine1[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
-    }
-    else if (dac == 2)
-    {
-      sine0[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
-      sine1[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
-    }
+    int voltageCode = voltage * 4095 / 5;
+    // dac_rev3.analogWrite((uint16_t)voltageCode, 0);
+    dac_rev3.fastWriteA((uint16_t)voltageCode);
+    lastInputCode0 = voltageCode;
+    dac_rev3.fastWriteB(lastInputCode1);
   }
 }
-void GetAdc29Status(int i)
+
+void setDac0_5VinputCode(uint16_t inputCode)
 {
-  gpio_function gpio29Function = gpio_get_function(29);
-  Serial.print("GPIO29 func: ");
-  Serial.println(gpio29Function);
-
-  bool pd = gpio_is_pulled_down(29);
-  Serial.print("GPIO29 pd: ");
-  Serial.println(pd);
-
-  bool h = gpio_is_input_hysteresis_enabled(29);
-  Serial.print("GPIO29 h: ");
-  Serial.println(h);
-
-  gpio_slew_rate slew = gpio_get_slew_rate(29);
-  Serial.print("GPIO29 slew: ");
-  Serial.println(slew);
-
-  gpio_drive_strength drive = gpio_get_drive_strength(29);
-  Serial.print("GPIO29 drive: ");
-  Serial.println(drive);
-
-  int irqmask = gpio_get_irq_event_mask(29);
-  Serial.print("GPIO29 irqmask: ");
-  Serial.println(irqmask);
-
-  bool out = gpio_is_dir_out(29);
-  Serial.print("GPIO29 out: ");
-  Serial.println(out);
-  Serial.printf("(%i) GPIO29 func: %i, pd: %i, h: %i, slew: %i, drive: %i, irqmask: %i, out: %i\n", i, gpio29Function, pd, h, slew, drive, irqmask, out);
+  if (revisionNumber == 2)
+  {
+    dac0_5V.setInputCode(inputCode);
+  }
+  else
+  {
+    dac_rev3.analogWrite(inputCode, 0);
+    dac_rev3.fastWriteA(inputCode);
+    lastInputCode0 = inputCode;
+    dac_rev3.fastWriteB(lastInputCode1);
+  }
 }
 
-float readAdc(int channel, int samples)
+void setDac1_8Vvoltage(float voltage)
+{
+  if (revisionNumber == 2)
+  {
+    dac1_8V.setVoltage(voltage);
+  }
+  else
+  {
+
+    int voltageCode = voltage * 4095 / 16;
+    voltageCode = voltageCode + 2048;
+
+    // dac_rev3.analogWrite((uint16_t)voltageCode, 1);
+    dac_rev3.fastWriteB((uint16_t)voltageCode);
+    lastInputCode1 = voltageCode;
+    dac_rev3.fastWriteA(lastInputCode0);
+  }
+}
+
+void setDac1_8VinputCode(uint16_t inputCode)
+{
+  if (revisionNumber == 2)
+  {
+    dac1_8V.setInputCode(inputCode);
+  }
+  else
+  {
+
+    // Serial.println(inputCode);
+    // dac_rev3.analogWrite(inputCode, 1);
+    dac_rev3.fastWriteB(inputCode);
+    lastInputCode1 = inputCode;
+    dac_rev3.fastWriteA(lastInputCode0);
+  }
+}
+
+int readAdc(int channel, int samples)
 {
   int adcReadingAverage = 0;
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < samples; i++)
   {
-    adcReadingAverage += analogRead(28);
-    delay(5);
+    adcReadingAverage += analogRead(channel);
+    delay(1);
   }
 
-  int adc3Reading = adcReadingAverage / 20;
-  Serial.print(adc3Reading);
+  int adc3Reading = adcReadingAverage / samples;
+  // Serial.print(adc3Reading);
 
-  float adc3Voltage = (adc3Reading - 2528) / 220.0; // painstakingly measured
-  return adc3Voltage;
+  // float adc3Voltage = (adc3Reading - 2528) / 220.0; // painstakingly measured
+  return adc3Reading;
 }
 
 int waveGen(void)
 {
+  int loopCounter = 0;
 
   listSpecialNets();
   listNets();
@@ -279,16 +287,18 @@ int waveGen(void)
   mode[1] = 's';
   mode[2] = 's';
 
-
   refillTable(amplitude[0], offset[0] + calib[0], 0);
   refillTable(amplitude[1], offset[1] + calib[1], 1);
 
-  if (dac0_5V.setVoltage(0.0) == false)
-  {
-    Serial.println("dac0_5V.setVoltage() failed");
-  }
-  dac1_8V.setInputCode(offset[1] + calib[1]);
+  setDac0_5Vvoltage(0.0);
 
+  setDac1_8VinputCode(offset[1] + calib[1]);
+  // setDac1_8VinputCode(8190);
+  // Serial.println(dac_rev3.getGain());
+
+  Serial.println(dac_rev3.maxValue());
+  Serial.print("Revision = ");
+  Serial.println(revisionNumber);
   Serial.println("\n\r\t\t\t\t     waveGen\t\n\n\r\toptions\t\t\twaves\t\t\tadjust frequency\n\r");
   Serial.println("\t5/0 = dac 0 0-5V (togg)\tq = square\t\t+ = frequency++\n\r");
   Serial.println("\t8/1 = dac 1 +-8V (togg)\ts = sine\t\t- = frequency--\n\r");
@@ -302,6 +312,10 @@ int waveGen(void)
   int chars = 0;
 
   chars = 0;
+
+  int firstCrossFreq0 = 0;
+  int firstCrossFreq1 = 0;
+
   while (1)
   {
     yield();
@@ -312,74 +326,90 @@ int waveGen(void)
     // float adc3Voltage = (adc3Reading - 2528) / 220.0; //painstakingly measured
     // float adc0Voltage = ((adc0Reading) / 400.0) - 0.69; //- 0.93; //painstakingly measured
 
-      int adc0Reading = 0;
-      int brightness0 = 0;
-      int hueShift0 = 0;
-      
+    int adc0Reading = 0;
+    int brightness0 = 0;
+    int hueShift0 = 0;
+    //firstCrossFreq0 = 1;
 
-      if (dacOn[0] == 1)
+    if (dacOn[0] == 1&& freq[0] < 33)
+    {
+      adc0Reading = INA1.getBusVoltage_mV();
+      // adc0Reading = dac0_5V.getInputCode();
+      adc0Reading = abs(adc0Reading);
+      hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
+      brightness0 = map(adc0Reading, 0, 5000, 4, 100);
+
+      lightUpNet(4, -1, 1, brightness0, hueShift0);
+      showLEDsCore2 = 1;
+      firstCrossFreq0 = 1;
+    }
+    else
+    {
+      if (firstCrossFreq0 == 1)
       {
-        adc0Reading = INA1.getBusVoltage_mV();
-        //adc0Reading = dac0_5V.getInputCode();
-        adc0Reading = abs(adc0Reading );
-        hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
-
-      } else {
-        adc0Reading = amplitude[0];
+      lightUpNet(4);
+      showLEDsCore2 = 1;
+      firstCrossFreq0 = 0;
       }
-        brightness0 = map(adc0Reading, 0, 5000, 10, 254);
 
      
+    }
 
-       lightUpNet(4, -1, 1, brightness0, hueShift0);
-      
+    int adc1Reading = 0;
+    int brightness1 = 0;
+    int hueShift1 = 0;
 
-      int adc1Reading = 0;
-      int brightness1 = 0;
-      int hueShift1 = 0;
-      if (dacOn[1] == 1)
-      {
-        adc1Reading = dac1_8V.getInputCode();
-
+    if (dacOn[1] == 1 && freq[1] < 17)
+    {
+      adc1Reading = readAdc(29, 1);
+        hueShift1 = map(adc1Reading, -2048, 2048, -50, 45);
         adc1Reading = adc1Reading - 2048;
 
-        hueShift1 = map(adc1Reading, -2048, 2048, -50, 45);
+        adc1Reading = abs(adc1Reading);
+
+        brightness1 = map(adc1Reading, 0, 2050, 4, 100);
 
 
-        adc1Reading = abs(adc1Reading );
-
-      } else {
-        adc1Reading = amplitude[1];
-      }
-      
-        brightness1 = map(adc1Reading, 0, 2050, 10, 254);
 
       lightUpNet(5, -1, 1, brightness1, hueShift1);
+      showLEDsCore2 = 1;
+      firstCrossFreq1 = 1;
+    }
+    else
+    {
+      if (firstCrossFreq1 == 1)
+      {
+      lightUpNet(5);
+      showLEDsCore2 = 1;
+      firstCrossFreq1 = 0;
+      }
+    }
 
     if (now - lastTime > 100000)
     {
+      loopCounter++;
+      //
+      // int adc0Reading = analogRead(26);
+      // if (activeDac == 0)
+      // {
+      // for (int i = 0; i < (analogRead(27)/100); i++)
+      // {
+      // Serial.print('.');
 
-       //int adc0Reading = analogRead(26);
-        // if (activeDac == 0)
-        // {
-        // for (int i = 0; i < (analogRead(27)/100); i++)
-        // {
-        // Serial.print('.');
-        
-        // }
-        // Serial.println(' ');
-        // }
-        // else if (activeDac == 1)
-        // {
+      // }
+      // Serial.println(' ');
+      // }
+      // else if (activeDac == 1)
+      // {
 
-        // for (int i = 0; i < (analogRead(29)/100); i++)
-        // {
-        // Serial.print('.');
-        
-        // }
-        // Serial.println(' ');
-        // }
-     
+      // for (int i = 0; i < (analogRead(29)/100); i++)
+      // {
+      // Serial.print('.');
+
+      // }
+      // Serial.println(' ');
+      // }
+
       lastTime = now;
       // Serial.println(count); // show # updates per 0.1 second
       count = 0;
@@ -429,7 +459,7 @@ int waveGen(void)
         case '8':
           if (activeDac == 0)
           {
-            dac0_5V.setVoltage(0.0);
+            setDac0_5Vvoltage(0.0);
             dacOn[0] = 0;
           }
 
@@ -440,16 +470,15 @@ int waveGen(void)
 
           if (dacOn[1] == 0)
           {
-            dac1_8V.setInputCode(offset[1] + calib[1]);
+            setDac1_8VinputCode(offset[1] + calib[1]);
           }
 
           break;
         case '5':
           if (activeDac == 1)
           {
-            dac1_8V.setInputCode(offset[1] + calib[1]);
+            setDac1_8VinputCode(offset[1] + calib[1]);
             dacOn[1] = 0;
-          
           }
 
           if (activeDac != 3)
@@ -458,7 +487,7 @@ int waveGen(void)
           activeDac = 0;
           if (dacOn[activeDac] == 0)
           {
-            dac0_5V.setVoltage(0.0);
+            setDac0_5Vvoltage(0.0);
           }
           break;
         case 'c':
@@ -499,16 +528,16 @@ int waveGen(void)
 
           mode[activeDac] = c;
           break;
-        case '{': 
+        case '{':
         case 'f':
         {
           if (mode[0] != 'v')
           {
-            dac0_5V.setVoltage(0.0);
+            setDac0_5Vvoltage(0.0);
           }
           if (mode[1] != 'v')
           {
-            dac1_8V.setInputCode(offset[1]);
+            setDac1_8VinputCode(offset[1]);
           }
           return 0;
         }
@@ -517,19 +546,15 @@ int waveGen(void)
         {
           if (mode[0] != 'v')
           {
-            dac0_5V.setVoltage(0.0);
-            
+            setDac0_5Vvoltage(0.0);
           }
           if (mode[1] != 'v')
           {
-            
-            dac1_8V.setInputCode(offset[1]);
+
+            setDac1_8VinputCode(offset[1]);
           }
-          
 
           return 1;
-
-
         }
         default:
           break;
@@ -590,54 +615,54 @@ int waveGen(void)
       if (t < halvePeriod[activeDac])
       {
         if (activeDac == 0 && dacOn[activeDac] == 1)
-          dac0_5V.setInputCode(amplitude[activeDac]);
+          setDac0_5VinputCode(amplitude[activeDac]);
         else if (activeDac == 1 && dacOn[activeDac] == 1)
-          dac1_8V.setInputCode(amplitude[activeDac]);
+          setDac1_8VinputCode(amplitude[activeDac]);
       }
       else
       {
         if (activeDac == 0 && dacOn[activeDac] == 1)
-          dac0_5V.setInputCode(0);
+          setDac0_5VinputCode(0);
         else if (activeDac == 1 && dacOn[activeDac] == 1)
-          dac1_8V.setInputCode(offset[activeDac]);
+          setDac1_8VinputCode(offset[activeDac]);
       }
       break;
     case 'w':
       if (activeDac == 0 && dacOn[activeDac] == 1)
-        dac0_5V.setInputCode(t * amplitude[activeDac] / period[activeDac]);
+        setDac0_5VinputCode(t * amplitude[activeDac] / period[activeDac]);
       else if (activeDac == 1 && dacOn[activeDac] == 1)
-        dac1_8V.setInputCode(t * amplitude[activeDac] / period[activeDac]);
+        setDac1_8VinputCode(t * amplitude[activeDac] / period[activeDac]);
       break;
     case 't':
       if (activeDac == 0 && dacOn[activeDac] == 1)
       {
 
         if (t < halvePeriod[activeDac])
-          dac0_5V.setInputCode(((t * amplitude[activeDac]) / halvePeriod[activeDac]));
+          setDac0_5VinputCode(((t * amplitude[activeDac]) / halvePeriod[activeDac]));
         else
-          dac0_5V.setInputCode((((period[activeDac] - t) * (amplitude[activeDac]) / halvePeriod[activeDac]) ));
+          setDac0_5VinputCode((((period[activeDac] - t) * (amplitude[activeDac]) / halvePeriod[activeDac])));
       }
       else if (activeDac == 1 && dacOn[activeDac] == 1)
       {
         if (t < halvePeriod[activeDac])
-          dac1_8V.setInputCode(t * amplitude[activeDac] / halvePeriod[activeDac]);
+          setDac1_8VinputCode(t * amplitude[activeDac] / halvePeriod[activeDac]);
         else
-          dac1_8V.setInputCode((period[activeDac] - t) * amplitude[activeDac] / halvePeriod[activeDac]);
+          setDac1_8VinputCode((period[activeDac] - t) * amplitude[activeDac] / halvePeriod[activeDac]);
       }
       break;
     case 'r':
       if (activeDac == 0 && dacOn[activeDac] == 1)
-        dac0_5V.setInputCode(random(amplitude[activeDac]) );
+        setDac0_5VinputCode(random(amplitude[activeDac]));
       else if (activeDac == 1 && dacOn[activeDac] == 1)
       {
-        dac1_8V.setInputCode(random(amplitude[activeDac]) );
+        setDac1_8VinputCode(random(amplitude[activeDac]));
       }
       break;
     case 'z': // zero
       if (activeDac == 0)
-        dac0_5V.setVoltage(0);
+        setDac0_5Vvoltage(0);
       else if (activeDac == 1)
-        dac1_8V.setInputCode(offset[activeDac]);
+        setDac1_8VinputCode(offset[activeDac]);
       break;
     case 'h': // high
       Serial.println("\n\r\t\t\t\t     waveGen\t\n\n\r\toptions\t\t\twaves\t\t\tadjust frequency\n\r");
@@ -650,7 +675,7 @@ int waveGen(void)
       mode[activeDac] = mode[2];
       break;
     case 'm': // mid
-      // dac1_8V.setInputCode(2047);
+      // setDac1_8VinputCode(2047);
       break;
     case 'a':
     {
@@ -903,14 +928,14 @@ int waveGen(void)
       if (activeDac == 0 && mode[2] != 'v')
       {
         // freq[activeDac] = 0;
-        setDac0_5V(amplitude[activeDac] / 819);
+        setDac0_5Vvoltage(amplitude[activeDac] / 819);
         mode[2] = 'v';
       }
       else if (activeDac == 1 && mode[2] != 'v')
       {
         // freq[activeDac] = 0;
         // refillTable(0, offset[activeDac] + calib[1], 1);
-        setDac1_8V(((amplitude[activeDac] + calib[1]) / 276) - ((offset[activeDac] / 276) - 7));
+        setDac1_8Vvoltage(((amplitude[activeDac] + calib[1]) / 276) - ((offset[activeDac] / 276) - 7));
         mode[2] = 'v';
       }
       else if (mode[2] == 'v')
@@ -925,17 +950,74 @@ int waveGen(void)
     case 's':
       // reference
       // float f = ((PI * 2) * t)/period;
-      // dac1_8V.setInputCode(2047 + 2047 * sin(f));
+      // setDac1_8VinputCode(2047 + 2047 * sin(f));
       //
       if (mode[activeDac] != 'v')
       {
         int idx = (360 * t) / period[activeDac];
         if (activeDac == 0 && dacOn[activeDac] == 1)
-          dac0_5V.setInputCode(sine0[idx]); // lookuptable
+          setDac0_5VinputCode(sine0[idx]); // lookuptable
         else if (activeDac == 1 && dacOn[activeDac] == 1)
-          dac1_8V.setInputCode(sine1[idx]); // lookuptable
+          setDac1_8VinputCode(sine1[idx]); // lookuptable
       }
       break;
     }
   }
+}
+
+void refillTable(int amplitude, int offset, int dac)
+{
+  // int offsetCorr = 0;
+  if (dac == 0)
+  {
+    // offset = amplitude / 2;
+  }
+
+  for (int i = 0; i < 360; i++)
+  {
+    if (dac == 0)
+    {
+      sine0[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
+    }
+    else if (dac == 1)
+    {
+      sine1[i] = offset + round((amplitude - (offset - 2047)) / 2 * sin(i * PI / 180));
+    }
+    else if (dac == 2)
+    {
+      sine0[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
+      sine1[i] = offset + round(amplitude / 2 * sin(i * PI / 180));
+    }
+  }
+}
+void GetAdc29Status(int i)
+{
+  gpio_function gpio29Function = gpio_get_function(29);
+  Serial.print("GPIO29 func: ");
+  Serial.println(gpio29Function);
+
+  bool pd = gpio_is_pulled_down(29);
+  Serial.print("GPIO29 pd: ");
+  Serial.println(pd);
+
+  bool h = gpio_is_input_hysteresis_enabled(29);
+  Serial.print("GPIO29 h: ");
+  Serial.println(h);
+
+  gpio_slew_rate slew = gpio_get_slew_rate(29);
+  Serial.print("GPIO29 slew: ");
+  Serial.println(slew);
+
+  gpio_drive_strength drive = gpio_get_drive_strength(29);
+  Serial.print("GPIO29 drive: ");
+  Serial.println(drive);
+
+  int irqmask = gpio_get_irq_event_mask(29);
+  Serial.print("GPIO29 irqmask: ");
+  Serial.println(irqmask);
+
+  bool out = gpio_is_dir_out(29);
+  Serial.print("GPIO29 out: ");
+  Serial.println(out);
+  Serial.printf("(%i) GPIO29 func: %i, pd: %i, h: %i, slew: %i, drive: %i, irqmask: %i, out: %i\n", i, gpio29Function, pd, h, slew, drive, irqmask, out);
 }

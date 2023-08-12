@@ -57,7 +57,8 @@ void setup()
 #ifdef FSSTUFF
   LittleFS.begin();
 #endif
-  setDac0_5V(0.0);
+  setDac0_5Vvoltage(0.0);
+  setDac1_8Vvoltage(1.9);
 }
 
 void setup1()
@@ -74,6 +75,7 @@ void setup1()
   startupColors();
 
   lightUpRail();
+  showLEDsCore2 = 1;
 
 }
 
@@ -346,6 +348,11 @@ void loop1() // core 2 handles the LEDs and the CH446Q
  lightUpRail();
 
     } 
+    if (rails > 3)
+    {
+      Serial.print("\n\r");
+      Serial.print(rails);
+    }
    delayMicroseconds(5200);
     
 
