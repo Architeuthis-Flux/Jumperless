@@ -226,13 +226,15 @@ void sendPath(int i, int setOrClear)
       chipSelect = path[i].chip[chip];
 
       chipToConnect = path[i].chip[chip];
-      for (int xy = 0; xy < 6; xy++)
-      {
 
-        if (path[i].x[xy] == -1 || path[i].y[xy] == -1)
-        {
-          continue;
-        }
+      //for (int xy = chip; xy < 4; xy++)
+      //{
+
+
+        // if (path[i].x[xy] == -1 || path[i].y[xy] == -1)
+        // {
+        //   continue;
+        // }
 // delayMicroseconds(800);
 //         netNumberC2 = path[i].net;
 //         onOffC2 = setOrClear;
@@ -273,7 +275,7 @@ void sendPath(int i, int setOrClear)
         pio_sm_put(pio, sm, chAddress);
 
         delayMicroseconds(40);
-      }
+      //}
     }
   }
 }

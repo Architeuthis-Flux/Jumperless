@@ -145,7 +145,7 @@ menu:
     digitalWrite(RESETPIN, HIGH);
 
     clearAllNTCC();
-    
+    delay(5);
     //showLEDsCore2 = 1;
     digitalWrite(RESETPIN, LOW);
 
@@ -365,6 +365,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q
   {
     delayMicroseconds(9200);
     sendAllPaths();
+    delayMicroseconds(2200);
     showNets();
     delayMicroseconds(9200);
     sendAllPathsCore2 = 0;
