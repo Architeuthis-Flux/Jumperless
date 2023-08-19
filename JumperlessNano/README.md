@@ -180,12 +180,101 @@ char *netNameConstants[MAX_NETS] = {(char*)"Net 0",(char*)"Net 1",(char*)"Net 2"
 
 Cool, so those 3 arrays are basically the important ones you'll need to be aware of when I go through the rest of how this all works
 
-## 
+## File Parsing
+I guess "file" is a bit of a misnomer here, the main way of using this thing right now is via the JumperlessWokwiBridge app and that just sends data over serial where it's directly stored into the **Nets** array. There is support for loading a file using LittleFS but that's not the main way I use this thing anymore because it's slower. But the format is exactly the same.
+
+There are actually 2 indentical file parsers, one in the Wokwi Bridge app and another on the Jumperless, they do the same thing. Really all they do is go through the list formatted with human readable names and replace them with the #defined numbers above. So D0 is replaced with 70 and DAC1_8V is replaced with 107.
+
+Extra formatting is an "opening curly brace" "newline", then "dashes" between nodes and "comma newline" between bridges. 
+```
+{
+45-GND,
+15-SUPPLY_5V,
+23-16,
+17-46,
+42-47,
+51-23,
+53-52,
+48-SUPPLY_3V,
+59-46,
+DAC1_8V-57,
+17-2,
+DAC0_5V-26,
+ADC3_8V-57,
+29-SUPPLY_5V,
+GND-34,
+A3-D10,
+A2-12,
+A0-10,
+35-SUPPLY_3V,
+11-D8,
+A5-20,
+9-8,
+}
+```
+Gets parsed into
+```
+{
+45-100,
+15-105,
+23-16,
+17-46,
+42-47,
+51-23,
+53-52,
+48-103,
+59-46,
+107-57,
+17-2,
+106-26,
+113-57,
+29-105,
+100-34,
+79-80,
+88-12,
+86-10,
+35-103,
+11-78,
+91-20,
+9-8,
+}
+```
+The Wokwi bridge app does that conversion just to send less data over serial, but even if it didn't, it would just parse it on the Jumperless.
+
+### Actually sorting it into nets (real parsing)
+Now the real fun begins in NetManager.cpp. At a high level, this is what it does:
 
 
+- Take in a pair of nodes
+- Search the existing nets for either of those nodes
+  - If it finds *one* of those nodes in a net, add both nodes to that net
+  - If it each of those nodes in 2 different nets, check the doNotIntersects, if that's okay, then combine those 2 nets into one net
+  - Else create a new net with both of those nodes at the first unused net index
+  
+After all that runs, you'll end up with a netlist that look like this
+```
+Index	Name		Number		Nodes			Bridges
+0	Empty Net	127		EMPTY_NET		{0-0}				
+1	GND		1		GND,45,34		{45-GND,GND-34}			
+2	+5V		2		5V,15,29		{15-5V,29-5V}			
+3	+3.3V		3		3V3,48,35		{48-3V3,35-3V3}			
+4	DAC 0		4		DAC_0,26		{DAC_0-26}			
+5	DAC 1		5		DAC_1,57,ADC_3		{DAC_1-57,ADC_3-57}		
+6	I Sense +	6		I_POS			{0-0}				
+7	I Sense -	7		I_NEG			{0-0}				
 
-
-
+Index	Name		Number		Nodes			Bridges
+8	Net 8		8		23,16,51		{23-16,51-23}			
+9	Net 9		9		17,46,59,2		{17-46,59-46,17-2}		
+10	Net 10		10		42,47			{42-47}				
+11	Net 11		11		53,52			{53-52}				
+12	Net 12		12		D9,D10			{D9-D10}			
+13	Net 13		13		A2,12			{A2-12}				
+14	Net 14		14		A0,10			{A0-10}				
+15	Net 15		15		11,D8			{11-D8}				
+16	Net 16		16		A5,20			{A5-20}				
+17	Net 17		17		9,8			{9-8}	
+```
 
 
 
