@@ -276,6 +276,87 @@ Index	Name		Number		Nodes			Bridges
 17	Net 17		17		9,8			{9-8}	
 ```
 
+## Pathfinding
+This is the *really* tricky part. I probably wrote all this code about 4 times, trashed it and started over from scratch with only the lessons learned from the last attempt.
+Earlier versions would add connections one at a time, but you'd end up in weird states because it has no knowledge of what other paths it needs to make room for. So the final version here clears the connections from the last update, takes in all the connections to be made, and finds paths for the whole board every time you add a new wire. All the old connections usually follow the same paths as last time unless they need to be nudged over to make room for some other path, and the actual connection won't be interrupted at all.
+
+
+![Untitled](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/0dbe9d22-85e1-45a0-96ac-68855ffd41c4)
+Here's the schematic of just the crosspoints, the Nano header, and the breadboard. 
+
+If you look closely, you'll see that there generally 2 connections (I'm calling these 2 connections **Lanes** between each breadboard chip, except for the chip that is across from it on the breadboard. And every breadboard chip has one connection to each of the special function chips. The pins on the Nano header has a connection to 2 special function chips (interleaved to make it easier to connect continuous pairs of pins to the breadboard).
+
+
+Here's the high level outline of what NetsToChipConnections.cpp is doing
+
+- Sorts all the paths by Net
+This sort of sets priority, lower net numbers (so all the special function nets) will be picked first and are more likely to have direct connections chosen
+
+- For each path, find the start and end chips
+  - If there are multiple candidates (Nano header pins will have 2) store both
+  - If both start and end chips have candidates in common, choose that chip (this would make it a bounce)
+  - Assign node and path types (BB to BB, NANO to BB, BB to SF, etc...)
+  - Sort a list of chips from least to most crowded (by how many connections that chip has used)
+  - Resolve the candidate chips by going down the sorted list of chips and picking the less crowded chip
+  - Search for a direct path between those 2 chips
+    - If there isn't one, swap to the other candidate chips and search again
+    - If one of the nodes is a special function with multiple options swap the nodes with their equivalents and search again
+    - If there still isn't a direct path, set the altPathNeeded flag and move on
+At this point, any paths that have a simple direct connection should be done, now we need to deal with the ones that don't
+
+- Resolve alt paths, if the altPathNeeded flag is set
+  - Search through all the other chips until you find one that has a direct connection to both the start and end chips
+    - If one chip is connected to the X inputs and the other the Y inputs, set that connection on chip[2] and x[2] y[2]
+    - If they're both on X or both on Y, set the sameChip flag and the x[3] or y[3] as -2 to denote that that connection is a bounce and it doesn't matter which pin is chosen, as long as it's available
+      
+- Resolve uncommitted hops, anything set as -2 gets a random unconnected pin assigned to it at the very end so it doesn't take up connection space
+
+
+There's a lot more subltlety to this but if I go into any more detail you might as well just read the code itself. It will all be in the file NetsToChipConnections.cpp, and if you're running it on a Jumperless or just an RP2040, you can set the Chip Connections and Chip Connections Alt debug flags and it will show you everything it's doing in a somewhat nicely formatted way. There are comments in the code but there are a lot of nested array things that can get pretty confusing, if you need help understanding what's going on in a particular function, let me know and I'd be happy to walk you through it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
