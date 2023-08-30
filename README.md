@@ -41,6 +41,11 @@ The connections are real and fully analog (-8V to +8V, up to around 1 MHz before
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/2c203686-e02e-4a0c-b5eb-0cab925386fb
 
+
+### If you want to read about how the code and stuff works, [the README in JumperlessNano](https://github.com/Architeuthis-Flux/Jumperless/tree/main/JumperlessNano) goes through how each part works in more detail.
+
+### Or check out the [Hackaday.io page](https://hackaday.io/project/191238-jumperless) and the [Hackaday Blog Writeup](https://hackaday.com/2023/08/25/hackaday-prize-2023-jumperless-the-jumperless-jumperboard/)
+
 And no, it's not an FPGA.
 
 ![IMG_3827](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/963cac46-b46d-4c64-a201-00305d2d0bbc)
