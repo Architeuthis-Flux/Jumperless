@@ -615,7 +615,7 @@ path    net    node1    type    chip0    x0    y0    node2    type    chip1    x
 
 ```
 
-# Part 3 - Controlling the Crosspoint Switches
+# Controlling the Crosspoint Switches
 
 
 ## What crosspoint switches crave
