@@ -85,7 +85,7 @@ void loop()
   char input;
   unsigned long timer = 0;
 
-   //while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
+  //while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
 //while (1) randomColors(0,90);
 menu:
 
