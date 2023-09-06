@@ -113,6 +113,7 @@ void initDAC(void)
     SPI.setCS(1);
     SPI.setSCK(2);
     SPI.setTX(3);
+    
     SPI.begin();
     // dac_rev3.maxValue = 4095;
     dac_rev3.setGain(2);
@@ -236,8 +237,8 @@ void setDac1_8Vvoltage(float voltage)
 
     // dac_rev3.analogWrite((uint16_t)voltageCode, 1);
     dac_rev3.fastWriteB((uint16_t)voltageCode);
-    lastInputCode1 = voltageCode;
-    dac_rev3.fastWriteA(lastInputCode0);
+    ///lastInputCode1 = voltageCode;
+   // dac_rev3.fastWriteA(lastInputCode0);
   }
 }
 
@@ -253,8 +254,8 @@ void setDac1_8VinputCode(uint16_t inputCode)
     // Serial.println(inputCode);
     // dac_rev3.analogWrite(inputCode, 1);
     dac_rev3.fastWriteB(inputCode);
-    lastInputCode1 = inputCode;
-    dac_rev3.fastWriteA(lastInputCode0);
+    //lastInputCode1 = inputCode;
+   // dac_rev3.fastWriteA(lastInputCode0);
   }
 }
 
@@ -333,8 +334,9 @@ int waveGen(void)
 
     if (dacOn[0] == 1&& freq[0] < 33)
     {
-      adc0Reading = INA1.getBusVoltage_mV();
+      //adc0Reading = INA1.getBusVoltage_mV();
       // adc0Reading = dac0_5V.getInputCode();
+      adc0Reading = readAdc(26, 1);
       adc0Reading = abs(adc0Reading);
       hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
       brightness0 = map(adc0Reading, 0, 5000, 4, 100);

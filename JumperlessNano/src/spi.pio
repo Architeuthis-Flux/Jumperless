@@ -16,14 +16,16 @@ bitloop:
     out pins, 1        side 0x0 [2]
     
     nop                side 0x1 [2]
+
     jmp x-- bitloop    side 0x1
 
 
     out pins, 1        side 0x1
 
-
     mov x, y           side 0x1
+
     irq  0             side 0x1
+    
     wait 0 irq 0 rel   side 0x1
     
     jmp !osre bitloop  side 0x0

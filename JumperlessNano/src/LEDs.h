@@ -6,22 +6,24 @@
 #include "Adafruit_NeoPixel.h"
 #include "NetsToChipConnections.h"
 
-#define LED_PIN 25
+#define LED_PIN 25 //change this to 0 if you want to run this on a Pico to control the lights on a Jumperlux
 #define LED_COUNT 111
 #define DEFAULTBRIGHTNESS 32
 #define DEFAULTRAILBRIGHTNESS 28
 #define DEFAULTSPECIALNETBRIGHTNESS 35
 
 // #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
- #define PCBREDSHIFTBLUE -25    //extra hue shift to offset the hue shift through pcb
- #define PCBGREENSHIFTBLUE -25
- #define PCBBLUESHIFTBLUE 42
+
 
 
 #define PCBEXTINCTION 30 //extra brightness for to offset the extinction through pcb
 #define PCBREDSHIFTPINK -18    //extra hue shift to offset the hue shift through pcb
 #define PCBGREENSHIFTPINK -25
 #define PCBBLUESHIFTPINK 35
+
+ #define PCBREDSHIFTBLUE -25    //extra hue shift to offset the hue shift through pcb
+ #define PCBGREENSHIFTBLUE -25
+ #define PCBBLUESHIFTBLUE 42
 
 // #define PCBEXTINCTION 0 //extra brightness for to offset the extinction through pcb
 //  #define PCBREDSHIFTBLUE 0    //extra hue shift to offset the hue shift through pcb
@@ -107,7 +109,7 @@ struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int br
 void initLEDs(void);
 char LEDbrightnessMenu(void);
 void clearLEDs(void);
-void colorWipe(uint32_t color, int wait);
+void randomColors(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);

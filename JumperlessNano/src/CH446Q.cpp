@@ -25,10 +25,6 @@ volatile uint32_t irq_flags = 0;
 
 void isrFromPio(void)
 {
-  // noInterrupts();
-  // pinMode(DATAPIN, OUTPUT);
-  // digitalWriteFast(DATAPIN, LOW);
-
   switch (chipSelect)
   {
   case CHIP_A:
@@ -92,8 +88,6 @@ void isrFromPio(void)
     break;
   }
   }
-  // Serial.print(chipSelect);
-  // return;
 
   delayMicroseconds(1);
   digitalWriteFast(CS_A, LOW);
@@ -113,7 +107,7 @@ void isrFromPio(void)
   irq_flags = pio0_hw->irq;
   pio_interrupt_clear(pio, PIO0_IRQ_0);
   hw_clear_bits(&pio0_hw->irq, irq_flags);
-  // interrupts();
+  
 }
 
 void initCH446Q(void)
@@ -203,13 +197,11 @@ void sendAllPaths(void) // should we sort them by chip? for now, no
 
   for (int i = 0; i < numberOfPaths; i++)
   {
-
-
     sendPath(i, 1);
-    //showLEDsCore2 = 1;
   }
 
 }
+
 void sendPath(int i, int setOrClear)
 {
 
@@ -226,29 +218,6 @@ void sendPath(int i, int setOrClear)
       chipSelect = path[i].chip[chip];
 
       chipToConnect = path[i].chip[chip];
-
-      //for (int xy = chip; xy < 4; xy++)
-      //{
-
-
-        // if (path[i].x[xy] == -1 || path[i].y[xy] == -1)
-        // {
-        //   continue;
-        // }
-// delayMicroseconds(800);
-//         netNumberC2 = path[i].net;
-//         onOffC2 = setOrClear;
-//         nodeC2 = path[i].node1;
-//         lightUpNetCore2 = 1;
-
-//         delayMicroseconds(800);
-
-//         nodeC2 = path[i].node2;
-//         lightUpNetCore2 = 1;
-
-
-        //lightUpNet(path[i].net, path[i].node1, setOrClear);
-        //lightUpNet(path[i].net, path[i].node2, setOrClear);
 
         chYdata = path[i].y[chip];
         chXdata = path[i].x[chip];

@@ -85,8 +85,8 @@ void loop()
   char input;
   unsigned long timer = 0;
 
-   //while (1) rainbowBounce(100); //I uncomment this to test the LEDs on a fresh board
-
+   //while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
+//while (1) randomColors(0,90);
 menu:
 
   //showLEDsCore2 = 1;
@@ -97,7 +97,7 @@ menu:
   // Serial.print("\tm = measure current/voltage\n\r");
   Serial.print("\tf = load formatted nodeFile\n\r");
   Serial.print("\tp = paste new Wokwi diagram\n\r");
-  Serial.print("\tl = LED brightness\n\r");
+  Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset Arduino\n\r");
   Serial.print("\n\r");
@@ -258,7 +258,12 @@ menu:
     break;
 
   case 'l':
-    LEDbrightnessMenu();
+    if (LEDbrightnessMenu() == '!')
+    {
+      clearLEDs();
+      delayMicroseconds(9200);
+      sendAllPathsCore2 = 1;
+    }
     break;
   
 
@@ -334,7 +339,7 @@ menu:
 unsigned long logoFlashTimer = 0;
 
 
-void loop1() // core 2 handles the LEDs and the CH446Q
+void loop1() // core 2 handles the LEDs and the CH446Q8
 {
 
 //while (1) rainbowBounce(50); //I uncomment this to test the LEDs on a fresh board

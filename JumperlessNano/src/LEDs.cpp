@@ -82,6 +82,10 @@ char LEDbrightnessMenu(void)
     Serial.print(LEDbrightnessSpecial);
     Serial.print("\n\r\tt = All types\t");
     Serial.print("\n\n\r\td = Reset to defaults");
+    Serial.print("\n\n\r\tb = Rainbow Bounce test");
+    Serial.print("\n\r\tc = Random Color test\n\r");
+
+
     Serial.print("\n\r\tx = Exit\n\n\r");
     // Serial.print(leds.getBrightness());
     if (LEDbrightness > 50 || LEDbrightnessRail > 50 || LEDbrightnessSpecial > 70)
@@ -373,6 +377,29 @@ char LEDbrightnessMenu(void)
                 }
             }
         }
+    }
+        else if (input == 'b')
+    {
+        Serial.print ("\n\rPress any key to exit\n\n\r");
+        while (Serial.available() == 0)
+        {
+            rainbowBounce(70);
+        }
+
+        input = '!'; // this tells the main fuction to reset the leds
+
+
+
+    } else if (input == 'c')
+    {
+        Serial.print ("\n\rPress any key to exit\n\n\r");
+        while (Serial.available() == 0)
+        {
+            randomColors(0,90);
+        }
+        input = '!';
+
+    
     }
     else
     {
@@ -1134,16 +1161,52 @@ hsvColor RgbToHsv(rgbColor rgb)
     return hsv;
 }
 
-void colorWipe(uint32_t color, int wait)
+void randomColors(uint32_t color, int wait)
 {
 
+    int count = 0;
+
     for (int i = 0; i < leds.numPixels(); i++)
-    { // For each pixel in strip...
+    {   
+    
+        count = random(0,5);
+
+        byte colorValR = random(0, 0xef);
+        byte colorValG = random(0, 0xef);
+        byte colorValB = random(0, 0xef);
+
+        color = colorValR << 16 | colorValG << 8 | colorValB;
+        switch (count)
+        {
+            case 0:
+            color = color & 0x00ffff; 
+            break;
+            case 1:
+            color = color & 0xff00ff;
+            break;
+            case 2:
+            color = color & 0xffff00;
+            break;
+            case 3:
+            color = color & 0x0000ff;   
+            break;
+            case 4:
+            color = color & 0x00ff00;
+            break;
+            case 5:
+            color = color & 0xff0000;
+            break;
+
+
+
+        }
+
 
         leds.setPixelColor(i, color); //  Set pixel's color (in RAM)
-        showLEDsCore2 = 1;            //  Update strip to match
-        delay(wait);                  //  Pause for a moment
+        showLEDsCore2 = 2;            //  Update strip to match
+                        //  Pause for a moment
     }
+    delay(wait);  
 }
 
 void rainbowy(int saturation, int brightness, int wait)
