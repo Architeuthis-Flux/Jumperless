@@ -383,7 +383,7 @@ char LEDbrightnessMenu(void)
         Serial.print ("\n\rPress any key to exit\n\n\r");
         while (Serial.available() == 0)
         {
-            rainbowBounce(70);
+            rainbowBounce(40);
         }
 
         input = '!'; // this tells the main fuction to reset the leds
@@ -1169,11 +1169,11 @@ void randomColors(uint32_t color, int wait)
     for (int i = 0; i < leds.numPixels(); i++)
     {   
     
-        count = random(0,5);
+        count = random(0,7);
 
-        byte colorValR = random(0, 0xef);
-        byte colorValG = random(0, 0xef);
-        byte colorValB = random(0, 0xef);
+        byte colorValR = random(0, 0x2f);
+        byte colorValG = random(0, 0x20);
+        byte colorValB = random(0, 0x2f);
 
         color = colorValR << 16 | colorValG << 8 | colorValB;
         switch (count)
