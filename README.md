@@ -61,8 +61,9 @@ https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/9c5d2b5a-3727-41
 
 
 Here are some fun bonus shots
-![Sequence 03_7](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/0a4df159-519c-4978-a0e2-18cb1f8faaf5)
-![RainBounce](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/5c3d64e9-9c42-4b6d-9656-c1c5f242aa41)
+![RainBounceLarge](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/76cc09b5-138b-4f5a-8b3c-4cb5f0c9df18)
+
+![RandomLarge](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4674d12f-ab89-47a5-aa29-7bf0252024dd)
 
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/b933e817-c6e4-4d97-9fc0-7b8d9e875ebb
