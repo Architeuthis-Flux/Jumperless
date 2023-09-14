@@ -70,9 +70,12 @@ Here are some fun bonus shots
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/b933e817-c6e4-4d97-9fc0-7b8d9e875ebb
 
 
+![DSC01523](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c61467fa-b122-4526-9a08-8fbbb16326da)
+![usage](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/68da817f-0bb4-4501-9174-7fe092e9d210)
 
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/d070d99d-b6b3-43e3-adee-4ca2d7358a9a
+![DSC01237-2](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/f757717a-d5b4-462b-af42-624a8e96e469)
 
 ![DSC01154](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/375efc39-2015-4e42-9d00-62606cfff685)
 
