@@ -68,6 +68,7 @@ Here are some fun bonus shots
 
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/b933e817-c6e4-4d97-9fc0-7b8d9e875ebb
+[SchematicRevision3.pdf](https://github.com/Architeuthis-Flux/Jumperless/files/12603152/SchematicRevision3.pdf)
 
 
 ![DSC01523](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c61467fa-b122-4526-9a08-8fbbb16326da)
