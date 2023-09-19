@@ -50,15 +50,21 @@ void setup()
 #endif
 
   initADC();
+  delay (1);
   initDAC();
+  delay (1);
   initINA219();
+  delay (1);
   Serial.begin(115200);
-
+delay (4);
 #ifdef FSSTUFF
   LittleFS.begin();
 #endif
   setDac0_5Vvoltage(0.0);
   setDac1_8Vvoltage(1.9);
+
+  clearAllNTCC();
+  delay (4);
 }
 
 void setup1()
@@ -68,6 +74,7 @@ void setup1()
   initCH446Q();
 #endif
 
+//delay (4);
   initLEDs();
 
   
@@ -368,9 +375,9 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
   if (sendAllPathsCore2 == 1)
   {
-    delayMicroseconds(9200);
+    delayMicroseconds(12200);
     sendAllPaths();
-    delayMicroseconds(2200);
+    delayMicroseconds(4200);
     showNets();
     delayMicroseconds(9200);
     sendAllPathsCore2 = 0;
@@ -396,3 +403,5 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
 
 }
+
+

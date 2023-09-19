@@ -115,12 +115,16 @@ void initDAC(void)
     SPI.setTX(3);
     
     SPI.begin();
-    // dac_rev3.maxValue = 4095;
+     //dac_rev3.maxValue = 4095;
+     delay(5);
     dac_rev3.setGain(2);
+     delay(5);
     dac_rev3.begin(1);
 
     delay(5);
     setDac0_5Vvoltage(0.00);
+   // setDac0_5VinputCode(4095);
+
     setDac1_8VinputCode(4095);
   }
 }
@@ -201,10 +205,12 @@ void setDac0_5Vvoltage(float voltage)
   else
   {
     int voltageCode = voltage * 4095 / 5;
+
+    
     // dac_rev3.analogWrite((uint16_t)voltageCode, 0);
     dac_rev3.fastWriteA((uint16_t)voltageCode);
     lastInputCode0 = voltageCode;
-    dac_rev3.fastWriteB(lastInputCode1);
+    //dac_rev3.fastWriteB(lastInputCode1);
   }
 }
 
@@ -219,7 +225,7 @@ void setDac0_5VinputCode(uint16_t inputCode)
     dac_rev3.analogWrite(inputCode, 0);
     dac_rev3.fastWriteA(inputCode);
     lastInputCode0 = inputCode;
-    dac_rev3.fastWriteB(lastInputCode1);
+    //dac_rev3.fastWriteB(lastInputCode1);
   }
 }
 
@@ -278,7 +284,7 @@ int readAdc(int channel, int samples)
 int waveGen(void)
 {
   int loopCounter = 0;
-
+  int c = 0;
   listSpecialNets();
   listNets();
 
@@ -336,6 +342,11 @@ int waveGen(void)
     {
       //adc0Reading = INA1.getBusVoltage_mV();
       // adc0Reading = dac0_5V.getInputCode();
+
+      if (c == 'q')
+      {
+      } else {
+
       adc0Reading = readAdc(26, 1);
       adc0Reading = abs(adc0Reading);
       hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
@@ -344,6 +355,8 @@ int waveGen(void)
       lightUpNet(4, -1, 1, brightness0, hueShift0);
       showLEDsCore2 = 1;
       firstCrossFreq0 = 1;
+
+      }
     }
     else
     {
@@ -422,7 +435,7 @@ int waveGen(void)
       }
       else
       {
-        int c = Serial.read();
+        c = Serial.read();
         switch (c)
         {
         case '+':
@@ -617,16 +630,31 @@ int waveGen(void)
       if (t < halvePeriod[activeDac])
       {
         if (activeDac == 0 && dacOn[activeDac] == 1)
+        {
           setDac0_5VinputCode(amplitude[activeDac]);
+          lightUpNet(4, -1, 1, DEFAULTSPECIALNETBRIGHTNESS, 12);
+          showLEDsCore2 = 1;
+      }
         else if (activeDac == 1 && dacOn[activeDac] == 1)
+        {
           setDac1_8VinputCode(amplitude[activeDac]);
+          
+          showLEDsCore2 = 1;
+        }
+
       }
       else
       {
         if (activeDac == 0 && dacOn[activeDac] == 1)
+        {
           setDac0_5VinputCode(0);
+lightUpNet(4, -1, 1, 2, 12);
+      }
+
         else if (activeDac == 1 && dacOn[activeDac] == 1)
+        {
           setDac1_8VinputCode(offset[activeDac]);
+        }
       }
       break;
     case 'w':

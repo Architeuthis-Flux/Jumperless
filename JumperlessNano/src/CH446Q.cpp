@@ -89,7 +89,7 @@ void isrFromPio(void)
   }
   }
 
-  delayMicroseconds(1);
+  delayMicroseconds(2);
   digitalWriteFast(CS_A, LOW);
   digitalWriteFast(CS_B, LOW);
   digitalWriteFast(CS_C, LOW);
@@ -103,7 +103,7 @@ void isrFromPio(void)
   digitalWriteFast(CS_J, LOW);
   digitalWriteFast(CS_K, LOW);
   digitalWriteFast(CS_L, LOW);
-
+delayMicroseconds(2);
   irq_flags = pio0_hw->irq;
   pio_interrupt_clear(pio, PIO0_IRQ_0);
   hw_clear_bits(&pio0_hw->irq, irq_flags);
@@ -219,6 +219,11 @@ void sendPath(int i, int setOrClear)
 
       chipToConnect = path[i].chip[chip];
 
+        if (path[i].y[chip] == -1 || path[i].x[chip] == -1)
+        {
+          continue;
+        }
+
         chYdata = path[i].y[chip];
         chXdata = path[i].x[chip];
 
@@ -243,7 +248,7 @@ void sendPath(int i, int setOrClear)
 
         pio_sm_put(pio, sm, chAddress);
 
-        delayMicroseconds(40);
+        delayMicroseconds(60);
       //}
     }
   }

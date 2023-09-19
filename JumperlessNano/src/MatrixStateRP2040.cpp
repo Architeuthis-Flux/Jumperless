@@ -37,6 +37,10 @@ CHIP_H,CHIP_H,CHIP_H,CHIP_H,CHIP_H,CHIP_H,CHIP_H,  //53,54,55,56,57,58,59
 CHIP_L};                                           //60
 
 
+// const int xHopMap[12][12][16] =  //[chip] [other chip][x]
+// {
+
+
 
 
 struct chipStatus ch[12] = {
