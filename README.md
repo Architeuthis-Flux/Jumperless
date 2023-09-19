@@ -4,9 +4,10 @@
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
 
+![JumperlessCropLights](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/690bea80-02cc-4e61-a65d-97b9b1a597ab)
 
 
-![DSC01154](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/375efc39-2015-4e42-9d00-62606cfff685)
+
 
 Using a bunch of analog crosspoint switches wired together into one bigger switch, this breadboard makes real, hardware connections between any points on the board or the Arduino Nano header at the top via software command, instead of needing to use jumper wires.
 
@@ -61,16 +62,23 @@ https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/9c5d2b5a-3727-41
 
 
 Here are some fun bonus shots
-![Sequence 03_7](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/0a4df159-519c-4978-a0e2-18cb1f8faaf5)
+![RainBounceLarge](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/76cc09b5-138b-4f5a-8b3c-4cb5f0c9df18)
+
+![RandomLarge](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4674d12f-ab89-47a5-aa29-7bf0252024dd)
+
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/b933e817-c6e4-4d97-9fc0-7b8d9e875ebb
+[SchematicRevision3.pdf](https://github.com/Architeuthis-Flux/Jumperless/files/12603152/SchematicRevision3.pdf)
 
 
+![DSC01523](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c61467fa-b122-4526-9a08-8fbbb16326da)
+![usage](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/68da817f-0bb4-4501-9174-7fe092e9d210)
 
 
 https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/d070d99d-b6b3-43e3-adee-4ca2d7358a9a
+![DSC01237-2](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/f757717a-d5b4-462b-af42-624a8e96e469)
 
-
+![DSC01154](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/375efc39-2015-4e42-9d00-62606cfff685)
 
 ![DSC00683](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/b3e3ac9d-74ca-4bfe-ad72-39505801d832)
 
