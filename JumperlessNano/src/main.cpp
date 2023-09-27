@@ -152,10 +152,11 @@ menu:
     digitalWrite(RESETPIN, HIGH);
 
     clearAllNTCC();
-    delay(5);
+    delay(10);
+    
     //showLEDsCore2 = 1;
     digitalWrite(RESETPIN, LOW);
-
+sendAllPathsCore2 = 1;
     timer = millis();
 #ifdef FSSTUFF
     clearNodeFile();
@@ -182,6 +183,9 @@ menu:
       Serial.print(millis() - timer);
       Serial.print("ms");
     }
+
+
+    resetArduino();
     break;
 
   case '\n':

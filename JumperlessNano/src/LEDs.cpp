@@ -90,7 +90,7 @@ char LEDbrightnessMenu(void)
     // Serial.print(leds.getBrightness());
     if (LEDbrightness > 50 || LEDbrightnessRail > 50 || LEDbrightnessSpecial > 70)
     {
-        Serial.print("\tBrightness settings above ~50 will cause significant heating, it's not recommended\n\r");
+        //Serial.print("\tBrightness settings above ~50 will cause significant heating, it's not recommended\n\r");
         delay(10);
     }
 
@@ -163,6 +163,12 @@ char LEDbrightnessMenu(void)
             {
             }
 
+            for (int i = 8; i <= numberOfNets; i++)
+            {
+                lightUpNet(i, -1, 1, LEDbrightness, 0);
+            }
+            showLEDsCore2 = 1;
+
             if (Serial.available() == 0)
             {
 
@@ -171,7 +177,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightness > 50)
                 {
-                    Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\r");
+                    //Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\r");
                 }
             }
         }
@@ -227,7 +233,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightnessRail > 50)
                 {
-                    Serial.println("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r");
+                    //Serial.println("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r");
                 }
             }
         }
@@ -238,7 +244,7 @@ char LEDbrightnessMenu(void)
 
     else if (input == 's')
     {
-        Serial.print("\n\r\t+ = increase\n\r\t- = decrease\n\r\tx = exit\n\n\r");
+        //Serial.print("\n\r\t+ = increase\n\r\t- = decrease\n\r\tx = exit\n\n\r");
         while (input == 's')
         {
 
@@ -256,7 +262,7 @@ char LEDbrightnessMenu(void)
                     LEDbrightnessSpecial = 200;
                 }
 
-                showLEDsCore2 = 1;
+                //showLEDsCore2 = 1;
             }
             else if (input2 == '-')
             {
@@ -268,7 +274,7 @@ char LEDbrightnessMenu(void)
                     LEDbrightnessSpecial = 1;
                 }
 
-                showLEDsCore2 = 1;
+                //showLEDsCore2 = 1;
             }
             else if (input2 == 'x')
             {
@@ -278,6 +284,12 @@ char LEDbrightnessMenu(void)
             {
             }
 
+            for (int i = 0; i < 8; i++)
+            {
+                lightUpNet(i, -1, 1, LEDbrightnessSpecial, 0);
+            }
+            showLEDsCore2 = 1;
+
             if (Serial.available() == 0)
             {
 
@@ -286,7 +298,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightnessSpecial > 70)
                 {
-                    Serial.print("Brightness settings above ~70 for special nets will cause significant heating, it's not recommended\n\n\r ");
+                    //Serial.print("Brightness settings above ~70 for special nets will cause significant heating, it's not recommended\n\n\r ");
                 }
             }
         }
@@ -359,6 +371,18 @@ char LEDbrightnessMenu(void)
             {
             }
 
+            for (int i = 8; i <= numberOfNets; i++)
+            {
+                lightUpNet(i, -1, 1, LEDbrightness, 0);
+            }
+            
+            lightUpRail(-1, -1, 1, LEDbrightnessRail);
+            for (int i = 0; i < 8; i++)
+            {
+                lightUpNet(i, -1, 1, LEDbrightnessSpecial, 0);
+            }
+showLEDsCore2 = 1;
+
             if (Serial.available() == 0)
             {
 
@@ -373,7 +397,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightness > 50 || LEDbrightnessRail > 50 || LEDbrightnessSpecial > 70)
                 {
-                    Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r ");
+                    //Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r ");
                 }
             }
         }
@@ -403,10 +427,11 @@ char LEDbrightnessMenu(void)
     }
     else
     {
-        // EEPROM.write(LEDBRIGHTNESSADDRESS, LEDbrightness);
-        // EEPROM.write(RAILBRIGHTNESSADDRESS, LEDbrightnessRail);
-        // EEPROM.write(SPECIALBRIGHTNESSADDRESS, LEDbrightnessSpecial);
-        // EEPROM.commit();
+         EEPROM.write(LEDBRIGHTNESSADDRESS, LEDbrightness);
+         EEPROM.write(RAILBRIGHTNESSADDRESS, LEDbrightnessRail);
+         EEPROM.write(SPECIALBRIGHTNESSADDRESS, LEDbrightnessSpecial);
+         EEPROM.commit();
+         assignNetColors();
 
         return input;
     }
@@ -1005,6 +1030,9 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2)
     Serial.print("\n\rled brightness: ");
     Serial.print(LEDbrightness);
 */
+
+    brightness2 = LEDbrightnessRail;
+    
     if (logo == -1 && logoFlash == 0)
     {
         leds.setPixelColor(110, 0x550008);

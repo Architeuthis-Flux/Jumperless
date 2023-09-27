@@ -122,6 +122,7 @@ void clearAllNTCC(void)
             ch[i].yStatus[j] = -1;
         }
     }
+
 }
 
 void sortPathsByNet(void) // not actually sorting, just copying the bridges and nets back from netStruct so they're both in the same order
@@ -829,6 +830,10 @@ void resolveAltPaths(void)
                     }
 
                     int xMapBB = xMapForChipLane0(path[i].chip[0], bb);
+                    if (xMapBB == -1)
+                    {
+                        continue; //don't bother checking if there's no connection
+                    }
 
                     int yMapSF = bb; // always
 
