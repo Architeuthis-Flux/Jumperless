@@ -6,7 +6,7 @@
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=_k0aKM68Xl4
 " target="_blank"><img src="https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4f7d4420-cfd2-4e11-983d-5c39cbba0e98" 
-alt="Watch the explainer video" width="800" height="600" border="0" /></a>
+alt="Watch the explainer video" width="550" height="412" border="0" /></a>
 
 (You can click on this to watch the explainer video)
 
