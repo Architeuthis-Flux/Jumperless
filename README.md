@@ -4,16 +4,19 @@
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
 
-![JumperlessCropLights](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/690bea80-02cc-4e61-a65d-97b9b1a597ab)
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=_k0aKM68Xl4
+" target="_blank"><img src="https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4f7d4420-cfd2-4e11-983d-5c39cbba0e98" 
+alt="Watch the explainer video" width="800" height="600" border="0" /></a>
 
+(You can click on this to watch the explainer video)
 
 
 
 Using a bunch of analog crosspoint switches wired together into one bigger switch, this breadboard makes real, hardware connections between any points on the board or the Arduino Nano header at the top via software command, instead of needing to use jumper wires.
 
+![BreaboardJump00420](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c3ec1f73-97c5-4268-9da4-672787bc9e1a)
 
 
-![DSC00734](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/70a6e627-1bbc-4ad0-a715-84616e95f7e9)
 
 
 Here's an example of me using this thing to connect some I2C pins from an Arduino to an OLED
