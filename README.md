@@ -4,9 +4,8 @@
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=_k0aKM68Xl4
-" target="_blank"><img src="https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4f7d4420-cfd2-4e11-983d-5c39cbba0e98" 
-alt="Watch the explainer video" width="600" height="450" border="0" /></a>
+
+[![Video](https://img.youtube.com/vi/_k0aKM68Xl4/maxresdefault.jpg)](https://www.youtube.com/watch?v=_k0aKM68Xl4)
 
 (You can click on this to watch the explainer video)
 
