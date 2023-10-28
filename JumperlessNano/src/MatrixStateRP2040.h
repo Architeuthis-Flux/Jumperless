@@ -137,6 +137,7 @@ struct pathStruct{
   enum nodeType nodeType[3];
   bool sameChip;
   bool Lchip;
+  bool doubleHop;
 
 };
 

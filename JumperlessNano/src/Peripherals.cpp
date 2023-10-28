@@ -79,6 +79,7 @@ void initDAC(void)
 {
 
    Wire.begin();
+   delay(5);
   if (dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 400, 4, 5) == true)
   {
     revisionNumber = 2;

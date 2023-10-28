@@ -127,8 +127,13 @@ menu:
     listNets();
     break;
   case 'b':
-
+    Serial.print("\n\n\rBridge Array\n\r");
     printBridgeArray();
+    Serial.print("\n\n\n\rPaths\n\r");
+    printPathsCompact();
+    Serial.print("\n\n\rChip Status\n\r");
+    printChipStatus();
+    Serial.print("\n\n\r");
     break;
 
   case 'm':

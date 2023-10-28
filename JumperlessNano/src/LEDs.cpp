@@ -421,6 +421,7 @@ showLEDsCore2 = 1;
         {
             randomColors(0,90);
         }
+        delay(10000);
         input = '!';
 
     
@@ -1197,11 +1198,15 @@ void randomColors(uint32_t color, int wait)
     for (int i = 0; i < leds.numPixels(); i++)
     {   
     
-        count = random(0,7);
+        count = random(0,8);
+        if (i > 80)
+        {
+            count = random(0,22);
+        }
 
-        byte colorValR = random(0, 0x2f);
-        byte colorValG = random(0, 0x20);
-        byte colorValB = random(0, 0x2f);
+        byte colorValR = random(60, 0x3f);
+        byte colorValG = random(60, 0x30);
+        byte colorValB = random(60, 0x3f);
 
         color = colorValR << 16 | colorValG << 8 | colorValB;
         switch (count)
@@ -1224,16 +1229,22 @@ void randomColors(uint32_t color, int wait)
             case 5:
             color = color & 0xff0000;
             break;
+            default:
+            color = color & 0x000000;
+            break;
 
 
 
         }
+        //color = color | (color >> 1);
 
 
         leds.setPixelColor(i, color); //  Set pixel's color (in RAM)
+        lightUpRail(-1,-1,1,LEDbrightnessRail);
         showLEDsCore2 = 2;            //  Update strip to match
                         //  Pause for a moment
     }
+    delay(500);
     delay(wait);  
 }
 

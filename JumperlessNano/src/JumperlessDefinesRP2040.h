@@ -193,6 +193,9 @@
 #define ADC2_5V 112
 #define ADC3_8V 113
 
+#define GPIO_0 114
+#define UART_TX 115
+#define UART_RX 116
 
 
 #define EMPTY_NET 127
