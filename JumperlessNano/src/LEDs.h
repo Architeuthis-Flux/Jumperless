@@ -123,6 +123,10 @@ rgbColor HsvToRgb(hsvColor hsv);
 void applyBrightness (int brightness);
 rgbColor unpackRgb(uint32_t color);
 
+
+void turnOffSkippedNodes();
+
+
 uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b);
 void startupColors(void);
 void rainbowBounce(int wait);

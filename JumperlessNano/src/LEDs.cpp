@@ -761,7 +761,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                 }
             }
         }
-
+turnOffSkippedNodes();
         /*                                                            Serial.print("color: ");
                                                             Serial.print(color,HEX);
                                                             Serial.print(" r: ");
@@ -779,6 +779,21 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
     }
     // showLEDsCore2 = 1;
 }
+
+void turnOffSkippedNodes(void)
+{
+
+    for (int i = 0; i < numberOfPaths; i++)
+    {
+
+        if (path[i].skip == true)
+        {
+              leds.setPixelColor(nodesToPixelMap[path[i].node1], 0);
+                leds.setPixelColor(nodesToPixelMap[path[i].node2], 0);
+
+        }
+        }
+    }
 
 struct rgbColor pcbColorCorrect(rgbColor colorToShift)
 {

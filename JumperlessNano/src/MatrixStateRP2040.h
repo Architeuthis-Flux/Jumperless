@@ -112,8 +112,8 @@ const int duplucateSFnodes[26][4] = {  // [] [sf chip1,  x pin1, sf chip2, x pin
 {CHIP_J,13,CHIP_L,3},
 {CHIP_J,14,CHIP_L,14},
 {CHIP_I,15,CHIP_J,15},
-{CHIP_I,15,CHIP_L,15},
-{CHIP_J,15,CHIP_L,15},
+//{CHIP_I,15,CHIP_L,15},
+///{CHIP_J,15,CHIP_L,15},
 {CHIP_K,15,CHIP_L,4},
 };
 
@@ -137,7 +137,7 @@ struct pathStruct{
   enum nodeType nodeType[3];
   bool sameChip;
   bool Lchip;
-  bool doubleHop;
+  bool skip = false;
 
 };
 

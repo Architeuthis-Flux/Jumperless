@@ -157,10 +157,13 @@ menu:
     digitalWrite(RESETPIN, HIGH);
 
     clearAllNTCC();
-    delay(10);
+    delay(5);
     
     //showLEDsCore2 = 1;
     digitalWrite(RESETPIN, LOW);
+    //delay(5);
+    //resetArduino();
+
 sendAllPathsCore2 = 1;
     timer = millis();
 #ifdef FSSTUFF
@@ -190,7 +193,7 @@ sendAllPathsCore2 = 1;
     }
 
 
-    resetArduino();
+    
     break;
 
   case '\n':

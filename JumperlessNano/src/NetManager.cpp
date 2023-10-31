@@ -546,6 +546,7 @@ int checkDoNotIntersectsByNet(int netToCheck1, int netToCheck2) // If you're sea
                     Serial.print(netToCheck1);
                 if (debugNM)
                     Serial.print(" due to Do Not Intersect rules, skipping\n\r");
+                path[newBridgeIndex].skip = true;
                 path[newBridgeIndex].net = -1;
                 return 0;
             }
@@ -879,10 +880,12 @@ int printNodeOrName(int node) // returns number of characters printed (for tabs)
 char same[12] = "           ";
 const char *definesToChar(int defined) // converts the internally used #defined numbers into human readable strings
 {
+         // Serial.print("defined = ");
+        //Serial.println(defined);
 
     const char *defNanoToChar[26] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "RESET", "AREF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"};
 
-    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3"};
+    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3", "GPIO_0", "NOT_DEFINED", "UART_Rx", "UART_Tx"};
 
     const char *emptyNet[] = {"EMPTY_NET", "?"};
 
@@ -890,8 +893,9 @@ const char *definesToChar(int defined) // converts the internally used #defined 
     {
         return defNanoToChar[defined - 70];
     }
-    else if (defined >= 100 && defined <= ADC3_8V)
+    else if (defined >= 100 && defined <= RP_UART_TX)
     {
+  
         return defSpecialToChar[defined - 100];
     }
     else if (defined == EMPTY_NET)

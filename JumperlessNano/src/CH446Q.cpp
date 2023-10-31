@@ -191,13 +191,43 @@ void resetArduino (void)
  sendPath(lastPath, 0);
 
 
+
 }
 void sendAllPaths(void) // should we sort them by chip? for now, no
 {
 
   for (int i = 0; i < numberOfPaths; i++)
   {
+
+    if (path[i].skip == true)
+    {
+      continue;
+    }
     sendPath(i, 1);
+if (debugNTCC2)
+{
+    Serial.print("path ");
+    Serial.print(i);
+    Serial.print(" \t");
+    printPathType(i);
+    Serial.print(" \n\r");
+  for (int j = 0; j < 4; j++)
+  {
+    printChipNumToChar(path[i].chip[j]);
+    Serial.print("  x[");
+    Serial.print(j);
+    Serial.print("]:");
+    Serial.print(path[i].x[j]);
+    Serial.print("   y[");
+    Serial.print(j);
+    Serial.print("]:");
+    Serial.print(path[i].y[j]);
+    Serial.print(" \t ");
+
+    
+  }
+  Serial.print("\n\n\r");
+  }
   }
 
 }
@@ -221,6 +251,7 @@ void sendPath(int i, int setOrClear)
 
         if (path[i].y[chip] == -1 || path[i].x[chip] == -1)
         {
+          //Serial.print("!");
           continue;
         }
 
@@ -244,11 +275,11 @@ void sendPath(int i, int setOrClear)
 
         // delayMicroseconds(50);
 
-        delayMicroseconds(30);
+        delayMicroseconds(60);
 
         pio_sm_put(pio, sm, chAddress);
 
-        delayMicroseconds(60);
+        delayMicroseconds(100);
       //}
     }
   }

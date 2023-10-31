@@ -31,6 +31,7 @@ bool debugNTCC = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
 
 bool debugNTCC2 = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
+bool debugNTCC3 = false;
 int pathIndex = 0;
 
 void clearAllNTCC(void)
@@ -74,6 +75,7 @@ void clearAllNTCC(void)
         path[i].altPathNeeded = false;
         path[i].Lchip = false;
         path[i].sameChip = false;
+        path[i].skip = false;
 
         for (int j = 0; j < 4; j++)
         {
@@ -278,7 +280,7 @@ void bridgesToPaths(void)
     resolveUncommittedHops();
     if (debugNTCC2)
     {
-        delay(10);
+        // delay(10);
         printPathsCompact();
 
         printChipStatus();
@@ -298,7 +300,7 @@ void commitPaths(void)
 
         if (debugNTCC == true)
         {
-            Serial.print("path[");
+            Serial.print("\n\rpath[");
             Serial.print(i);
             Serial.print("] net: ");
             Serial.print(path[i].net);
@@ -307,13 +309,14 @@ void commitPaths(void)
             printNodeOrName(path[i].node1);
             Serial.print(" to ");
             printNodeOrName(path[i].node2);
+            // Serial.print("\n\r");
         }
         if (path[i].altPathNeeded == true)
         {
-            if (debugNTCC2 == true)
-            {
-                Serial.println("\taltPathNeeded flag already set\n\r");
-            }
+            // if (debugNTCC2 == true)
+            // {
+            //     Serial.println("\taltPathNeeded flag already set\n\r");
+            // }
 
             continue;
         }
@@ -470,7 +473,7 @@ void commitPaths(void)
 
             if (path[i].chip[0] != CHIP_L && path[i].chip[1] == CHIP_L) // if theyre both chip L we'll deal with it differently
             {
-               // Serial.print("\tBBtoCHIP L  ");
+                // Serial.print("\tBBtoCHIP L  ");
                 int yMapBBc0 = 0; // y 0 is always connected to chip L
 
                 int xMapChipL = xMapForNode(path[i].node2, CHIP_L);
@@ -564,9 +567,9 @@ void commitPaths(void)
 
                 ch[path[i].chip[1]].yStatus[path[i].chip[0]] = path[i].net;
 
-                if (debugNTCC2 == true)
+                if (debugNTCC == true)
                 {
-                    //delay(10);
+                    // delay(10);
 
                     Serial.print(" \tchip[0]: ");
                     Serial.print(chipNumToChar(path[i].chip[0]));
@@ -603,7 +606,7 @@ void commitPaths(void)
 
                 if (debugNTCC2)
                 {
-                    //delay(10);
+                    // delay(10);
                     Serial.print("\tno direct path, setting altPathNeeded flag (BBtoSF)");
                 }
                 break;
@@ -668,10 +671,10 @@ void commitPaths(void)
         }
             // case BBtoNANO:
         }
-        if (debugNTCC2)
-        {
-            Serial.println("\n\r");
-        }
+        // if (debugNTCC2)
+        // {
+        //     Serial.println("\n\r");
+        // }
     }
     duplicateSFnets();
     resolveAltPaths();
@@ -736,7 +739,7 @@ void resolveAltPaths(void)
 
                     if (path[i].Lchip == true)
                     {
-                        Serial.print("Lchip");
+                        //Serial.print("Lchip");
 
                         if (ch[CHIP_L].yStatus[bb] == -1 || ch[CHIP_L].yStatus[bb] == path[i].net) /////////
                         {
@@ -1418,20 +1421,20 @@ void resolveAltPaths(void)
             {
                 if (debugNTCC2)
                 {
-                    Serial.println("NANOtoNANO");
+                     Serial.println("NANOtoNANO");
                 }
                 int foundHop = 0;
                 int giveUpOnL = 0;
                 int swapped = 0;
-                if (path[i].Lchip == true)
+                if (path[i].Lchip == true) //TODO check if the same net is connected to another SF chip and use that instead
                 {
                     int sfChip1 = path[i].chip[0];
                     int sfChip2 = path[i].chip[1];
                     if (((sfChip1 == CHIP_L && sfChip2 >= CHIP_I) || (sfChip2 == CHIP_L && sfChip1 >= CHIP_I)) && sfChip1 != sfChip2)
                     {
-                               if (debugNTCC2)
+                        if (debugNTCC2)
                         {
-                        Serial.println("L to Special Function via ADCs");
+                            Serial.println("\n\n\rL to Special Function via ADCs\n\r");
                         }
                         int whichIsL = 0;
                         int whichIsSF = 1;
@@ -1445,20 +1448,37 @@ void resolveAltPaths(void)
                             whichIsL = 1;
                             whichIsSF = 0;
                         }
-                        //Serial.println(whichIsL);
-
-
+                        // Serial.println(whichIsL);
 
                         int whichADC = path[i].chip[whichIsSF] - CHIP_I;
-       if (debugNTCC2)
+
+                        if (debugNTCC2)
                         {
-                        Serial.println(whichADC);
-                        Serial.println("sfChip1: ");
-                        Serial.println(sfChip1);
-                        Serial.println("sfChip2: ");
-                        Serial.println(sfChip2);
+                            Serial.println(whichADC);
+                            Serial.println("sfChip1: ");
+                            Serial.println(sfChip1);
+                            Serial.println("sfChip2: ");
+                            Serial.println(sfChip2);
+                            Serial.println(" ");
                         }
 
+                        if (ch[CHIP_L].xStatus[whichADC + 2] != -1 && ch[CHIP_L].xStatus[whichADC + 2] != path[i].net)
+                        {
+                            Serial.print("\n\rCouldn't find a path for ");
+                            printNodeOrName(path[i].node1);
+                            Serial.print(" to ");
+                            printNodeOrName(path[i].node2);
+                            Serial.println("  ");
+
+                            path[i].skip = true;
+                            path[i].chip[0] = -1;
+                            path[i].chip[1] = -1;
+                            path[i].chip[2] = -1;
+                            path[i].chip[3] = -1;
+                            //numberOfPaths--;
+                           // break;
+                          // continue;
+                        }
 
                         path[i].x[whichIsL] = whichADC + 2;
                         path[i].y[whichIsL] = -2;
@@ -1466,31 +1486,35 @@ void resolveAltPaths(void)
                         if (whichIsSF == 0)
                         {
                             path[i].x[whichIsSF] = xMapForNode(ADC0_5V + whichADC, sfChip1);
-                        } else {
+                            //path[i].x[whichIsL] = xMapForNode(ADC0_5V + whichADC, sfChip2);
+                        }
+                        else
+                        {
                             path[i].x[whichIsSF] = xMapForNode(ADC0_5V + whichADC, sfChip2);
+                            //path[i].x[whichIsL] = xMapForNode(ADC0_5V + whichADC, sfChip1);
                         }
 
-                        if (debugNTCC2)
-                        {
+                            if (debugNTCC2)
+                            {
 
-                        Serial.println(path[i].x[whichIsSF]);
-                        Serial.print("path[i].node1;  ");
-                        Serial.println(path[i].node1);
-                        Serial.print("path[i].node2;  ");
-                        Serial.println(path[i].node2);
-                        Serial.print("xMapForNode(path[i].node1, sfChip1);  ");
-                        Serial.println(xMapForNode(path[i].node1, sfChip1));
-                        Serial.print("xMapForNode(path[i].node2, sfChip2);  ");
-                        Serial.println(xMapForNode(path[i].node2, sfChip2));
-                    }
+                            Serial.println(path[i].x[whichIsSF]);
+                            Serial.print("path[i].node1;  ");
+                            Serial.println(path[i].node1);
+                            Serial.print("path[i].node2;  ");
+                            Serial.println(path[i].node2);
+                            Serial.print("xMapForNode(path[i].node1, sfChip1);  ");
+                            Serial.println(xMapForNode(path[i].node1, sfChip1));
+                            Serial.print("xMapForNode(path[i].node2, sfChip2);  ");
+                            Serial.println(xMapForNode(path[i].node2, sfChip2));
+                        }
                         path[i].y[whichIsSF] = -2;
 
-                        if (whichIsL == 0)
+                        if (whichIsL == 0) //l is the first chip
                         {
-                            path[i].x[3] = xMapForNode(path[i].node1, sfChip2);
                             path[i].x[2] = xMapForNode(path[i].node2, sfChip1);
-                            path[i].chip[3] = sfChip1;
-                            path[i].chip[2] = sfChip2;
+                            path[i].x[3] = xMapForNode(path[i].node1, sfChip2);
+                            path[i].chip[2] = sfChip1;
+                            path[i].chip[3] = sfChip2;
 
                             path[i].y[2] = -2;
                             path[i].y[3] = -2;
@@ -1501,64 +1525,89 @@ void resolveAltPaths(void)
                             ch[sfChip2].xStatus[path[i].x[whichIsSF]] = path[i].net;
                             ch[sfChip2].xStatus[xMapForNode(path[i].node2, sfChip2)] = path[i].net;
                             ch[sfChip1].xStatus[xMapForNode(path[i].node1, sfChip1)] = path[i].net;
+                            
 
                         }
-                        else
+                        else // l is the second chip
                         {
+                            path[i].x[3] = xMapForNode(path[i].node1, sfChip1);
+                            path[i].x[2] = xMapForNode(path[i].node2, sfChip2);
                             path[i].chip[3] = sfChip1;
                             path[i].chip[2] = sfChip2;
 
-                            path[i].x[3] = xMapForNode(path[i].node1, sfChip1);
 
-                            path[i].x[2] = xMapForNode(path[i].node2, sfChip2);
 
                             path[i].y[2] = -2;
                             path[i].y[3] = -2;
 
-                            ch[sfChip1].xStatus[path[i].x[whichIsSF]] = path[i].net;
-                            ch[sfChip1].xStatus[xMapForNode(path[i].node1, sfChip1)] = path[i].net;
-
-                            ch[sfChip2].xStatus[xMapForNode(path[i].node2, sfChip2)] = path[i].net;
-
                             ch[sfChip2].xStatus[path[i].x[whichIsL]] = path[i].net;
                             ch[sfChip2].xStatus[whichADC + 2] = path[i].net;
+
+                            ch[sfChip1].xStatus[path[i].x[whichIsSF]] = path[i].net;
+                            ch[sfChip1].xStatus[xMapForNode(path[i].node1, sfChip1)] = path[i].net;
+                            ch[sfChip2].xStatus[xMapForNode(path[i].node2, sfChip2)] = path[i].net;
+
+
                         }
-
+                        //foundPath = 1;
                         path[i].altPathNeeded = false;
-                        //path[i].sameChip = true;
+                        // path[i].sameChip = true;
 
-                        //resolveUncommittedHops();
+                        // resolveUncommittedHops();
                         for (int ySearch = 0; ySearch < 8; ySearch++)
                         {
-                            if (ch[sfChip1].yStatus[ySearch] == path[i].net || ch[sfChip1].yStatus[ySearch] == -1)
+                            if ( ch[sfChip1].yStatus[ySearch] == -1 || ch[sfChip1].yStatus[ySearch] == path[i].net)
                             {
                                 ch[sfChip1].yStatus[ySearch] = path[i].net;
+
+                                if (whichIsL == 0)
+                                {
+                                    path[i].y[1] = ySearch;
+                                    path[i].y[2] = ySearch;
+                                }
+                                else
+                                {
+                                    path[i].y[0] = ySearch;
+                                    path[i].y[3] = ySearch;
+                                }
+
                                 path[i].y[whichIsL] = ySearch;
-                                path[i].y[whichIsL+2] = ySearch;
+                                path[i].y[whichIsL + 2] = ySearch;
+                                //ch[sfChip2].yStatus[ySearch] = path[i].net;
                                 break;
                             }
                         }
                         for (int ySearch = 0; ySearch < 8; ySearch++)
                         {
-                            if (ch[sfChip2].yStatus[ySearch] == path[i].net || ch[sfChip2].yStatus[ySearch] == -1)
+                            if ( ch[sfChip2].yStatus[ySearch] == -1 || ch[sfChip2].yStatus[ySearch] == path[i].net)
                             {
                                 ch[sfChip2].yStatus[ySearch] = path[i].net;
-                                path[i].y[whichIsSF] = ySearch;
-                                path[i].y[whichIsSF+2] = ySearch;
+
+                                if (whichIsL == 0)
+                                {
+                                    path[i].y[0] = ySearch;
+                                    path[i].y[3] = ySearch;
+                                }
+                                else
+                                {
+                                    path[i].y[1] = ySearch;
+                                    path[i].y[2] = ySearch;
+                                }
+                                
+                                // path[i].y[whichIsSF] = ySearch;
+                                // path[i].y[whichIsSF + 2] = ySearch;
                                 break;
                             }
                         }
-                        
-
                     }
                     else
                     {
 
                         for (int bb = 0; bb < 8; bb++) // this is a long winded way to do this but it's at least slightly readable
                         {
-                            //Serial.println(bb);
+                            // Serial.println(bb);
 
-                            // Serial.print("ERROR: ");
+                             //Serial.print("ERROR: ");
 
                             if (sfChip1 == CHIP_L && sfChip2 == CHIP_L)
                             {
@@ -1647,8 +1696,9 @@ void resolveAltPaths(void)
                                 if (giveUpOnL == 0)
                                 {
                                     ch[CHIP_L].yStatus[bb] = path[i].net;
-                                    path[i].y[2] = 0;
-                                    path[i].y[3] = 0;
+                                    path[i].y[2] = -1;
+                                    path[i].y[3] = -1;
+                                    break;
                                 }
                                 else
                                 {
@@ -1821,32 +1871,32 @@ void resolveUncommittedHops(void)
 
         if (pathsWithSameXChips[i] == 1 || pathsWithSameYChips[i] == 1)
         {
-            if (debugNTCC2)
+            if (debugNTCC3)
             {
                 Serial.print(i);
                 Serial.print("\tsame chips: ");
             }
             for (int chip = 0; chip < 4; chip++)
             {
-                if (debugNTCC2)
+                if (debugNTCC3)
                 {
                     Serial.print(chipNumToChar(sameChips[0][chip]));
                     Serial.print(", ");
                 }
             }
-            if (debugNTCC2)
+            if (debugNTCC3)
             {
                 Serial.print("\t");
             }
             for (int chip = 0; chip < 4; chip++)
             {
-                if (debugNTCC2)
+                if (debugNTCC3)
                 {
                     Serial.print(chipNumToChar(sameChips[1][chip]));
                     Serial.print(", ");
                 }
             }
-            if (debugNTCC2)
+            if (debugNTCC3)
             {
                 Serial.println(" ");
             }
@@ -1907,7 +1957,7 @@ void resolveUncommittedHops(void)
                             {
                                 continue;
                             }
-                            if (debugNTCC2)
+                            if (debugNTCC3)
                             {
                                 Serial.print("freeXidx: ");
                                 Serial.print(freeXidx);
@@ -1957,7 +2007,7 @@ void resolveUncommittedHops(void)
 
                                 otherChipXStatus = ch[otherChip].xStatus[otherChipX];
 
-                                if (debugNTCC2)
+                                if (debugNTCC3)
                                 {
                                     Serial.print("Checking free X connections on the bounce chip for freeness\n\r");
 
@@ -1996,10 +2046,6 @@ void resolveUncommittedHops(void)
                                 ch[otherChip].xStatus[otherChipX] = path[i].net;
                                 ch[thisChip].xStatus[freeX] = path[i].net;
                             }
-                        }
-                        if (debugNTCC2)
-                        {
-                            //printChipStatus();
                         }
                     }
                 }
@@ -2054,11 +2100,6 @@ void resolveUncommittedHops(void)
         else
         {
         }
-    }
-    if (debugNTCC2)
-    {
-
-        // printPathsCompact();
     }
 }
 
@@ -2446,6 +2487,7 @@ void assignPathType(int pathIndex)
     if ((path[pathIndex].node1 == 1 || path[pathIndex].node1 == 30 || path[pathIndex].node1 == 31 || path[pathIndex].node1 == 60) || path[pathIndex].chip[0] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection\n\n\n\r ");
+        path[pathIndex].altPathNeeded = true;
         swapNodes(pathIndex);
         path[pathIndex].Lchip = true;
 
@@ -2460,7 +2502,7 @@ void assignPathType(int pathIndex)
     {
         path[pathIndex].nodeType[0] = NANO;
     }
-    else if (path[pathIndex].node1 >= GND && path[pathIndex].node1 <= ADC3_8V)
+    else if (path[pathIndex].node1 >= GND && path[pathIndex].node1 <= EMPTY_NET)
     {
         path[pathIndex].nodeType[0] = SF;
     }
@@ -2468,6 +2510,7 @@ void assignPathType(int pathIndex)
     if ((path[pathIndex].node2 == 1 || path[pathIndex].node2 == 30 || path[pathIndex].node2 == 31 || path[pathIndex].node2 == 60) || path[pathIndex].chip[1] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection 2\n\n\n\r ");
+        path[pathIndex].altPathNeeded = true;
         path[pathIndex].Lchip = true;
         path[pathIndex].nodeType[1] = SF;
     }
@@ -2479,7 +2522,7 @@ void assignPathType(int pathIndex)
     {
         path[pathIndex].nodeType[1] = NANO;
     }
-    else if (path[pathIndex].node2 >= GND && path[pathIndex].node2 <= ADC3_8V)
+    else if (path[pathIndex].node2 >= GND && path[pathIndex].node2 <= EMPTY_NET)
     {
         path[pathIndex].nodeType[1] = SF;
     }
@@ -2524,7 +2567,7 @@ void assignPathType(int pathIndex)
     {
         path[pathIndex].pathType = NANOtoNANO;
     }
-    if (debugNTCC)
+    if (debugNTCC2)
     {
         Serial.print("Path ");
         Serial.print(pathIndex);
@@ -2934,11 +2977,11 @@ void printPathArray(void) // this also prints candidates and x y
         }
         tabs += Serial.println("\n\n\r");
 
-        // Serial.print(tabs);
-        // for (int i = 0; i < 24 - (tabs); i++)
-        //{
-        //     Serial.print(" ");
-        // }
+        Serial.print(tabs);
+        for (int i = 0; i < 24 - (tabs); i++)
+        {
+            Serial.print(" ");
+        }
         tabs = 0;
     }
 }
