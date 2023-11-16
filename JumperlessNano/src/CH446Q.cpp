@@ -11,9 +11,7 @@
 #include "spi.pio.h"
 #include "pio_spi.h"
 
-#define MYNAMEISERIC 0  //on the board I sent to eric, the data and clock lines are bodged to GPIO 18 and 19. To allow for using hardware SPI
-
-
+#define MYNAMEISERIC 0 // on the board I sent to eric, the data and clock lines are bodged to GPIO 18 and 19. To allow for using hardware SPI
 
 int chipToPinArray[12] = {CS_A, CS_B, CS_C, CS_D, CS_E, CS_F, CS_G, CS_H, CS_I, CS_J, CS_K, CS_L};
 PIO pio = pio0;
@@ -103,11 +101,10 @@ void isrFromPio(void)
   digitalWriteFast(CS_J, LOW);
   digitalWriteFast(CS_K, LOW);
   digitalWriteFast(CS_L, LOW);
-delayMicroseconds(2);
+  delayMicroseconds(2);
   irq_flags = pio0_hw->irq;
   pio_interrupt_clear(pio, PIO0_IRQ_0);
   hw_clear_bits(&pio0_hw->irq, irq_flags);
-  
 }
 
 void initCH446Q(void)
@@ -116,14 +113,11 @@ void initCH446Q(void)
   uint dat = 14;
   uint clk = 15;
 
-
-if (MYNAMEISERIC)
-{
-  dat = 18;
-  clk = 19;
-
-
-} 
+  if (MYNAMEISERIC)
+  {
+    dat = 18;
+    clk = 19;
+  }
 
   uint cs = 7;
 
@@ -174,9 +168,7 @@ if (MYNAMEISERIC)
   digitalWrite(RESETPIN, LOW);
 }
 
-
-
-void resetArduino (void)
+void resetArduino(void)
 {
   int lastPath = MAX_BRIDGES - 1;
   path[lastPath].chip[0] = CHIP_I;
@@ -188,10 +180,7 @@ void resetArduino (void)
 
   sendPath(lastPath, 1);
   delay(100);
- sendPath(lastPath, 0);
-
-
-
+  sendPath(lastPath, 0);
 }
 void sendAllPaths(void) // should we sort them by chip? for now, no
 {
@@ -204,32 +193,29 @@ void sendAllPaths(void) // should we sort them by chip? for now, no
       continue;
     }
     sendPath(i, 1);
-if (debugNTCC2)
-{
-    Serial.print("path ");
-    Serial.print(i);
-    Serial.print(" \t");
-    printPathType(i);
-    Serial.print(" \n\r");
-  for (int j = 0; j < 4; j++)
-  {
-    printChipNumToChar(path[i].chip[j]);
-    Serial.print("  x[");
-    Serial.print(j);
-    Serial.print("]:");
-    Serial.print(path[i].x[j]);
-    Serial.print("   y[");
-    Serial.print(j);
-    Serial.print("]:");
-    Serial.print(path[i].y[j]);
-    Serial.print(" \t ");
-
-    
+    if (debugNTCC)
+    {
+      Serial.print("path ");
+      Serial.print(i);
+      Serial.print(" \t");
+      printPathType(i);
+      Serial.print(" \n\r");
+      for (int j = 0; j < 4; j++)
+      {
+        printChipNumToChar(path[i].chip[j]);
+        Serial.print("  x[");
+        Serial.print(j);
+        Serial.print("]:");
+        Serial.print(path[i].x[j]);
+        Serial.print("   y[");
+        Serial.print(j);
+        Serial.print("]:");
+        Serial.print(path[i].y[j]);
+        Serial.print(" \t ");
+      }
+      Serial.print("\n\n\r");
+    }
   }
-  Serial.print("\n\n\r");
-  }
-  }
-
 }
 
 void sendPath(int i, int setOrClear)
@@ -249,37 +235,37 @@ void sendPath(int i, int setOrClear)
 
       chipToConnect = path[i].chip[chip];
 
-        if (path[i].y[chip] == -1 || path[i].x[chip] == -1)
-        {
-          //Serial.print("!");
-          continue;
-        }
+      if (path[i].y[chip] == -1 || path[i].x[chip] == -1)
+      {
+        // Serial.print("!");
+        continue;
+      }
 
-        chYdata = path[i].y[chip];
-        chXdata = path[i].x[chip];
+      chYdata = path[i].y[chip];
+      chXdata = path[i].x[chip];
 
-        chYdata = chYdata << 5;
-        chYdata = chYdata & 0b11100000;
+      chYdata = chYdata << 5;
+      chYdata = chYdata & 0b11100000;
 
-        chXdata = chXdata << 1;
-        chXdata = chXdata & 0b00011110;
+      chXdata = chXdata << 1;
+      chXdata = chXdata & 0b00011110;
 
-        chAddress = chYdata | chXdata;
+      chAddress = chYdata | chXdata;
 
-        if (setOrClear == 1)
-        {
-          chAddress = chAddress | 0b00000001; // this last bit determines whether we set or unset the path
-        }
+      if (setOrClear == 1)
+      {
+        chAddress = chAddress | 0b00000001; // this last bit determines whether we set or unset the path
+      }
 
-        chAddress = chAddress << 24;
+      chAddress = chAddress << 24;
 
-        // delayMicroseconds(50);
+      // delayMicroseconds(50);
 
-        delayMicroseconds(60);
+      delayMicroseconds(30);
 
-        pio_sm_put(pio, sm, chAddress);
+      pio_sm_put(pio, sm, chAddress);
 
-        delayMicroseconds(100);
+      delayMicroseconds(60);
       //}
     }
   }

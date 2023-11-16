@@ -31,8 +31,6 @@
 
 volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
 
-
-
 // https://wokwi.com/projects/367384677537829889
 
 void setup()
@@ -50,13 +48,13 @@ void setup()
 #endif
 
   initADC();
-  delay (1);
+  delay(1);
   initDAC();
-  delay (1);
+  delay(1);
   initINA219();
-  delay (1);
+  delay(1);
   Serial.begin(115200);
-delay (4);
+  delay(4);
 #ifdef FSSTUFF
   LittleFS.begin();
 #endif
@@ -64,7 +62,7 @@ delay (4);
   setDac1_8Vvoltage(1.9);
 
   clearAllNTCC();
-  delay (4);
+  delay(4);
 }
 
 void setup1()
@@ -74,16 +72,13 @@ void setup1()
   initCH446Q();
 #endif
 
-//delay (4);
+  // delay (4);
   initLEDs();
-
-  
 
   startupColors();
 
   lightUpRail();
   showLEDsCore2 = 1;
-
 }
 
 void loop()
@@ -92,11 +87,11 @@ void loop()
   char input;
   unsigned long timer = 0;
 
-  //while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
-//while (1) randomColors(0,90);
+  // while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
+// while (1) randomColors(0,90);
 menu:
 
-  //showLEDsCore2 = 1;
+  // showLEDsCore2 = 1;
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
@@ -147,24 +142,24 @@ menu:
       break;
     }
 
-  case 'a':
-  {
-    resetArduino(); // reset works
-    // uploadArduino(); //this is unwritten
-  }
+  // case 'a':
+  // {
+  //   resetArduino(); // reset works
+  //   // uploadArduino(); //this is unwritten
+  // }
 
   case 'f':
     digitalWrite(RESETPIN, HIGH);
 
     clearAllNTCC();
-    delay(5);
-    
-    //showLEDsCore2 = 1;
-    digitalWrite(RESETPIN, LOW);
-    //delay(5);
-    //resetArduino();
+    // delay(1);
 
-sendAllPathsCore2 = 1;
+    // showLEDsCore2 = 1;
+
+    // delay(5);
+    // resetArduino();
+
+    sendAllPathsCore2 = 1;
     timer = millis();
 #ifdef FSSTUFF
     clearNodeFile();
@@ -173,11 +168,11 @@ sendAllPathsCore2 = 1;
     openNodeFile();
     getNodesToConnect();
 #endif
-
+    digitalWrite(RESETPIN, LOW);
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
-    //showNets();
+    // showNets();
 
 #ifdef PIOSTUFF
     sendAllPathsCore2 = 1;
@@ -192,8 +187,6 @@ sendAllPathsCore2 = 1;
       Serial.print("ms");
     }
 
-
-    
     break;
 
   case '\n':
@@ -284,7 +277,6 @@ sendAllPathsCore2 = 1;
       sendAllPathsCore2 = 1;
     }
     break;
-  
 
   case 'r':
     resetArduino();
@@ -357,63 +349,53 @@ sendAllPathsCore2 = 1;
 }
 unsigned long logoFlashTimer = 0;
 
-
 void loop1() // core 2 handles the LEDs and the CH446Q8
 {
 
-//while (1) rainbowBounce(50); //I uncomment this to test the LEDs on a fresh board
+  // while (1) rainbowBounce(50); //I uncomment this to test the LEDs on a fresh board
   if (showLEDsCore2 >= 1)
   {
     int rails = showLEDsCore2;
-   
-    //showNets();
+
+    // showNets();
     if (rails == 1)
     {
- lightUpRail();
-
-    } 
+      lightUpRail();
+    }
     if (rails > 3)
     {
       Serial.print("\n\r");
       Serial.print(rails);
     }
-   delayMicroseconds(5200);
-    
+    delayMicroseconds(3200);
 
     leds.show();
-    delayMicroseconds(9200);
+    delayMicroseconds(8200);
     showLEDsCore2 = 0;
   }
 
   if (sendAllPathsCore2 == 1)
   {
-    delayMicroseconds(12200);
+    delayMicroseconds(6200);
     sendAllPaths();
-    delayMicroseconds(4200);
+    delayMicroseconds(2200);
     showNets();
     delayMicroseconds(9200);
     sendAllPathsCore2 = 0;
   }
 
-
-
   if (logoFlash == 2)
   {
     logoFlashTimer = millis();
     logoFlash = 1;
-    
-  } 
+  }
 
   if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 600)
   {
     logoFlash = 0;
     logoFlashTimer = 0;
-    //lightUpRail();
+    // lightUpRail();
     leds.setPixelColor(110, 0x550008);
     leds.show();
   }
-
-
 }
-
-
