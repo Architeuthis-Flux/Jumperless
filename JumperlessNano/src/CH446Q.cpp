@@ -237,7 +237,10 @@ void sendPath(int i, int setOrClear)
 
       if (path[i].y[chip] == -1 || path[i].x[chip] == -1)
       {
-        // Serial.print("!");
+        if (debugNTCC)
+         Serial.print("!");
+
+         
         continue;
       }
 

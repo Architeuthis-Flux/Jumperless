@@ -14,7 +14,7 @@
 
 //SerialPIO ardSerial(1, 0);
 
-void initArduino (void)
+void initArduino (void) //if the UART is set up, the Arduino won't flash from it's own USB port
 {
 
 //Serial1.setRX(1);

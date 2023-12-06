@@ -49,7 +49,7 @@ void setup()
 
   initADC();
   delay(1);
-  initDAC();
+  initDAC(); // also sets revisionNumber
   delay(1);
   initINA219();
   delay(1);
@@ -87,25 +87,29 @@ void loop()
   char input;
   unsigned long timer = 0;
 
-  // while (1) rainbowBounce(80); //I uncomment this to test the LEDs on a fresh board
-// while (1) randomColors(0,90);
 menu:
+  // showMeasurements();
 
-  // showLEDsCore2 = 1;
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
   Serial.print("\tw = waveGen\n\r");
-  // Serial.print("\tm = measure current/voltage\n\r");
+  Serial.print("\tv = toggle show current/voltage\n\r");
   Serial.print("\tf = load formatted nodeFile\n\r");
   Serial.print("\tp = paste new Wokwi diagram\n\r");
   Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset Arduino\n\r");
-  Serial.print("\n\r");
+  Serial.print("\n\n\r");
 
+dontshowmenu:
   while (Serial.available() == 0)
-    ;
+  {
+    if (showReadings >= 1)
+    {
+      showMeasurements();
+    }
+  }
 
   input = Serial.read();
 
@@ -114,6 +118,31 @@ menu:
 
   switch (input)
   {
+  case 'v':
+
+    if (showReadings >= 3)
+    {
+      showReadings = 0;
+      // goto dontshowmenu;
+      break;
+    }
+    else
+    {
+            showReadings++;
+      chooseShownReadings();
+
+      Serial.write("\x1B\x5B");
+      Serial.write("1F");//scroll up one line
+      Serial.write("\x1B\x5B");
+      Serial.write("2K");//clear line
+      Serial.write("\x1B\x5B");
+      Serial.write("1F");//scroll up one line
+      Serial.write("\x1B\x5B");
+      Serial.write("2K");//clear line
+
+      goto dontshowmenu;
+      //break;
+    }
 
   case 'n':
 
@@ -129,6 +158,9 @@ menu:
     Serial.print("\n\n\rChip Status\n\r");
     printChipStatus();
     Serial.print("\n\n\r");
+    Serial.print("Revision ");
+    Serial.print(revisionNumber);
+    Serial.print("\n\n\r");
     break;
 
   case 'm':
@@ -142,11 +174,11 @@ menu:
       break;
     }
 
-  // case 'a':
-  // {
-  //   resetArduino(); // reset works
-  //   // uploadArduino(); //this is unwritten
-  // }
+    // case 'a':
+    // {
+    //   resetArduino(); // reset works
+    //   // uploadArduino(); //this is unwritten
+    // }
 
   case 'f':
     digitalWrite(RESETPIN, HIGH);

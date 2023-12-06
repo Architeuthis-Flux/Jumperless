@@ -5,7 +5,7 @@
 #include "Adafruit_INA219.h"
 
 #include "NetManager.h"
-
+#include "MatrixStateRP2040.h"
 #include "LEDs.h"
 
 #include <Arduino.h>
@@ -21,9 +21,23 @@
 
 #include <SPI.h>
 
+#define CSI Serial.write("\x1B\x5B");
+
 #define DAC_RESOLUTION 9
 
 int revisionNumber = 0;
+
+int showReadings = 0;
+
+int showADCreadings[4] = {1,1,1,1};
+
+int showINA0[3] = {1,1,1}; //0 = current, 1 = voltage, 2 = power
+int showINA1[3] = {0, 0, 0}; //0 = current, 1 = voltage, 2 = power
+
+
+int showDAC0 = 0;
+int showDAC1 = 0;
+
 
 float freq[3] = {1, 1, 0};
 uint32_t period[3] = {0, 0, 0};
@@ -147,8 +161,8 @@ void initINA219(void)
     Serial.println("Failed to find INA219 chip");
   }
 
-  INA0.setMaxCurrentShunt(1, 2);
-  INA1.setMaxCurrentShunt(1, 2);
+  INA0.setMaxCurrentShunt(1, 2.0);
+  INA1.setMaxCurrentShunt(1, 2.0);
 
   Serial.println(INA0.setBusVoltageRange(16));
   Serial.println(INA1.setBusVoltageRange(16));
@@ -266,20 +280,208 @@ void setDac1_8VinputCode(uint16_t inputCode)
   }
 }
 
+void chooseShownReadings(void)
+{
+  showADCreadings[0] = 0;
+  showADCreadings[1] = 0;
+  showADCreadings[2] = 0;
+  showADCreadings[3] = 0;
+
+
+
+
+  for (int i = 0; i <= newBridgeIndex; i++)
+  {
+
+    if (path[i].node1 == ADC0_5V || path[i].node2 == ADC0_5V)
+    {
+      showADCreadings[0] = 1;
+    }
+
+   if (path[i].node1 == ADC1_5V || path[i].node2 == ADC1_5V)
+    {
+      showADCreadings[1] = 1;
+    }
+
+    if (path[i].node1 == ADC2_5V || path[i].node2 == ADC2_5V)
+    {
+      showADCreadings[2] = 1;
+    }
+
+    if (path[i].node1 == ADC3_8V || path[i].node2 == ADC3_8V)
+    {
+      showADCreadings[3] = 1;
+    }
+
+    if (path[i].node1 == CURRENT_SENSE_PLUS || path[i].node1 == CURRENT_SENSE_PLUS || path[i].node2 == CURRENT_SENSE_MINUS || path[i].node2 == CURRENT_SENSE_MINUS)
+    {
+
+      switch (showReadings)
+      {
+      case 0:
+
+      case 1:
+        showINA0[0] = 1;
+        showINA0[1] = 0;
+        showINA0[2] = 0;
+        break;
+      case 2:
+        showINA0[0] = 1;
+        showINA0[1] = 1;
+        showINA0[2] = 0;
+        break;
+      case 3:
+
+        showINA0[0] = 1;
+        showINA0[1] = 1;
+        showINA0[2] = 1;
+        break;
+      }
+    }
+
+  }
+}
+
+
+void showMeasurements(int samples)
+{
+
+
+while (Serial.available() == 0)
+{
+  CSI
+Serial.write("2K");
+  int adc0ReadingUnscaled;
+  float adc0Reading;
+
+  int adc1ReadingUnscaled;
+  float adc1Reading;
+
+  int adc2ReadingUnscaled;
+  float adc2Reading;
+
+  int adc3ReadingUnscaled;
+  float adc3Reading;
+int bs = 0;
+
+
+  if (showADCreadings[0] == 1)
+  {
+
+  adc0ReadingUnscaled = readAdc(0, samples);
+  adc0Reading = (adc0ReadingUnscaled) * (5.0 / 4095);
+  //adc0Reading -= 0.1; // offset
+bs+= Serial.print("D0: ");
+bs+=Serial.print(adc0Reading);
+bs+=Serial.print("V\t");
+  }
+
+  if (showADCreadings[1] == 1)
+  {
+
+  adc1ReadingUnscaled = readAdc(1, samples);
+  adc1Reading = (adc1ReadingUnscaled) * (5.0 / 4095);
+  //adc1Reading -= 0.1; // offset
+bs+=Serial.print("D1: ");
+bs+=Serial.print(adc1Reading);
+bs+=Serial.print("V\t");
+  }
+
+  if (showADCreadings[2] == 1)
+  {
+
+  adc2ReadingUnscaled = readAdc(2, samples);
+  adc2Reading = (adc2ReadingUnscaled) * (5.0 / 4095);
+  //adc2Reading -= 0.1; // offset
+
+bs+=Serial.print("D2: ");
+bs+=Serial.print(adc2Reading);
+bs+=Serial.print("V\t");
+  }
+
+  if (showADCreadings[3] == 1)
+  {
+
+  adc3ReadingUnscaled = readAdc(3, samples);
+  adc3Reading = (adc3ReadingUnscaled) * (16.0 / 4010);
+  adc3Reading -= 8.7; // offset
+bs+=Serial.print("D3: ");
+bs+=Serial.print(adc3Reading);
+bs+=Serial.print("V\t");
+  }
+
+if (showINA0[0] == 1 || showINA0[1] == 1 || showINA0[2] == 1)
+{
+  bs+=Serial.print("   INA219: ");
+}
+
+if (showINA0[0] == 1)
+{
+bs+=Serial.print("I: ");
+bs+=Serial.print(INA0.getCurrent_mA());
+bs+=Serial.print("mA\t");
+}
+if (showINA0[1] == 1)
+{
+bs+=Serial.print(" V: ");
+bs+=Serial.print(INA0.getBusVoltage());
+bs+=Serial.print("V\t");
+}
+if (showINA0[2] == 1)
+{
+bs+=Serial.print("P: ");
+bs+=Serial.print(INA0.getPower_mW());
+bs+=Serial.print("mW\t");
+}
+
+ bs+=Serial.print("                     \r");
+
+
+
+
+
+// for (int i = 0; i < bs; i++)
+// {
+//   Serial.print("\b");
+// }
+
+// Serial.print("ADC1: ");
+// Serial.print(adc1ReadingUnscaled);
+// Serial.print("V\n\r");
+// Serial.print("ADC2: ");
+// Serial.print(adc2ReadingUnscaled);
+// Serial.print("V\n\r");
+// Serial.print("ADC3: ");
+// Serial.print(adc3ReadingUnscaled);
+// Serial.print("V\n\n\r");
+delay(250);
+
+}
+
+}
+
+
+
+
+
+
 int readAdc(int channel, int samples)
 {
   int adcReadingAverage = 0;
+
+  uint8_t adcChannel = channel+ ADC0_PIN;
+
   for (int i = 0; i < samples; i++)
   {
-    adcReadingAverage += analogRead(channel);
+    adcReadingAverage += analogRead(adcChannel);
     delay(1);
   }
 
-  int adc3Reading = adcReadingAverage / samples;
+  int adcReading = adcReadingAverage / samples;
   // Serial.print(adc3Reading);
 
   // float adc3Voltage = (adc3Reading - 2528) / 220.0; // painstakingly measured
-  return adc3Reading;
+  return adcReading;
 }
 
 int waveGen(void)

@@ -473,7 +473,7 @@ void commitPaths(void)
 
             if (path[i].chip[0] != CHIP_L && path[i].chip[1] == CHIP_L) // if theyre both chip L we'll deal with it differently
             {
-                // Serial.print("\tBBtoCHIP L  ");
+                // Serial.print("\tBBtoCHIP L  \n\n\n\n");
                 int yMapBBc0 = 0; // y 0 is always connected to chip L
 
                 int xMapChipL = xMapForNode(path[i].node2, CHIP_L);
@@ -1151,6 +1151,7 @@ void resolveAltPaths(void)
 
                     if (foundPath == 1)
                     {
+                        
                         break;
                     }
                     int giveUpOnL = 0;
@@ -2487,7 +2488,7 @@ void assignPathType(int pathIndex)
     if ((path[pathIndex].node1 == 1 || path[pathIndex].node1 == 30 || path[pathIndex].node1 == 31 || path[pathIndex].node1 == 60) || path[pathIndex].chip[0] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection\n\n\n\r ");
-        path[pathIndex].altPathNeeded = true;
+        //path[pathIndex].altPathNeeded = true;
         swapNodes(pathIndex);
         path[pathIndex].Lchip = true;
 
@@ -2510,7 +2511,7 @@ void assignPathType(int pathIndex)
     if ((path[pathIndex].node2 == 1 || path[pathIndex].node2 == 30 || path[pathIndex].node2 == 31 || path[pathIndex].node2 == 60) || path[pathIndex].chip[1] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection 2\n\n\n\r ");
-        path[pathIndex].altPathNeeded = true;
+        //path[pathIndex].altPathNeeded = true;
         path[pathIndex].Lchip = true;
         path[pathIndex].nodeType[1] = SF;
     }

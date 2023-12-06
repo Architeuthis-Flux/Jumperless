@@ -6,6 +6,17 @@
   #include "INA219.h"
 #include <Wire.h>
 
+extern int showReadings;
+
+extern int showINA0[3]; //0 = current, 1 = voltage, 2 = power
+extern int showINA1[3]; //0 = current, 1 = voltage, 2 = power
+
+extern int showDAC0;
+extern int showDAC1;
+
+extern int showADCreadings[4];
+
+
 extern int revisionNumber;
 
 void initINA219(void);
@@ -26,7 +37,8 @@ int waveGen(void);
 void GetAdc29Status(int i);
 int readAdc(int channel, int samples = 10);
 
-
+void chooseShownReadings(void);
+void showMeasurements(int samples = 50);
 
 
 const uint16_t DACLookup_FullSine_9Bit[512] =

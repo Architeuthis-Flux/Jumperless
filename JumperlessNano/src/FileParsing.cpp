@@ -660,6 +660,24 @@ void parseStringToBridges(void)
 void debugFlagInit(void)
 {
 
+    if (EEPROM.read(FIRSTSTARTUPADDRESS) == 255)
+    {
+        EEPROM.write(FIRSTSTARTUPADDRESS, 0);
+        EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
+        EEPROM.write(TIME_FILEPARSINGADDRESS, 0);
+        EEPROM.write(DEBUG_NETMANAGERADDRESS, 0);
+        EEPROM.write(TIME_NETMANAGERADDRESS, 0);
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 0);
+        EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 0);
+        EEPROM.write(DEBUG_LEDSADDRESS, 0);
+        EEPROM.write(LEDBRIGHTNESSADDRESS, DEFAULTBRIGHTNESS);
+        EEPROM.write(RAILBRIGHTNESSADDRESS, DEFAULTRAILBRIGHTNESS);
+        EEPROM.write(SPECIALBRIGHTNESSADDRESS, DEFAULTSPECIALNETBRIGHTNESS);
+       
+        EEPROM.commit();
+        delay(5);
+    }
+
 #ifdef EEPROMSTUFF
     debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
     debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
@@ -741,17 +759,17 @@ void debugFlagSet(int flag)
     case 1:
     {
         flagStatus = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
-        if (flagStatus == 1)
-        {
-            EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
-
-            debugFP = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(DEBUG_FILEPARSINGADDRESS, 1);
 
             debugFP = true;
+        }
+        else
+        {
+            EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
+
+            debugFP = false;
         }
 
         break;
@@ -760,17 +778,17 @@ void debugFlagSet(int flag)
     {
         flagStatus = EEPROM.read(TIME_FILEPARSINGADDRESS);
 
-        if (flagStatus == 1)
-        {
-            EEPROM.write(TIME_FILEPARSINGADDRESS, 0);
-
-            debugFPtime = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
 
             debugFPtime = true;
+        }
+        else
+        {
+            EEPROM.write(TIME_FILEPARSINGADDRESS, 0);
+
+            debugFPtime = false;
         }
 
         break;
@@ -779,17 +797,17 @@ void debugFlagSet(int flag)
     {
         flagStatus = EEPROM.read(DEBUG_NETMANAGERADDRESS);
 
-        if (flagStatus == 1)
-        {
-            EEPROM.write(DEBUG_NETMANAGERADDRESS, 0);
-
-            debugNM = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(DEBUG_NETMANAGERADDRESS, 1);
 
             debugNM = true;
+        }
+        else
+        {
+            EEPROM.write(DEBUG_NETMANAGERADDRESS, 0);
+
+            debugNM = false;
         }
         break;
     }
@@ -797,17 +815,17 @@ void debugFlagSet(int flag)
     {
         flagStatus = EEPROM.read(TIME_NETMANAGERADDRESS);
 
-        if (flagStatus == 1)
-        {
-            EEPROM.write(TIME_NETMANAGERADDRESS, 0);
-
-            debugNMtime = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(TIME_NETMANAGERADDRESS, 1);
 
             debugNMtime = true;
+        }
+        else
+        {
+            EEPROM.write(TIME_NETMANAGERADDRESS, 0);
+
+            debugNMtime = false;
         }
         break;
     }
@@ -815,17 +833,17 @@ void debugFlagSet(int flag)
     {
         flagStatus = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
 
-        if (flagStatus == 1)
-        {
-            EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 0);
-
-            debugNTCC = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 1);
 
             debugNTCC = true;
+        }
+        else
+        {
+            EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 0);
+
+            debugNTCC = false;
         }
 
         break;
@@ -833,17 +851,18 @@ void debugFlagSet(int flag)
     case 6:
     {
         flagStatus = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
-        if (flagStatus == 1)
-        {
-            EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 0);
 
-            debugNTCC2 = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 1);
 
             debugNTCC2 = true;
+        }
+        else
+        {
+            EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 0);
+
+            debugNTCC2 = false;
         }
         break;
     }
@@ -852,17 +871,17 @@ void debugFlagSet(int flag)
     {
         flagStatus = EEPROM.read(DEBUG_LEDSADDRESS);
 
-        if (flagStatus == 1)
-        {
-            EEPROM.write(DEBUG_LEDSADDRESS, 0);
-
-            debugLEDs = false;
-        }
-        else
+        if (flagStatus == 0)
         {
             EEPROM.write(DEBUG_LEDSADDRESS, 1);
 
             debugLEDs = true;
+        }
+        else
+        {
+            EEPROM.write(DEBUG_LEDSADDRESS, 0);
+
+            debugLEDs = false;
         }
         break;
     }
