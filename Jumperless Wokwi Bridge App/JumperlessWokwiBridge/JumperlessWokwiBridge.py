@@ -628,9 +628,12 @@ while True:
 
             print("\n\n\rsketch.ino\n\r")
             print(sketch)
-
-            print("\n\n\rlibraries.txt\n\r")
-            print(libraries)
+            
+            try: 
+                print("\n\n\rlibraries.txt\n\r")
+                print(libraries)
+            except:
+                print("\n\n\rNo libraries.txt\n\r")
 
         # if (justreconnected == 1):
 
@@ -662,6 +665,10 @@ while True:
                         conn1 = "112"
                     elif conn1.endswith('3'):
                         conn1 = "113"
+                    elif conn1.endswith('4'):
+                        conn1 = "108"
+                    elif conn1.endswith('5'):
+                        conn1 = "109"                        
 
                 if conn1.startswith("bb1:") == True:
                     periodIndex = conn1.find('.')
@@ -727,6 +734,10 @@ while True:
                         conn2 = "112"
                     elif conn2.endswith('3'):
                         conn2 = "113"
+                    elif conn2.endswith('4'):
+                        conn2 = "108"
+                    elif conn2.endswith('5'):
+                        conn2 = "109"
 
                 if conn2.startswith("bb1:") == True:
                     periodIndex = conn2.find('.')
