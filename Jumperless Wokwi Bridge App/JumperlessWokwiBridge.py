@@ -41,7 +41,7 @@ def openSerial():
 
     portSelected = 0
     
-    print("\n\r")
+    print("\n")
 
     while portSelected == False:
         autodetected = -1
@@ -56,7 +56,7 @@ def openSerial():
 
         if autodetected != -1:
             selection = autodetected
-            print("\n\n\rAutodetected Jumperless at", end=" ")
+            print("\n\nAutodetected Jumperless at", end=" ")
             print(ports[int(selection) - 1].device)
 
             portName = ports[int(selection) - 1].device
@@ -66,12 +66,13 @@ def openSerial():
 
         else:
             selection = input(
-                "\n\n\rSelect the port connected to your Jumperless   ('r' to rescan)\n\n\r")
+                "\n\nSelect the port connected to your Jumperless   ('r' to rescan)\n\n")
         
             if selection.isdigit() == True and int(selection) <= i:
                 portName = ports[int(selection) - 1].device
                 portSelected = True
                 print(ports[int(selection) - 1].device)
+                
                 serialconnected = 1
         
 
@@ -96,27 +97,34 @@ def check_presence(correct_port, interval=.15):
 
     portFound = 0
     while True:
-
+        
+       
         if (reading == 0):
-
+            
             portFound = 0
 
             for port in serial.tools.list_ports.comports():
 
                 if portName in port.device:
-
+                    
                     portFound = 1
 
             #print (portFound)
 
-            if portFound >= 1:
+            if portFound == 1:
                 try:
-                    ser = serial.Serial(portName, 115200, timeout=None)
+                    #print (portName)
+                    #ser = serial.Serial(portName, 115200)
+                    #print (portName)
+                    #ser.open(portName)
                     justChecked = 1
                     serialconnected = 1
-                    time.sleep(0.05)
+                    time.sleep(0.1)
                     justChecked = 0
+                    
+                    
                 except:
+                    
                     continue
 
             else:
@@ -155,7 +163,7 @@ def openProject():
         
     while (url_selected == 0):
 
-        print('\n\n\rChoose from saved projects or paste the link to you Wokwi project:\n\n\r')
+        print('\n\nChoose from saved projects or paste the link to you Wokwi project:\n\n')
 
         try:
             f = open("savedWokwiProjects.txt", "r")
@@ -174,7 +182,7 @@ def openProject():
 
                 print(line)
 
-        linkInput = input('\n\n\r')
+        linkInput = input('\n\n')
 
         if (linkInput.startswith("http") == True):
             entryType = 2
@@ -186,7 +194,7 @@ def openProject():
                     if (otherIndex == int(linkInput)):
                         idx = idx.rsplit('\t\t')
                         idxLink = idx[1].rstrip('\n')
-                        #print("\n\n\rRunning project ", end='')
+                        #print("\n\nRunning project ", end='')
                         #print(idx[0])
                         entryType = 2
 
@@ -208,9 +216,9 @@ def openProject():
         checkurl = ' '
         url_link = linkInput
 
-#         print("\n\n\r linkInput = ", end='')
+#         print("\n\n linkInput = ", end='')
 #         print(linkInput)
-#         print("\n\n\r url_link = ", end='')
+#         print("\n\n url_link = ", end='')
 #         print(url_link)
 
         #checkurl = requests.get(url_link)
@@ -222,16 +230,16 @@ def openProject():
                 url_selected = 1
                 # break
             else:
-                print("\n\n\rBad Link")
+                print("\n\nBad Link")
                 url_link = 0
                 linkInput = 0
-                #url_link = input('\n\n\rBad link\n\n\rPaste the link to you Wokwi project here:\n\n\r')
+                #url_link = input('\n\nBad link\n\nPaste the link to you Wokwi project here:\n\n')
                 continue
 
         except:
-            print("\n\n\rBad Link!!!")
+            print("\n\nBad Link!!!")
             url_link = 0
-            #url_link = input('\n\n\rBad link\n\n\rPaste the link to you Wokwi project here:\n\n\r')
+            #url_link = input('\n\nBad link\n\nPaste the link to you Wokwi project here:\n\n')
             continue
 
         matchFound = 0
@@ -250,7 +258,7 @@ def openProject():
                 if line == linkInput:
                     #print ( "Match Found at index ", end = '')
                     matchFound = index
-                    print("\n\n\rRunning project ", end='')
+                    print("\n\nRunning project ", end='')
                     print(name)
                     #print (matchFound)
                     #print (line)
@@ -261,13 +269,13 @@ def openProject():
                 # print(line)
 
         if matchFound == 0:
-            name = input("\n\n\rEnter a name for this new project\n\n\r")
+            name = input("\n\nEnter a name for this new project\n\n")
             f.close()
             f = open("savedWokwiProjects.txt", "a")
             f.write(name)
             f.write('\t\t')
             f.write(linkInput)
-            f.write("\n\r")
+            f.write("\n")
 
             
             
@@ -280,7 +288,7 @@ def openProject():
     
 openProject()
 
-print("\n\n\rSave your Wokwi project to update the Jumperless\n\n\rEnter 'menu' for Bridge App menu\n\n\r")
+print("\n\nSave your Wokwi project to update the Jumperless\n\nEnter 'menu' for Bridge App menu\n\n")
 
 
 
@@ -290,15 +298,15 @@ def bridgeMenu():
 
     while(menuEntered == 1):
 
-        print("\t\t\tBridge App Menu\n\n\r")
+        print("\t\t\tBridge App Menu\n\n")
 
-        print("\t\td = Delete Saved Projects\n\r")
-        print("\t\tr = Restart Bridge App\n\r")
-        print("\t\ts = Restart Serial\n\r")
-        print("\t\tl = Load Project\n\r")
-        print("\t\tj = Go Back To Jumperless\n\r")
+        print("\t\td = Delete Saved Projects\n")
+        print("\t\tr = Restart Bridge App\n")
+        print("\t\ts = Restart Serial\n")
+        print("\t\tl = Load Project\n")
+        print("\t\tj = Go Back To Jumperless\n")
 
-        menuSelection = input("\n\n\r")
+        menuSelection = input("\n\n")
 
         if (menuSelection == 's'):
             ser.close()
@@ -337,7 +345,7 @@ def bridgeMenu():
         
         while (menuSelection == 'd'):
             
-            print('\n\n\rEnter the index of the project you\'d like to delete:\n\n\rr = Return To Menu\ta = Delete All\n\n\r')
+            print('\n\nEnter the index of the project you\'d like to delete:\n\nr = Return To Menu\ta = Delete All\n\n')
 
             try:
                 f = open("savedWokwiProjects.txt", "r")
@@ -356,7 +364,7 @@ def bridgeMenu():
 
                     print(line)
 
-            linkInput = input('\n\n\r')
+            linkInput = input('\n\n')
             
             if (linkInput == 'a'):
                 f.close()
@@ -380,7 +388,7 @@ def bridgeMenu():
                             #del lines[idx+1]
                             idx = idx.rsplit('\t\t')
                             idxLink = idx[1].rstrip('\n')
-                            print("\n\n\rDeleting project ", end='')
+                            print("\n\nDeleting project ", end='')
                             print(idx[0])
                             break
                         
@@ -401,7 +409,7 @@ def bridgeMenu():
                 break
 
                             
-
+portNotFound = 1
                             
             
 
@@ -413,7 +421,7 @@ def serialTermIn():
     global justChecked
     global reading
     global menuEntered
-    
+    global portNotFound
     while True:
         readLength = 0
         
@@ -422,12 +430,12 @@ def serialTermIn():
             try:
                 if (ser.in_waiting > 0):
                     #justChecked = 0
-                    reading = 1
+                    #reading = 1
                     inputBuffer = b' '
 
                     waiting = ser.in_waiting
 
-                    while True:
+                    while (serialconnected >= 0):
                         inByte = ser.read()
 
                         inputBuffer += inByte
@@ -454,34 +462,46 @@ def serialTermIn():
                     readlength = 0
                     #justChecked = 0
                     reading = 0
+                    portNotFound = 0
 
             except:
-                portNotFound = 1
+                
+                ser.close()
                 print("Disconnected")
+                portNotFound = 1
                 while (portNotFound == 1):
                     portFound = 0
-
+                   
+                    time.sleep(0.3)
                     for port in serial.tools.list_ports.comports():
 
                         if portName in port.device:
 
                             portFound = 1
+                            portNotFound = 0
+                            #print ("found ")
                             #print (port.device)
 
-                    if portFound >= 1:
-                        ser = serial.Serial(portName, 115200, timeout=None)
-                        justChecked = 1
-                        serialconnected = 1
-                        time.sleep(0.05)
-                        justChecked = 0
-                        portNotFound = 0
+                    if portFound == 1:
+                        try:
+                            ser = serial.Serial(portName, 115200, timeout=None)
+                            justChecked = 1
+                            serialconnected = 1
+                            time.sleep(0.2)
+                            justChecked = 0
+                            portNotFound = 0
+                            justreconnected = 1
+                        except:
+                            portFound = 0
+                            portNotFound = 1
+                            time.sleep(0.25)
 
                     else:
-                        justreconnected = 1
+                        #justreconnected = 1
                         justChecked = 0
                         serialconnected = 0
 
-                        ser.close()
+                        #ser.close()
                         portNotFound = 1
                         time.sleep(.1)
 
@@ -516,7 +536,7 @@ def serialTermOut():
             if (serialconnected == 1):
                 #justChecked = 0
                 while (justChecked == 0):
-                    time.sleep(0.0001)
+                    time.sleep(0.01)
                 else:
 
                     #print (outputBuffer)
@@ -525,7 +545,7 @@ def serialTermOut():
                             #print (outputBuffer.encode('ascii'))
                             ser.write(outputBuffer.encode('ascii'))
                         except:
-                            portNotFound = 1
+#                             portNotFound = 1
 
                             while (portNotFound == 1):
                                 portFound = 0
@@ -535,11 +555,10 @@ def serialTermOut():
                                     if portName in port.device:
 
                                         portFound = 1
-                                        #print (port.device)
+                                        print (port.device)
 
                                     if portFound >= 1:
-                                        ser = serial.Serial(
-                                            portName, 115200, timeout=None)
+                                        #
                                         justChecked = 1
                                         serialconnected = 1
                                         time.sleep(0.05)
@@ -547,7 +566,7 @@ def serialTermOut():
                                         portNotFound = 0
 
                                     else:
-                                        justreconnected = 1
+                                        justreconnected = 0
                                         justChecked = 0
                                         serialconnected = 0
 
@@ -572,7 +591,7 @@ port_controller.start()
 time.sleep(.75)
 
 while True:
-
+   
     if (menuEntered == 1):
         bridgeMenu()
 
@@ -584,15 +603,22 @@ while True:
 
     while (justreconnected == 1):
         time.sleep(.01)
+        #print("just reconnected")
         lastDiagram = '-1'
+        ser.close()
+        time.sleep(.1)
+        #if (portNotFound != 1):
+            #ser = serial.Serial(portName, 115200, timeout=None)
         if (serialconnected == 1):
             print('Reconnected')
+            portNotFound = 0
+            portFound = 1
             break
     else:
         justreconnected = 0
 
     if (serialconnected == 1):
-
+        #print ("connected!!!")
         result = requests.get(url_link).text
         doc = BeautifulSoup(result, "html.parser")
 
@@ -623,17 +649,14 @@ while True:
         sketch = str(c)
 
         if debug == True:
-            print("\n\n\rdiagram.json\n\r")
+            print("\n\ndiagram.json\n")
             print(diagram)
 
-            print("\n\n\rsketch.ino\n\r")
+            print("\n\nsketch.ino\n")
             print(sketch)
-            
-            try: 
-                print("\n\n\rlibraries.txt\n\r")
-                print(libraries)
-            except:
-                print("\n\n\rNo libraries.txt\n\r")
+
+            print("\n\nlibraries.txt\n")
+            print(libraries)
 
         # if (justreconnected == 1):
 
@@ -668,7 +691,7 @@ while True:
                     elif conn1.endswith('4'):
                         conn1 = "108"
                     elif conn1.endswith('5'):
-                        conn1 = "109"                        
+                        conn1 = "109"
 
                 if conn1.startswith("bb1:") == True:
                     periodIndex = conn1.find('.')
@@ -817,4 +840,4 @@ while True:
             #print (p)
 
         else:
-            time.sleep(.5)
+            time.sleep(.75)

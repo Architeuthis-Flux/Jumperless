@@ -22,6 +22,7 @@
 #include <SPI.h>
 
 #define CSI Serial.write("\x1B\x5B");
+//#define CSI Serial.write("\033");
 
 #define DAC_RESOLUTION 9
 
@@ -349,8 +350,11 @@ void showMeasurements(int samples)
 
 while (Serial.available() == 0)
 {
-  CSI
-Serial.write("2K");
+  //CSI
+  //Serial.write("\x1B\x5B 2K");
+//Serial.write("2K");
+
+Serial.print("\r                                                                       \r");
   int adc0ReadingUnscaled;
   float adc0Reading;
 
@@ -434,7 +438,7 @@ bs+=Serial.print(INA0.getPower_mW());
 bs+=Serial.print("mW\t");
 }
 
- bs+=Serial.print("                     \r");
+ bs+=Serial.print("      \r");
 
 
 
@@ -454,7 +458,7 @@ bs+=Serial.print("mW\t");
 // Serial.print("ADC3: ");
 // Serial.print(adc3ReadingUnscaled);
 // Serial.print("V\n\n\r");
-delay(250);
+delay(350);
 
 }
 

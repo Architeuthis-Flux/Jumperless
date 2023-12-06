@@ -130,15 +130,18 @@ dontshowmenu:
     {
             showReadings++;
       chooseShownReadings();
-
-      Serial.write("\x1B\x5B");
-      Serial.write("1F");//scroll up one line
-      Serial.write("\x1B\x5B");
-      Serial.write("2K");//clear line
-      Serial.write("\x1B\x5B");
-      Serial.write("1F");//scroll up one line
-      Serial.write("\x1B\x5B");
-      Serial.write("2K");//clear line
+//Serial.write("\033");
+      //Serial.write("\x1B\x5B");
+      //Serial.write("1F");//scroll up one line
+      //Serial.write("\x1B\x5B");
+//Serial.write("\033");
+      //Serial.write("2K");//clear line
+ //Serial.write("\033");
+      //Serial.write("\x1B\x5B");
+     // Serial.write("1F");//scroll up one line
+      //Serial.write("\x1B\x5B");
+//Serial.write("\033");
+      //Serial.write("2K");//clear line
 
       goto dontshowmenu;
       //break;
