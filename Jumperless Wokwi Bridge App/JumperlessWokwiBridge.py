@@ -40,6 +40,7 @@ def openSerial():
     serialconnected = 0
 
     portSelected = 0
+    foundports = []
     
     print("\n")
 
@@ -52,21 +53,28 @@ def openSerial():
             print("{}: {} [{}]".format(i, port, desc))
             if desc == "Jumperless":
                 autodetected = i
+                foundports.append(ports[autodetected-1][0])
+                
         selection = -1
+        sortedports = sorted(foundports,key = lambda x:x[-1])
+        #print(sortedports)
 
-        if autodetected != -1:
+        #if autodetected != -1:
+        if False:    
+            
+            
             selection = autodetected
             print("\n\nAutodetected Jumperless at", end=" ")
-            print(ports[int(selection) - 1].device)
+            print(sortedports[0])
 
-            portName = ports[int(selection) - 1].device
-
+            #portName = ports[int(selection) - 1].device
+            portName = sortedports[0]
             portSelected = True
             serialconnected = 1
 
         else:
             selection = input(
-                "\n\nSelect the port connected to your Jumperless   ('r' to rescan)\n\n")
+                "\n\nSelect the port connected to your Jumperless   ('r' to rescan)\n\n(Choose the lower numbered port, the other is routable USB-Serial)\n\n")
         
             if selection.isdigit() == True and int(selection) <= i:
                 portName = ports[int(selection) - 1].device
@@ -692,7 +700,13 @@ while True:
                         conn1 = "108"
                     elif conn1.endswith('5'):
                         conn1 = "109"
-
+                    elif conn1.endswith('6'):
+                        conn1 = "116"                        
+                    elif conn1.endswith('7'):
+                        conn1 = "117"
+                    elif conn1.endswith('D'):
+                        conn1 = "114"                        
+                        
                 if conn1.startswith("bb1:") == True:
                     periodIndex = conn1.find('.')
                     conn1 = conn1[4:periodIndex]
@@ -761,6 +775,12 @@ while True:
                         conn2 = "108"
                     elif conn2.endswith('5'):
                         conn2 = "109"
+                    elif conn2.endswith('6'):
+                        conn2 = "116"                        
+                    elif conn2.endswith('7'):
+                        conn2 = "117"
+                    elif conn2.endswith('D'):
+                        conn2 = "114"                             
 
                 if conn2.startswith("bb1:") == True:
                     periodIndex = conn2.find('.')

@@ -22,7 +22,7 @@
 #include <SPI.h>
 
 #define CSI Serial.write("\x1B\x5B");
-//#define CSI Serial.write("\033");
+// #define CSI Serial.write("\033");
 
 #define DAC_RESOLUTION 9
 
@@ -30,15 +30,13 @@ int revisionNumber = 0;
 
 int showReadings = 0;
 
-int showADCreadings[4] = {1,1,1,1};
+int showADCreadings[4] = {1, 1, 1, 1};
 
-int showINA0[3] = {1,1,1}; //0 = current, 1 = voltage, 2 = power
-int showINA1[3] = {0, 0, 0}; //0 = current, 1 = voltage, 2 = power
-
+int showINA0[3] = {1, 1, 1}; // 0 = current, 1 = voltage, 2 = power
+int showINA1[3] = {0, 0, 0}; // 0 = current, 1 = voltage, 2 = power
 
 int showDAC0 = 0;
 int showDAC1 = 0;
-
 
 float freq[3] = {1, 1, 0};
 uint32_t period[3] = {0, 0, 0};
@@ -93,8 +91,8 @@ void initADC(void)
 void initDAC(void)
 {
 
-   Wire.begin();
-   delay(5);
+  Wire.begin();
+  delay(5);
   if (dac1_8V.begin(MCP4725A1_Addr_A01, i2c0, 400, 4, 5) == true)
   {
     revisionNumber = 2;
@@ -129,17 +127,17 @@ void initDAC(void)
     SPI.setCS(1);
     SPI.setSCK(2);
     SPI.setTX(3);
-    
+
     SPI.begin();
-     //dac_rev3.maxValue = 4095;
-     delay(5);
+    // dac_rev3.maxValue = 4095;
+    delay(5);
     dac_rev3.setGain(2);
-     delay(5);
+    delay(5);
     dac_rev3.begin(1);
 
     delay(5);
     setDac0_5Vvoltage(0.00);
-   // setDac0_5VinputCode(4095);
+    // setDac0_5VinputCode(4095);
 
     setDac1_8VinputCode(4095);
   }
@@ -222,11 +220,10 @@ void setDac0_5Vvoltage(float voltage)
   {
     int voltageCode = voltage * 4095 / 5;
 
-    
     // dac_rev3.analogWrite((uint16_t)voltageCode, 0);
     dac_rev3.fastWriteA((uint16_t)voltageCode);
     lastInputCode0 = voltageCode;
-    //dac_rev3.fastWriteB(lastInputCode1);
+    // dac_rev3.fastWriteB(lastInputCode1);
   }
 }
 
@@ -241,7 +238,7 @@ void setDac0_5VinputCode(uint16_t inputCode)
     dac_rev3.analogWrite(inputCode, 0);
     dac_rev3.fastWriteA(inputCode);
     lastInputCode0 = inputCode;
-    //dac_rev3.fastWriteB(lastInputCode1);
+    // dac_rev3.fastWriteB(lastInputCode1);
   }
 }
 
@@ -259,8 +256,8 @@ void setDac1_8Vvoltage(float voltage)
 
     // dac_rev3.analogWrite((uint16_t)voltageCode, 1);
     dac_rev3.fastWriteB((uint16_t)voltageCode);
-    ///lastInputCode1 = voltageCode;
-   // dac_rev3.fastWriteA(lastInputCode0);
+    /// lastInputCode1 = voltageCode;
+    // dac_rev3.fastWriteA(lastInputCode0);
   }
 }
 
@@ -276,8 +273,8 @@ void setDac1_8VinputCode(uint16_t inputCode)
     // Serial.println(inputCode);
     // dac_rev3.analogWrite(inputCode, 1);
     dac_rev3.fastWriteB(inputCode);
-    //lastInputCode1 = inputCode;
-   // dac_rev3.fastWriteA(lastInputCode0);
+    // lastInputCode1 = inputCode;
+    // dac_rev3.fastWriteA(lastInputCode0);
   }
 }
 
@@ -288,9 +285,6 @@ void chooseShownReadings(void)
   showADCreadings[2] = 0;
   showADCreadings[3] = 0;
 
-
-
-
   for (int i = 0; i <= newBridgeIndex; i++)
   {
 
@@ -299,7 +293,7 @@ void chooseShownReadings(void)
       showADCreadings[0] = 1;
     }
 
-   if (path[i].node1 == ADC1_5V || path[i].node2 == ADC1_5V)
+    if (path[i].node1 == ADC1_5V || path[i].node2 == ADC1_5V)
     {
       showADCreadings[1] = 1;
     }
@@ -339,141 +333,126 @@ void chooseShownReadings(void)
         break;
       }
     }
-
   }
 }
-
 
 void showMeasurements(int samples)
 {
 
-
-while (Serial.available() == 0)
-{
-  //CSI
-  //Serial.write("\x1B\x5B 2K");
-//Serial.write("2K");
-
-Serial.print("\r                                                                       \r");
-  int adc0ReadingUnscaled;
-  float adc0Reading;
-
-  int adc1ReadingUnscaled;
-  float adc1Reading;
-
-  int adc2ReadingUnscaled;
-  float adc2Reading;
-
-  int adc3ReadingUnscaled;
-  float adc3Reading;
-int bs = 0;
-
-
-  if (showADCreadings[0] == 1)
+  while (Serial.available() == 0)
   {
+    // CSI
+    // Serial.write("\x1B\x5B 2K");
+    // Serial.write("2K");
 
-  adc0ReadingUnscaled = readAdc(0, samples);
-  adc0Reading = (adc0ReadingUnscaled) * (5.0 / 4095);
-  //adc0Reading -= 0.1; // offset
-bs+= Serial.print("D0: ");
-bs+=Serial.print(adc0Reading);
-bs+=Serial.print("V\t");
+    Serial.print("\r                                                                       \r");
+    int adc0ReadingUnscaled;
+    float adc0Reading;
+
+    int adc1ReadingUnscaled;
+    float adc1Reading;
+
+    int adc2ReadingUnscaled;
+    float adc2Reading;
+
+    int adc3ReadingUnscaled;
+    float adc3Reading;
+    int bs = 0;
+
+    if (showADCreadings[0] == 1)
+    {
+
+      adc0ReadingUnscaled = readAdc(0, samples);
+      adc0Reading = (adc0ReadingUnscaled) * (5.0 / 4095);
+      // adc0Reading -= 0.1; // offset
+      bs += Serial.print("D0: ");
+      bs += Serial.print(adc0Reading);
+      bs += Serial.print("V\t");
+    }
+
+    if (showADCreadings[1] == 1)
+    {
+
+      adc1ReadingUnscaled = readAdc(1, samples);
+      adc1Reading = (adc1ReadingUnscaled) * (5.0 / 4095);
+      // adc1Reading -= 0.1; // offset
+      bs += Serial.print("D1: ");
+      bs += Serial.print(adc1Reading);
+      bs += Serial.print("V\t");
+    }
+
+    if (showADCreadings[2] == 1)
+    {
+
+      adc2ReadingUnscaled = readAdc(2, samples);
+      adc2Reading = (adc2ReadingUnscaled) * (5.0 / 4095);
+      // adc2Reading -= 0.1; // offset
+
+      bs += Serial.print("D2: ");
+      bs += Serial.print(adc2Reading);
+      bs += Serial.print("V\t");
+    }
+
+    if (showADCreadings[3] == 1)
+    {
+
+      adc3ReadingUnscaled = readAdc(3, samples);
+      adc3Reading = (adc3ReadingUnscaled) * (16.0 / 4010);
+      adc3Reading -= 8.7; // offset
+      bs += Serial.print("D3: ");
+      bs += Serial.print(adc3Reading);
+      bs += Serial.print("V\t");
+    }
+
+    if (showINA0[0] == 1 || showINA0[1] == 1 || showINA0[2] == 1)
+    {
+      bs += Serial.print("   INA219: ");
+    }
+
+    if (showINA0[0] == 1)
+    {
+      bs += Serial.print("I: ");
+      bs += Serial.print(INA0.getCurrent_mA());
+      bs += Serial.print("mA\t");
+    }
+    if (showINA0[1] == 1)
+    {
+      bs += Serial.print(" V: ");
+      bs += Serial.print(INA0.getBusVoltage());
+      bs += Serial.print("V\t");
+    }
+    if (showINA0[2] == 1)
+    {
+      bs += Serial.print("P: ");
+      bs += Serial.print(INA0.getPower_mW());
+      bs += Serial.print("mW\t");
+    }
+
+    bs += Serial.print("      \r");
+
+    // for (int i = 0; i < bs; i++)
+    // {
+    //   Serial.print("\b");
+    // }
+
+    // Serial.print("ADC1: ");
+    // Serial.print(adc1ReadingUnscaled);
+    // Serial.print("V\n\r");
+    // Serial.print("ADC2: ");
+    // Serial.print(adc2ReadingUnscaled);
+    // Serial.print("V\n\r");
+    // Serial.print("ADC3: ");
+    // Serial.print(adc3ReadingUnscaled);
+    // Serial.print("V\n\n\r");
+    delay(350);
   }
-
-  if (showADCreadings[1] == 1)
-  {
-
-  adc1ReadingUnscaled = readAdc(1, samples);
-  adc1Reading = (adc1ReadingUnscaled) * (5.0 / 4095);
-  //adc1Reading -= 0.1; // offset
-bs+=Serial.print("D1: ");
-bs+=Serial.print(adc1Reading);
-bs+=Serial.print("V\t");
-  }
-
-  if (showADCreadings[2] == 1)
-  {
-
-  adc2ReadingUnscaled = readAdc(2, samples);
-  adc2Reading = (adc2ReadingUnscaled) * (5.0 / 4095);
-  //adc2Reading -= 0.1; // offset
-
-bs+=Serial.print("D2: ");
-bs+=Serial.print(adc2Reading);
-bs+=Serial.print("V\t");
-  }
-
-  if (showADCreadings[3] == 1)
-  {
-
-  adc3ReadingUnscaled = readAdc(3, samples);
-  adc3Reading = (adc3ReadingUnscaled) * (16.0 / 4010);
-  adc3Reading -= 8.7; // offset
-bs+=Serial.print("D3: ");
-bs+=Serial.print(adc3Reading);
-bs+=Serial.print("V\t");
-  }
-
-if (showINA0[0] == 1 || showINA0[1] == 1 || showINA0[2] == 1)
-{
-  bs+=Serial.print("   INA219: ");
 }
-
-if (showINA0[0] == 1)
-{
-bs+=Serial.print("I: ");
-bs+=Serial.print(INA0.getCurrent_mA());
-bs+=Serial.print("mA\t");
-}
-if (showINA0[1] == 1)
-{
-bs+=Serial.print(" V: ");
-bs+=Serial.print(INA0.getBusVoltage());
-bs+=Serial.print("V\t");
-}
-if (showINA0[2] == 1)
-{
-bs+=Serial.print("P: ");
-bs+=Serial.print(INA0.getPower_mW());
-bs+=Serial.print("mW\t");
-}
-
- bs+=Serial.print("      \r");
-
-
-
-
-
-// for (int i = 0; i < bs; i++)
-// {
-//   Serial.print("\b");
-// }
-
-// Serial.print("ADC1: ");
-// Serial.print(adc1ReadingUnscaled);
-// Serial.print("V\n\r");
-// Serial.print("ADC2: ");
-// Serial.print(adc2ReadingUnscaled);
-// Serial.print("V\n\r");
-// Serial.print("ADC3: ");
-// Serial.print(adc3ReadingUnscaled);
-// Serial.print("V\n\n\r");
-delay(350);
-
-}
-
-}
-
-
-
-
-
 
 int readAdc(int channel, int samples)
 {
   int adcReadingAverage = 0;
 
-  uint8_t adcChannel = channel+ ADC0_PIN;
+  uint8_t adcChannel = channel + ADC0_PIN;
 
   for (int i = 0; i < samples; i++)
   {
@@ -543,38 +522,37 @@ int waveGen(void)
     int adc0Reading = 0;
     int brightness0 = 0;
     int hueShift0 = 0;
-    //firstCrossFreq0 = 1;
+    // firstCrossFreq0 = 1;
 
-    if (dacOn[0] == 1&& freq[0] < 33)
+    if (dacOn[0] == 1 && freq[0] < 33)
     {
-      //adc0Reading = INA1.getBusVoltage_mV();
-      // adc0Reading = dac0_5V.getInputCode();
+      // adc0Reading = INA1.getBusVoltage_mV();
+      //  adc0Reading = dac0_5V.getInputCode();
 
       if (c == 'q')
       {
-      } else {
+      }
+      else
+      {
 
-      adc0Reading = readAdc(26, 1);
-      adc0Reading = abs(adc0Reading);
-      hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
-      brightness0 = map(adc0Reading, 0, 5000, 4, 100);
+        adc0Reading = readAdc(26, 1);
+        adc0Reading = abs(adc0Reading);
+        hueShift0 = map(adc0Reading, 0, 5000, -90, 0);
+        brightness0 = map(adc0Reading, 0, 5000, 4, 100);
 
-      lightUpNet(4, -1, 1, brightness0, hueShift0);
-      showLEDsCore2 = 1;
-      firstCrossFreq0 = 1;
-
+        lightUpNet(4, -1, 1, brightness0, hueShift0);
+        showLEDsCore2 = 1;
+        firstCrossFreq0 = 1;
       }
     }
     else
     {
       if (firstCrossFreq0 == 1)
       {
-      lightUpNet(4);
-      showLEDsCore2 = 1;
-      firstCrossFreq0 = 0;
+        lightUpNet(4);
+        showLEDsCore2 = 1;
+        firstCrossFreq0 = 0;
       }
-
-     
     }
 
     int adc1Reading = 0;
@@ -584,14 +562,12 @@ int waveGen(void)
     if (dacOn[1] == 1 && freq[1] < 17)
     {
       adc1Reading = readAdc(29, 1);
-        hueShift1 = map(adc1Reading, -2048, 2048, -50, 45);
-        adc1Reading = adc1Reading - 2048;
+      hueShift1 = map(adc1Reading, -2048, 2048, -50, 45);
+      adc1Reading = adc1Reading - 2048;
 
-        adc1Reading = abs(adc1Reading);
+      adc1Reading = abs(adc1Reading);
 
-        brightness1 = map(adc1Reading, 0, 2050, 4, 100);
-
-
+      brightness1 = map(adc1Reading, 0, 2050, 4, 100);
 
       lightUpNet(5, -1, 1, brightness1, hueShift1);
       showLEDsCore2 = 1;
@@ -601,9 +577,9 @@ int waveGen(void)
     {
       if (firstCrossFreq1 == 1)
       {
-      lightUpNet(5);
-      showLEDsCore2 = 1;
-      firstCrossFreq1 = 0;
+        lightUpNet(5);
+        showLEDsCore2 = 1;
+        firstCrossFreq1 = 0;
       }
     }
 
@@ -841,22 +817,21 @@ int waveGen(void)
           setDac0_5VinputCode(amplitude[activeDac]);
           lightUpNet(4, -1, 1, DEFAULTSPECIALNETBRIGHTNESS, 12);
           showLEDsCore2 = 1;
-      }
+        }
         else if (activeDac == 1 && dacOn[activeDac] == 1)
         {
           setDac1_8VinputCode(amplitude[activeDac]);
-          
+
           showLEDsCore2 = 1;
         }
-
       }
       else
       {
         if (activeDac == 0 && dacOn[activeDac] == 1)
         {
           setDac0_5VinputCode(0);
-lightUpNet(4, -1, 1, 2, 12);
-      }
+          lightUpNet(4, -1, 1, 2, 12);
+        }
 
         else if (activeDac == 1 && dacOn[activeDac] == 1)
         {

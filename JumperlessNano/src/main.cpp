@@ -1,6 +1,22 @@
 
 
 #include <Arduino.h>
+
+#define USE_TINYUSB 1
+
+#define LED LED_BUILTIN
+
+#ifdef USE_TINYUSB
+#include <Adafruit_TinyUSB.h>
+#endif
+
+#ifdef CFG_TUSB_CONFIG_FILE
+#include CFG_TUSB_CONFIG_FILE
+#else
+#include "tusb_config.h"
+#endif
+
+#include "ArduinoStuff.h"
 #include "JumperlessDefinesRP2040.h"
 #include "NetManager.h"
 #include "MatrixStateRP2040.h"
@@ -12,7 +28,6 @@
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
 // #include <EEPROM.h>
-#include "ArduinoStuff.h"
 
 #ifdef EEPROMSTUFF
 #include <EEPROM.h>
@@ -29,17 +44,26 @@
 
 #endif
 
+Adafruit_USBD_CDC USBSer1;
+
 volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
 
 // https://wokwi.com/projects/367384677537829889
 
 void setup()
 {
-
+  pinMode(0, OUTPUT);
   pinMode(2, INPUT);
   pinMode(3, INPUT);
-  // initArduino();
+
   // debugFlagInit();
+  USBDevice.setProductDescriptor("Jumperless");
+  USBDevice.setManufacturerDescriptor("Architeuthis Flux");
+  USBDevice.setSerialDescriptor("0");
+  USBDevice.setID(0xACAB, 0x1312);
+  USBSer1.setStringDescriptor("Jumperless USB Serial");
+
+  USBSer1.begin(115200);
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
@@ -54,6 +78,8 @@ void setup()
   initINA219();
   delay(1);
   Serial.begin(115200);
+
+  initArduino();
   delay(4);
 #ifdef FSSTUFF
   LittleFS.begin();
@@ -74,10 +100,12 @@ void setup1()
 
   // delay (4);
   initLEDs();
-
+  delay(4);
   startupColors();
-
+  delay(4);
   lightUpRail();
+
+  delay(4);
   showLEDsCore2 = 1;
 }
 
@@ -128,23 +156,23 @@ dontshowmenu:
     }
     else
     {
-            showReadings++;
+      showReadings++;
       chooseShownReadings();
-//Serial.write("\033");
-      //Serial.write("\x1B\x5B");
-      //Serial.write("1F");//scroll up one line
-      //Serial.write("\x1B\x5B");
-//Serial.write("\033");
-      //Serial.write("2K");//clear line
- //Serial.write("\033");
-      //Serial.write("\x1B\x5B");
-     // Serial.write("1F");//scroll up one line
-      //Serial.write("\x1B\x5B");
-//Serial.write("\033");
-      //Serial.write("2K");//clear line
+      // Serial.write("\033");
+      // Serial.write("\x1B\x5B");
+      // Serial.write("1F");//scroll up one line
+      // Serial.write("\x1B\x5B");
+      // Serial.write("\033");
+      // Serial.write("2K");//clear line
+      // Serial.write("\033");
+      // Serial.write("\x1B\x5B");
+      // Serial.write("1F");//scroll up one line
+      // Serial.write("\x1B\x5B");
+      // Serial.write("\033");
+      // Serial.write("2K");//clear line
 
       goto dontshowmenu;
-      //break;
+      // break;
     }
 
   case 'n':
@@ -184,17 +212,12 @@ dontshowmenu:
     // }
 
   case 'f':
-    digitalWrite(RESETPIN, HIGH);
+   
 
     clearAllNTCC();
-    // delay(1);
 
-    // showLEDsCore2 = 1;
 
-    // delay(5);
-    // resetArduino();
-
-    sendAllPathsCore2 = 1;
+    //sendAllPathsCore2 = 1;
     timer = millis();
 #ifdef FSSTUFF
     clearNodeFile();
@@ -203,10 +226,13 @@ dontshowmenu:
     openNodeFile();
     getNodesToConnect();
 #endif
-    digitalWrite(RESETPIN, LOW);
+    digitalWrite(RESETPIN, HIGH);
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
+
+
+ digitalWrite(RESETPIN, LOW);
     // showNets();
 
 #ifdef PIOSTUFF
@@ -314,7 +340,9 @@ dontshowmenu:
     break;
 
   case 'r':
+
     resetArduino();
+
     break;
 
   case 'd':
@@ -384,6 +412,9 @@ dontshowmenu:
 }
 unsigned long logoFlashTimer = 0;
 
+int arduinoReset = 0;
+unsigned long lastTimeReset = 0;
+
 void loop1() // core 2 handles the LEDs and the CH446Q8
 {
 
@@ -432,5 +463,32 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     // lightUpRail();
     leds.setPixelColor(110, 0x550008);
     leds.show();
+  }
+
+  if (arduinoReset == 0 && USBSer1.peek() == 0x30) // 0x30 is the first thing AVRDUDE sends
+  {
+
+    resetArduino();
+    arduinoReset = 1;
+    lastTimeReset = millis();
+  }
+
+  if (USBSer1.available())
+  {
+
+    char ch = USBSer1.read();
+    Serial1.write(ch);
+
+  }
+  if (Serial1.available())
+  {
+    char ch = Serial1.read();
+    USBSer1.write(ch);
+  }
+
+
+  if (millis() - lastTimeReset > 1000) //if the arduino hasn't been reset in a second, reset the flag
+  {
+    arduinoReset = 0;
   }
 }

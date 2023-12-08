@@ -20,6 +20,8 @@ def find_jumperless_port_monitor(source, target, env):
             
             if desc == "Jumperless":
                 autodetected = i
+                print("Autodetected jumperless port: " + ports[autodetected][0])
+                
             i = i + 1
 
         if autodetected != -1:

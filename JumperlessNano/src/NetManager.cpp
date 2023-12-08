@@ -885,7 +885,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
 
     const char *defNanoToChar[26] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "RESET", "AREF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"};
 
-    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3", "GPIO_0", "NOT_DEFINED", "UART_Rx", "UART_Tx"};
+    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3", "GPIO_0", "NOT_DEFINED", "UART_Tx", "UART_Rx"};
 
     const char *emptyNet[] = {"EMPTY_NET", "?"};
 
@@ -893,7 +893,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
     {
         return defNanoToChar[defined - 70];
     }
-    else if (defined >= 100 && defined <= RP_UART_TX)
+    else if (defined >= 100 && defined <= RP_UART_RX)
     {
   
         return defSpecialToChar[defined - 100];

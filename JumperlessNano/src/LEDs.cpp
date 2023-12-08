@@ -59,15 +59,15 @@ void initLEDs(void)
     EEPROM.write(DEBUG_LEDSADDRESS, debugLEDs);
 
     pinMode(LED_PIN, OUTPUT);
-    delay(30);
+    delay(1);
     leds.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-    delay(30);
+    delay(1);
     leds.show();
-    delay(40);
+    delay(2);
     // leds.setBrightness(100);
-    delay(20);
+    delay(2);
     EEPROM.commit();
-    delay(100);
+    delay(20);
 }
 
 char LEDbrightnessMenu(void)
@@ -660,7 +660,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
     int colorCorrection = 0;
     int pcbHueShift = 0;
 
-    if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] < 121)
+    if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] <= NANO_A7)
     {
 
         for (int j = 0; j < MAX_NODES; j++)
@@ -669,7 +669,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
             {
                 break;
             }
-            if (net[netNumber].nodes[j] < 121)
+            if (net[netNumber].nodes[j] <= NANO_A7)
             {
                 if (net[netNumber].nodes[j] == node || node == -1)
                 {
@@ -753,6 +753,16 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                         }
 
                         leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
+                        if (debugLEDs)
+                        {
+                        Serial.print("net: ");
+                        Serial.print(netNumber);
+                        Serial.print(" node: ");
+                        Serial.print(net[netNumber].nodes[j]);
+                        Serial.print(" mapped to LED:");
+
+                        Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
+                        }
                     }
                     else
                     {
@@ -1451,7 +1461,7 @@ struct rgbColor unpackRgb(uint32_t color)
 }
 void clearLEDs(void)
 {
-    for (int i = 0; i <= LED_COUNT; i++)
+    for (int i = 0; i <= 254; i++)
     { // For each pixel in strip...
 
         leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)

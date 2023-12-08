@@ -7,7 +7,8 @@
           "usb_vid": "0x2e8a",
           "usb_pid": "0x000a",
           "usb_manufacturer": "Architeuthis Flux",
-          "usb_product": "Jumperless"        
+          "usb_product": "Jumperless"
+              
         }
       },
       "core": "arduino",

@@ -739,16 +739,18 @@ void resolveAltPaths(void)
 
                     if (path[i].Lchip == true)
                     {
-                        //Serial.print("Lchip");
+                       
 
                         if (ch[CHIP_L].yStatus[bb] == -1 || ch[CHIP_L].yStatus[bb] == path[i].net) /////////
                         {
+                                     
+                            int xMapL0c0 = xMapForChipLane0(path[i].chip[0], bb);
+                            int xMapL1c0 = xMapForChipLane1(path[i].chip[0], bb);
 
-                            int xMapL0c0 = xMapForChipLane0(path[i].chip[0], path[i].chip[bb]);
-                            int xMapL1c0 = xMapForChipLane1(path[i].chip[0], path[i].chip[bb]);
+                            int xMapL0c1 = xMapForChipLane0(bb, path[i].chip[0]);
+                            int xMapL1c1 = xMapForChipLane1(bb, path[i].chip[0]);
 
-                            int xMapL0c1 = xMapForChipLane0(path[i].chip[bb], path[i].chip[0]);
-                            int xMapL1c1 = xMapForChipLane1(path[i].chip[bb], path[i].chip[0]);
+
 
                             int freeLane = -1;
 
@@ -777,6 +779,7 @@ void resolveAltPaths(void)
 
                             if (freeLane == 0)
                             {
+                                //Serial.print("Lchip!!!!!!!!!!!!");
 
                                 ch[path[i].chip[0]].xStatus[xMapL0c0] = path[i].net;
                                 ch[path[i].chip[1]].xStatus[xMapL0c1] = path[i].net;
@@ -797,6 +800,7 @@ void resolveAltPaths(void)
                             }
                             else if (freeLane == 1)
                             {
+                                //Serial.print("Lchip!!!!!!!!!!!22222!");
                                 ch[path[i].chip[0]].xStatus[xMapL1c0] = path[i].net;
                                 ch[path[i].chip[1]].xStatus[xMapL1c1] = path[i].net;
 
@@ -2325,7 +2329,7 @@ void findStartAndEndChips(int node1, int node2, int pathIdx)
             }
             break;
         }
-        case GND ... ADC3_8V:
+        case GND ... 126:
         {
             if (debugNTCC)
             {
@@ -2485,7 +2489,7 @@ void assignPathType(int pathIndex)
         path[pathIndex].sameChip = false;
     }
 
-    if ((path[pathIndex].node1 == 1 || path[pathIndex].node1 == 30 || path[pathIndex].node1 == 31 || path[pathIndex].node1 == 60) || path[pathIndex].chip[0] == CHIP_L)
+    if ((path[pathIndex].node1 == 1 || path[pathIndex].node1 == 30 || path[pathIndex].node1 == 31 || path[pathIndex].node1 == 60) || path[pathIndex].node1 == 114 || path[pathIndex].node1 == 116 || path[pathIndex].node1 == 117 || path[pathIndex].chip[0] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection\n\n\n\r ");
         //path[pathIndex].altPathNeeded = true;
@@ -2508,7 +2512,7 @@ void assignPathType(int pathIndex)
         path[pathIndex].nodeType[0] = SF;
     }
 
-    if ((path[pathIndex].node2 == 1 || path[pathIndex].node2 == 30 || path[pathIndex].node2 == 31 || path[pathIndex].node2 == 60) || path[pathIndex].chip[1] == CHIP_L)
+    if ((path[pathIndex].node2 == 1 || path[pathIndex].node2 == 30 || path[pathIndex].node2 == 31 || path[pathIndex].node2 == 60) || path[pathIndex].node2 == 114 || path[pathIndex].node2 == 116 || path[pathIndex].node2 == 117|| path[pathIndex].chip[1] == CHIP_L)
     {
         // Serial.print("\n\n\rthis should be a bb to sf connection 2\n\n\n\r ");
         //path[pathIndex].altPathNeeded = true;

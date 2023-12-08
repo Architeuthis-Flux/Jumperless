@@ -1,3 +1,8 @@
+
+#ifndef JUMPERLESSDEFINESRP2040_H
+#define JUMPERLESSDEFINESRP2040_H
+
+
 #define PIOSTUFF 1 //comment these out to remove them
 #define EEPROMSTUFF 1
 #define FSSTUFF 1
@@ -118,15 +123,15 @@
 #define t30 30
 
 
-#define b1  31
-#define b2  32
-#define b3  33
-#define b4  34
-#define b5  35
-#define b6  36
-#define b7  37
-#define b8  38
-#define b9  39
+#define b1 31
+#define b2 32
+#define b3 33
+#define b4 34
+#define b5 35
+#define b6 36
+#define b7 37
+#define b8 38
+#define b9 39
 #define b10 40
 #define b11 41
 #define b12 42
@@ -196,8 +201,12 @@
 #define ADC3_8V 113
 
 #define RP_GPIO_0 114
-#define RP_UART_RX 116
-#define RP_UART_TX 117
+#define RP_UART_TX 116
+#define RP_UART_RX 117
 
 
 #define EMPTY_NET 127
+
+
+
+#endif
