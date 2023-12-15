@@ -59,8 +59,8 @@ def openSerial():
         sortedports = sorted(foundports,key = lambda x:x[-1])
         #print(sortedports)
 
-        #if autodetected != -1:
-        if False:    
+        if autodetected != -1:
+        #if False:    
             
             
             selection = autodetected

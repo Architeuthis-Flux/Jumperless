@@ -48,49 +48,49 @@ struct chipStatus ch[12] = {
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_I, CHIP_J, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_K, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_H},//X MAP constant
-  {CHIP_L,  t2,t3, t4, t5, t6, t7, t8}},  // Y MAP constant
+  {CHIP_L,  TOP_2,TOP_3, TOP_4, TOP_5, TOP_6, TOP_7, TOP_8}},  // Y MAP constant
 
   {1,'B',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_I, CHIP_J, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_K, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
-  {CHIP_L,  t9,t10,t11,t12,t13,t14,t15}},//yMap
+  {CHIP_L,  TOP_9,TOP_10,TOP_11,TOP_12,TOP_13,TOP_14,TOP_15}},//yMap
 
   {2,'C',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_I, CHIP_J, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_K, CHIP_H, CHIP_H},
-  {CHIP_L, t16,t17,t18,t19,t20,t21,t22}},
+  {CHIP_L, TOP_16,TOP_17,TOP_18,TOP_19,TOP_20,TOP_21,TOP_22}},
 
   {3,'D',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_I, CHIP_J, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_K},
-  {CHIP_L, t23,t24,t25,t26,t27,t28,t29}},
+  {CHIP_L, TOP_23,TOP_24,TOP_25,TOP_26,TOP_27,TOP_28,TOP_29}},
 
   {4,'E',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_K, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_I, CHIP_J, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
-  {CHIP_L,   b2, b3, b4, b5, b6, b7, b8}},
+  {CHIP_L,   BOTTOM_2, BOTTOM_3, BOTTOM_4, BOTTOM_5, BOTTOM_6, BOTTOM_7, BOTTOM_8}},
 
   {5,'F',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_B, CHIP_K, CHIP_C, CHIP_C, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_I, CHIP_J, CHIP_G, CHIP_G, CHIP_H, CHIP_H},
-  {CHIP_L,  b9, b10,b11,b12,b13,b14,b15}},
+  {CHIP_L,  BOTTOM_9, BOTTOM_10,BOTTOM_11,BOTTOM_12,BOTTOM_13,BOTTOM_14,BOTTOM_15}},
 
   {6,'G',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_K, CHIP_D, CHIP_D, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_I, CHIP_J, CHIP_H, CHIP_H},
-  {CHIP_L,  b16,b17,b18,b19,b20,b21,b22}},
+  {CHIP_L,  BOTTOM_16,BOTTOM_17,BOTTOM_18,BOTTOM_19,BOTTOM_20,BOTTOM_21,BOTTOM_22}},
 
   {7,'H',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
   {CHIP_A, CHIP_A, CHIP_B, CHIP_B, CHIP_C, CHIP_C, CHIP_D, CHIP_K, CHIP_E, CHIP_E, CHIP_F, CHIP_F, CHIP_G, CHIP_G, CHIP_I, CHIP_J},
-  {CHIP_L,  b23,b24,b25,b26,b27,b28,b29}},
+  {CHIP_L,  BOTTOM_23,BOTTOM_24,BOTTOM_25,BOTTOM_26,BOTTOM_27,BOTTOM_28,BOTTOM_29}},
 
   {8,'I',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
@@ -113,7 +113,7 @@ struct chipStatus ch[12] = {
   {11,'L',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
-  {CURRENT_SENSE_MINUS, CURRENT_SENSE_PLUS, ADC0_5V, ADC1_5V, ADC2_5V, ADC3_8V, DAC1_8V, DAC0_5V, t1, t30, b1, b30, RP_UART_TX, RP_UART_RX, SUPPLY_5V, RP_GPIO_0},
+  {CURRENT_SENSE_MINUS, CURRENT_SENSE_PLUS, ADC0_5V, ADC1_5V, ADC2_5V, ADC3_8V, DAC1_8V, DAC0_5V, TOP_1, TOP_30, BOTTOM_1, BOTTOM_30, RP_UART_TX, RP_UART_RX, SUPPLY_5V, RP_GPIO_0},
   {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}}
   };
 
