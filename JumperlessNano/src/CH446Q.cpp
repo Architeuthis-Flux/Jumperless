@@ -101,7 +101,7 @@ void isrFromPio(void)
   digitalWriteFast(CS_J, LOW);
   digitalWriteFast(CS_K, LOW);
   digitalWriteFast(CS_L, LOW);
-  delayMicroseconds(2);
+  delayMicroseconds(1);
   irq_flags = pio0_hw->irq;
   pio_interrupt_clear(pio, PIO0_IRQ_0);
   hw_clear_bits(&pio0_hw->irq, irq_flags);
@@ -179,7 +179,7 @@ void resetArduino(void)
   path[lastPath].y[1] = 0;
 
   sendPath(lastPath, 1);
-  delay(3);
+  delay(5);
   sendPath(lastPath, 0);
 }
 void sendAllPaths(void) // should we sort them by chip? for now, no
@@ -264,11 +264,11 @@ void sendPath(int i, int setOrClear)
 
       // delayMicroseconds(50);
 
-      delayMicroseconds(30);
+      delayMicroseconds(20);
 
       pio_sm_put(pio, sm, chAddress);
 
-      delayMicroseconds(60);
+      delayMicroseconds(40);
       //}
     }
   }

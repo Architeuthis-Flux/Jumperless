@@ -109,10 +109,13 @@ void setup1()
   showLEDsCore2 = 1;
 }
 
+char connectFromArduino = '\0';
+
+char input;
+
 void loop()
 {
 
-  char input;
   unsigned long timer = 0;
 
 menu:
@@ -131,7 +134,8 @@ menu:
   Serial.print("\n\n\r");
 
 dontshowmenu:
-  while (Serial.available() == 0)
+
+  while (Serial.available() == 0 && connectFromArduino == '\0')
   {
     if (showReadings >= 1)
     {
@@ -139,10 +143,20 @@ dontshowmenu:
     }
   }
 
-  input = Serial.read();
+  if (connectFromArduino != '\0')
+  {
+    input = 'f';
+
+  }
+  else
+  {
+    input = Serial.read();
+    Serial.print("\n\r");
+  }
 
   // Serial.print(input);
-  Serial.print("\n\r");
+  
+
 
   switch (input)
   {
@@ -158,7 +172,7 @@ dontshowmenu:
     {
       showReadings++;
       chooseShownReadings();
-      // Serial.write("\033");
+      // Serial.write("\033"); //these VT100/ANSI commands work on some terminals and not others so I took it out
       // Serial.write("\x1B\x5B");
       // Serial.write("1F");//scroll up one line
       // Serial.write("\x1B\x5B");
@@ -212,12 +226,10 @@ dontshowmenu:
     // }
 
   case 'f':
-   
-
+    
     clearAllNTCC();
 
-
-    //sendAllPathsCore2 = 1;
+    // sendAllPathsCore2 = 1;
     timer = millis();
 #ifdef FSSTUFF
     clearNodeFile();
@@ -231,8 +243,7 @@ dontshowmenu:
     clearLEDs();
     assignNetColors();
 
-
- digitalWrite(RESETPIN, LOW);
+    digitalWrite(RESETPIN, LOW);
     // showNets();
 
 #ifdef PIOSTUFF
@@ -248,6 +259,12 @@ dontshowmenu:
       Serial.print("ms");
     }
 
+    if (connectFromArduino != '\0')
+    {
+      connectFromArduino = '\0';
+      goto dontshowmenu;
+    }
+   
     break;
 
   case '\n':
@@ -433,10 +450,10 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
       Serial.print("\n\r");
       Serial.print(rails);
     }
-    delayMicroseconds(3200);
+    delayMicroseconds(2200);
 
     leds.show();
-    delayMicroseconds(8200);
+    delayMicroseconds(5200);
     showLEDsCore2 = 0;
   }
 
@@ -446,23 +463,8 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     sendAllPaths();
     delayMicroseconds(2200);
     showNets();
-    delayMicroseconds(9200);
+    delayMicroseconds(7200);
     sendAllPathsCore2 = 0;
-  }
-
-  if (logoFlash == 2)
-  {
-    logoFlashTimer = millis();
-    logoFlash = 1;
-  }
-
-  if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 600)
-  {
-    logoFlash = 0;
-    logoFlashTimer = 0;
-    // lightUpRail();
-    leds.setPixelColor(110, 0x550008);
-    leds.show();
   }
 
   if (arduinoReset == 0 && USBSer1.peek() == 0x30) // 0x30 is the first thing AVRDUDE sends
@@ -471,6 +473,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     resetArduino();
     arduinoReset = 1;
     lastTimeReset = millis();
+    // Serial.print("resetting Arduino\n\r");
   }
 
   if (USBSer1.available())
@@ -478,17 +481,55 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
     char ch = USBSer1.read();
     Serial1.write(ch);
-
   }
-  if (Serial1.available())
+
+  if (arduinoReset == 1 && Serial1.available() > 0)
   {
     char ch = Serial1.read();
     USBSer1.write(ch);
   }
 
+  if (Serial1.available() && connectFromArduino == '\0')
+  {
+    char ch = Serial1.read();
 
-  if (millis() - lastTimeReset > 1000) //if the arduino hasn't been reset in a second, reset the flag
+    if (ch == 'f' && connectFromArduino == '\0')
+    {
+      input = 'f';
+
+      connectFromArduino = ch;
+      // Serial.print("!!!!");
+    }
+    // Serial.write(ch);
+    USBSer1.write(ch);
+  }
+
+  if (millis() - lastTimeReset > 3000) // if the arduino hasn't been reset in a second, reset the flag
   {
     arduinoReset = 0;
+  }
+  else
+  {
+    while (USBSer1.available())
+    {
+
+      char ch = USBSer1.read();
+      Serial1.write(ch);
+    }
+  }
+
+  if (logoFlash == 2)
+  {
+    logoFlashTimer = millis();
+    logoFlash = 1;
+  }
+
+  if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 250)
+  {
+    logoFlash = 0;
+    logoFlashTimer = 0;
+    // lightUpRail();
+    leds.setPixelColor(110, 0x550008);
+    leds.show();
   }
 }

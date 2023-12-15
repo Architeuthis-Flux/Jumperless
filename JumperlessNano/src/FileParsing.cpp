@@ -38,15 +38,28 @@ void savePreformattedNodeFile(void)
 
     nodeFile = LittleFS.open("nodeFile.txt", "w+");
 
-    while (Serial.available() == 0)
+
+    
+    while (Serial.available() == 0 && Serial1.available() == 0)
     {
     }
-
+  
+if (Serial.available() > 0)
+{
     while (Serial.available() > 0)
     {
         nodeFile.write(Serial.read());
         delay(1);
     }
+} else if (Serial1.available() > 0)
+{
+    while (Serial1.available() > 0)
+    {
+        nodeFile.write(Serial1.read());
+        delay(1);
+        //Serial.print("1");
+    }
+}
 
     nodeFile.close();
 }
