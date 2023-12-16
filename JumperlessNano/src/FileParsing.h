@@ -19,7 +19,7 @@ void parseWokwiFileToNodeFile();
 void changeWokwiDefinesToJumperless ();
 void writeToNodeFile(void);
 
-void savePreformattedNodeFile (void);
+void savePreformattedNodeFile (int source = 0);
 
 void openNodeFile();
 

@@ -113,6 +113,8 @@ char connectFromArduino = '\0';
 
 char input;
 
+int serSource = 0;
+
 void loop()
 {
 
@@ -146,7 +148,7 @@ dontshowmenu:
   if (connectFromArduino != '\0')
   {
     input = 'f';
-
+    //connectFromArduino = '\0';
   }
   else
   {
@@ -155,8 +157,6 @@ dontshowmenu:
   }
 
   // Serial.print(input);
-  
-
 
   switch (input)
   {
@@ -226,18 +226,28 @@ dontshowmenu:
     // }
 
   case 'f':
-    
+
     clearAllNTCC();
 
     // sendAllPathsCore2 = 1;
     timer = millis();
-#ifdef FSSTUFF
+
     clearNodeFile();
-    savePreformattedNodeFile();
+
+    
+
+    if (connectFromArduino != '\0')
+    {
+      serSource = 1;
+    } else {
+      serSource = 0;
+    }
+
+    savePreformattedNodeFile(serSource);
 
     openNodeFile();
     getNodesToConnect();
-#endif
+
     digitalWrite(RESETPIN, HIGH);
     bridgesToPaths();
     clearLEDs();
@@ -264,7 +274,7 @@ dontshowmenu:
       connectFromArduino = '\0';
       goto dontshowmenu;
     }
-   
+
     break;
 
   case '\n':
@@ -471,10 +481,19 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
   {
 
     resetArduino();
+    //delay(10);
     arduinoReset = 1;
     lastTimeReset = millis();
-    // Serial.print("resetting Arduino\n\r");
+    //Serial1.write(0x30);
+    //Serial.print("resetting Arduino\n\r");
+
   }
+
+
+    if (millis() - lastTimeReset > 3000) // if the arduino hasn't been reset in a second, reset the flag
+  {
+    arduinoReset = 0;
+  }   
 
   if (USBSer1.available())
   {
@@ -483,40 +502,28 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     Serial1.write(ch);
   }
 
-  if (arduinoReset == 1 && Serial1.available() > 0)
+
+  if (connectFromArduino == '\0')
+  {
+   if (Serial1.available())
   {
     char ch = Serial1.read();
     USBSer1.write(ch);
-  }
-
-  if (Serial1.available() && connectFromArduino == '\0')
-  {
-    char ch = Serial1.read();
+    //Serial.print(ch);
 
     if (ch == 'f' && connectFromArduino == '\0')
     {
       input = 'f';
 
-      connectFromArduino = ch;
-      // Serial.print("!!!!");
+      connectFromArduino = 'f';
+      //Serial.print("!!!!");
     }
-    // Serial.write(ch);
-    USBSer1.write(ch);
+     
+    
+  } 
   }
 
-  if (millis() - lastTimeReset > 3000) // if the arduino hasn't been reset in a second, reset the flag
-  {
-    arduinoReset = 0;
-  }
-  else
-  {
-    while (USBSer1.available())
-    {
 
-      char ch = USBSer1.read();
-      Serial1.write(ch);
-    }
-  }
 
   if (logoFlash == 2)
   {

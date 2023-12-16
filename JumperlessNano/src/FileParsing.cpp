@@ -32,34 +32,38 @@ unsigned long timeToFP = 0;
 
 int numConnsJson = 0;
 
-void savePreformattedNodeFile(void)
+void savePreformattedNodeFile(int source)
 {
     LittleFS.remove("nodeFile.txt");
 
     nodeFile = LittleFS.open("nodeFile.txt", "w+");
 
-
-    
-    while (Serial.available() == 0 && Serial1.available() == 0)
-    {
-    }
-  
-if (Serial.available() > 0)
+if (source == 0)
 {
+    while (Serial.available() == 0)
+{}
+
     while (Serial.available() > 0)
     {
         nodeFile.write(Serial.read());
         delay(1);
     }
-} else if (Serial1.available() > 0)
+
+}
+if (source == 1)
 {
+    while (Serial1.available() == 0)
+{}
+
+    //Serial.println("waiting for Arduino to send file");
     while (Serial1.available() > 0)
     {
         nodeFile.write(Serial1.read());
-        delay(1);
-        //Serial.print("1");
+        delayMicroseconds(400);
+        //Serial.print(chw);
     }
 }
+
 
     nodeFile.close();
 }
