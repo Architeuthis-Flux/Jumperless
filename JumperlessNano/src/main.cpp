@@ -114,6 +114,7 @@ char connectFromArduino = '\0';
 char input;
 
 int serSource = 0;
+int readInNodesArduino = 0;
 
 void loop()
 {
@@ -136,6 +137,7 @@ menu:
   Serial.print("\n\n\r");
 
 dontshowmenu:
+  connectFromArduino = '\0';
 
   while (Serial.available() == 0 && connectFromArduino == '\0')
   {
@@ -148,7 +150,7 @@ dontshowmenu:
   if (connectFromArduino != '\0')
   {
     input = 'f';
-    //connectFromArduino = '\0';
+    // connectFromArduino = '\0';
   }
   else
   {
@@ -226,7 +228,7 @@ dontshowmenu:
     // }
 
   case 'f':
-
+    readInNodesArduino = 1;
     clearAllNTCC();
 
     // sendAllPathsCore2 = 1;
@@ -234,32 +236,30 @@ dontshowmenu:
 
     clearNodeFile();
 
-    
-
     if (connectFromArduino != '\0')
     {
       serSource = 1;
-    } else {
+    }
+    else
+    {
       serSource = 0;
     }
 
     savePreformattedNodeFile(serSource);
 
+    //Serial.print("savePFNF\n\r");
     openNodeFile();
     getNodesToConnect();
-
+    //Serial.print("openNF\n\r");
     digitalWrite(RESETPIN, HIGH);
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
-
+    //Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
 
-#ifdef PIOSTUFF
     sendAllPathsCore2 = 1;
-
-#endif
 
     if (debugNMtime)
     {
@@ -272,9 +272,14 @@ dontshowmenu:
     if (connectFromArduino != '\0')
     {
       connectFromArduino = '\0';
-      goto dontshowmenu;
+    //Serial.print("connectFromArduino\n\r");
+      // delay(2000);
+      input = ' ';
+      readInNodesArduino = 0;
+       goto dontshowmenu;
     }
 
+    readInNodesArduino = 0;
     break;
 
   case '\n':
@@ -481,49 +486,65 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
   {
 
     resetArduino();
-    //delay(10);
     arduinoReset = 1;
     lastTimeReset = millis();
-    //Serial1.write(0x30);
-    //Serial.print("resetting Arduino\n\r");
-
   }
 
+  while (arduinoReset == 1)
+  {
+    // if (USBSer1.peek() == 0x30)
+    // {
+    //   resetArduino();
+    // }
+
+    if (USBSer1.available())
+    {
+
+      char ch = USBSer1.read();
+      Serial1.write(ch);
+    }
+
+    if (Serial1.available())
+    {
+      char ch = Serial1.read();
+      USBSer1.write(ch);
+    }
 
     if (millis() - lastTimeReset > 3000) // if the arduino hasn't been reset in a second, reset the flag
-  {
-    arduinoReset = 0;
-  }   
-
-  if (USBSer1.available())
-  {
-
-    char ch = USBSer1.read();
-    Serial1.write(ch);
-  }
-
-
-  if (connectFromArduino == '\0')
-  {
-   if (Serial1.available())
-  {
-    char ch = Serial1.read();
-    USBSer1.write(ch);
-    //Serial.print(ch);
-
-    if (ch == 'f' && connectFromArduino == '\0')
     {
-      input = 'f';
-
-      connectFromArduino = 'f';
-      //Serial.print("!!!!");
+      arduinoReset = 0;
     }
-     
-    
-  } 
   }
 
+  if (readInNodesArduino == 0)
+  {
 
+    if (USBSer1.available())
+    {
+
+      char ch = USBSer1.read();
+      Serial1.write(ch);
+    }
+
+    if (Serial1.available())
+    {
+      char ch = Serial1.read();
+      USBSer1.write(ch);
+      // Serial.print(ch);
+
+      if (ch == 'f' && connectFromArduino == '\0')
+      {
+        // input = 'f';
+
+        connectFromArduino = 'f';
+        // Serial.print("!!!!");
+      }
+      else
+      {
+        // connectFromArduino = '\0';
+      }
+    }
+  }
 
   if (logoFlash == 2)
   {

@@ -39,5 +39,7 @@ void runCommandAfterReset(char);
 void debugFlagSet(int flag);
 void debugFlagInit(void);
 void clearNodeFile(void);
+int lenHelper(int);
+int printLen(int);
 
 #endif

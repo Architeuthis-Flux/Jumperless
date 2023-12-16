@@ -12,8 +12,6 @@
 bool debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 bool debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
 
-
-
 createSafeString(nodeFileString, 1200);
 
 createSafeString(nodeString, 1200);
@@ -37,33 +35,43 @@ void savePreformattedNodeFile(int source)
     LittleFS.remove("nodeFile.txt");
 
     nodeFile = LittleFS.open("nodeFile.txt", "w+");
-
-if (source == 0)
-{
-    while (Serial.available() == 0)
-{}
-
-    while (Serial.available() > 0)
+    if (debugFP)
     {
-        nodeFile.write(Serial.read());
-        delay(1);
+        Serial.print("source = ");
+        Serial.println(source);
     }
-
-}
-if (source == 1)
-{
-    while (Serial1.available() == 0)
-{}
-
-    //Serial.println("waiting for Arduino to send file");
-    while (Serial1.available() > 0)
+    if (source == 0)
     {
-        nodeFile.write(Serial1.read());
-        delayMicroseconds(400);
-        //Serial.print(chw);
-    }
-}
+        while (Serial.available() == 0)
+        {
+        }
 
+        while (Serial.available() > 0)
+        {
+            nodeFile.write(Serial.read());
+            delay(1);
+        }
+    }
+    if (source == 1)
+    {
+        while (Serial1.available() == 0)
+        {
+        }
+        delayMicroseconds(900);
+        // Serial.println("waiting for Arduino to send file");
+        while (Serial1.available() > 0)
+        {
+            nodeFile.write(Serial1.read());
+            delayMicroseconds(900);
+            // Serial.println(Serial1.available());
+        }
+
+        while (Serial1.available() > 0)
+        {
+            Serial1.read();
+            delay(1);
+        }
+    }
 
     nodeFile.close();
 }
@@ -455,9 +463,46 @@ void splitStringToFields()
         Serial.println("\n\rsplitting and cleaning up string\n\r");
     if (debugFP)
         Serial.println("_");
+
     openBraceIndex = nodeFileString.indexOf("{");
     closeBraceIndex = nodeFileString.indexOf("}");
-    nodeFileString.substring(specialFunctionsString, openBraceIndex + 1, closeBraceIndex);
+    int fIndex = nodeFileString.indexOf("f");
+
+    int foundOpenBrace = -1;
+    int foundCloseBrace = -1;
+    int foundF = -1;
+
+    if (openBraceIndex != -1)
+    {
+        foundOpenBrace = 1;
+    }
+    if (closeBraceIndex != -1)
+    {
+        foundCloseBrace = 1;
+    }
+    if (fIndex != -1)
+    {
+        foundF = 1;
+    }
+
+    // Serial.println(openBraceIndex);
+    // Serial.println(closeBraceIndex);
+    // Serial.println(fIndex);
+
+    if (foundF == 1)
+    {
+        nodeFileString.substring(nodeFileString, fIndex + 1, nodeFileString.length());
+    }
+
+    if (foundOpenBrace == 1 && foundCloseBrace == 1)
+    {
+
+        nodeFileString.substring(specialFunctionsString, openBraceIndex + 1, closeBraceIndex);
+    }
+    else
+    {
+        nodeFileString.substring(specialFunctionsString, 0, nodeFileString.length());
+    }
     specialFunctionsString.trim();
 
     if (debugFP)
@@ -600,51 +645,79 @@ void parseStringToBridges(void)
     int specialFunctionsStringLength = specialFunctionsString.length() - 1;
 
     int readLength = 0;
-    int readTotal = specialFunctionsStringLength;
+
 
     newBridgeLength = 0;
     newBridgeIndex = 0;
 
     if (debugFP)
-        Serial.println("parsing bridges into array\n\r");
-
-    for (int i = 0; i <= specialFunctionsStringLength; i += readLength)
     {
+        Serial.println("parsing bridges into array\n\r");
+    }
+    int stringIndex = 0;
+    char delimitersCh[] = ",- \n\r";
 
-        sscanf(specialFunctionsString.c_str(), "%i-%i,\n\r%n", &path[newBridgeIndex].node1, &path[newBridgeIndex].node2, &readLength);
-        specialFunctionsString.remove(0, readLength);
+    createSafeString(buffer, 10);
+    createSafeStringFromCharArray(delimiters, delimitersCh);
+    int doneReading = 0;
 
-        readTotal -= readLength;
+    for (int i = 0; i <= specialFunctionsStringLength; i++)
+    {
+       
+        stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
-        // if(debugFP)Serial.print(newBridge[newBridgeIndex][0]);
-        // if(debugFP)Serial.print("-");
-        // if(debugFP)Serial.println(newBridge[newBridgeIndex][1]);
 
+        buffer.toInt(path[newBridgeIndex].node1);
+
+        if (debugFP)
+        {
+        Serial.print("node1 = ");
+        Serial.println(path[newBridgeIndex].node1);
+        }
+
+        stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
+
+
+        buffer.toInt(path[newBridgeIndex].node2);
+
+        if (debugFP)
+        {
+        Serial.print("node2 = ");
+        Serial.println(path[newBridgeIndex].node2);
+        }
+
+        readLength = stringIndex;
+        
+
+
+        if (readLength == -1)
+        {
+            doneReading = 1;
+            break;
+        }
         newBridgeLength++;
         newBridgeIndex++;
 
-        // delay(500);
-    }
-    /*
-        readTotal = bridgeStringLength;
 
-        for (int i = 0; i <= bridgeStringLength; i += readLength)
+        if (debugFP)
         {
+        Serial.print("readLength = ");
+        Serial.println(readLength);
+        Serial.print("specialFunctionsString.length() = ");
+        Serial.println(specialFunctionsString.length());
+        }
+        
 
-            sscanf(bridgeString.c_str(), "%i-%i,\n\r%n", &path[newBridgeIndex].node1, &path[newBridgeIndex].node2, &readLength);
-            bridgeString.remove(0, readLength);
+        if (debugFP)
+            Serial.print(newBridgeIndex);
+        if (debugFP)
+            Serial.print("-");
+        if (debugFP)
+            Serial.println(newBridge[newBridgeIndex][1]);
 
-            readTotal -= readLength;
 
-            // if(debugFP)Serial.print(newBridge[newBridgeIndex][0]);
-            // if(debugFP)Serial.print("-");
-            // if(debugFP)Serial.println(newBridge[newBridgeIndex][1]);
+    }
 
-            newBridgeLength++;
-            newBridgeIndex++;
-
-            // delay(500);
-        }*/
     newBridgeIndex = 0;
     if (debugFP)
         for (int i = 0; i < newBridgeLength; i++)
@@ -674,6 +747,34 @@ void parseStringToBridges(void)
         Serial.println("ms to open and parse file\n\r");
 }
 
+int lenHelper(int x)
+{
+    if (x >= 1000000000)
+        return 10;
+    if (x >= 100000000)
+        return 9;
+    if (x >= 10000000)
+        return 8;
+    if (x >= 1000000)
+        return 7;
+    if (x >= 100000)
+        return 6;
+    if (x >= 10000)
+        return 5;
+    if (x >= 1000)
+        return 4;
+    if (x >= 100)
+        return 3;
+    if (x >= 10)
+        return 2;
+    return 1;
+}
+
+int printLen(int x)
+{
+    return x < 0 ? lenHelper(-x) + 1 : lenHelper(x);
+}
+
 void debugFlagInit(void)
 {
 
@@ -690,7 +791,7 @@ void debugFlagInit(void)
         EEPROM.write(LEDBRIGHTNESSADDRESS, DEFAULTBRIGHTNESS);
         EEPROM.write(RAILBRIGHTNESSADDRESS, DEFAULTRAILBRIGHTNESS);
         EEPROM.write(SPECIALBRIGHTNESSADDRESS, DEFAULTSPECIALNETBRIGHTNESS);
-       
+
         EEPROM.commit();
         delay(5);
     }

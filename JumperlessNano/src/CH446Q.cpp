@@ -179,7 +179,7 @@ void resetArduino(void)
   path[lastPath].y[1] = 0;
 
   sendPath(lastPath, 1);
-  delay(5);
+  delay(15);
   sendPath(lastPath, 0);
 }
 void sendAllPaths(void) // should we sort them by chip? for now, no
