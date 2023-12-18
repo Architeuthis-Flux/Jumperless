@@ -139,7 +139,9 @@ menu:
 dontshowmenu:
   connectFromArduino = '\0';
 
-  while (Serial.available() == 0 && connectFromArduino == '\0')
+  while (Serial.available() == 0 && connectFromArduino == '\0' )
+    ;
+
   {
     if (showReadings >= 1)
     {

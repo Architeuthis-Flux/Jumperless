@@ -339,7 +339,7 @@ void chooseShownReadings(void)
 void showMeasurements(int samples)
 {
 
-  while (Serial.available() == 0)
+  while (Serial.available() == 0 && Serial1.available() == 0)
   {
     // CSI
     // Serial.write("\x1B\x5B 2K");
@@ -444,7 +444,13 @@ void showMeasurements(int samples)
     // Serial.print("ADC3: ");
     // Serial.print(adc3ReadingUnscaled);
     // Serial.print("V\n\n\r");
-    delay(350);
+
+    if (Serial.available() == 0 && Serial1.available() == 0)
+    {
+      delay(350);
+    }
+
+    
   }
 }
 
