@@ -515,9 +515,10 @@ int setSupplySwitch(void)
 
 
 void lightUpNetsFromInputBuffer(void)
-{
-    //char *bufferPtr = inputBuffer;
-    //char inputBufferCopy[INPUTBUFFERLENGTH]; 
+{   
+    const int numberOfNRNs = 10;//how many commands there are below
+    const char *notReallyNets[] = { "headerglow", "glow", "hg", "+8v", "8v", "-8v", "logo", "status", "logoflash", "statusflash"};
+    int notReallyNetsInt[] = { 0, 0, 0, 3, 3, 4, 1, 1, 2, 2};//these correspond to an index in rawOtherColors[]
     char *token[50];
 
 
@@ -560,6 +561,39 @@ void lightUpNetsFromInputBuffer(void)
             break;
         }
 
+    int wasNRN = 0;
+
+        for (int j = 0; j < numberOfNRNs; j++)
+        {
+            // Serial.print("token[i] = ");
+            // Serial.println(token[i]);
+            // Serial.print("notReallyNets[j] = ");
+            // Serial.println(notReallyNets[j]);
+            if (strcasecmp(token[i], notReallyNets[j]) == 0)
+            {
+                rawOtherColors[notReallyNetsInt[j]] = color;
+
+                switch (notReallyNetsInt[j])
+                {
+                case 3:
+                    rawRailColors[2][0] = color; 
+                    break;
+
+                case 4:
+                    rawRailColors[2][2] = color; 
+                    break;
+                }
+
+
+                wasNRN = 1;
+                break;
+            }
+        }
+
+        if (wasNRN == 1)
+        {
+            continue;
+        }
        int netNumber = atoi(token[i]);
 
         // if (netNumber == 0)

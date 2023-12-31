@@ -22,7 +22,7 @@ uint8_t intersections[8]; //if this net shares a node with another net, store th
 
 int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net that contains any #defined nodes here, it won't connect and throw an error (SUPPLY to GND)
 
-uint8_t priority = 0; //priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
+uint8_t priority = 0; //this isn't implemented - priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
 
 rgbColor color; //color of the net in hex
 
@@ -116,7 +116,7 @@ const int duplucateSFnodes[26][4] = {  // [] [sf chip1,  x pin1, sf chip2, x pin
 {CHIP_J,13,CHIP_L,3},
 {CHIP_J,14,CHIP_L,14},
 {CHIP_I,15,CHIP_J,15},
-//{CHIP_I,15,CHIP_L,15},
+//{CHIP_I,15,CHIP_L,15},  //rev2
 ///{CHIP_J,15,CHIP_L,15},
 {CHIP_K,15,CHIP_L,4},
 };

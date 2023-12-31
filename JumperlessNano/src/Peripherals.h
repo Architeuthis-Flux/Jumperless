@@ -8,6 +8,7 @@
 
 extern int showReadings;
 
+extern int inaConnected;
 extern int showINA0[3]; //0 = current, 1 = voltage, 2 = power
 extern int showINA1[3]; //0 = current, 1 = voltage, 2 = power
 

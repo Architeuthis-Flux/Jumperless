@@ -42,15 +42,15 @@ uint32_t rawSpecialNetColors[8] =
      0x232323,
      0x232323};
 
-uint32_t rawOtherColors[8] =
-    {0x020008, // dim header glow
-     0x550008, // logo glow
-     0x0055AA, // logo flash
+ uint32_t rawOtherColors[8] =
+    {0x020008, // headerglow
+     0x550008, // logo / status
+     0x0055AA, // logoflash / statusflash
      0x301A02, // +8V
      0x120932, // -8V
-     0x230913,
-     0x232323,
-     0x232323};
+     0x230913, // unassigned
+     0x232323,  // unassigned
+     0x232323}; // unassigned
 
 rgbColor specialNetColors[8] =
     {{00, 00, 00},
@@ -1141,9 +1141,10 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
 
     for (int i = 80; i <= 109; i++)
     {
-        if (leds.getPixelColor(i) == 0 )
+        if (leds.getPixelColor(i) == 0 || leds.getPixelColor(i) != rawOtherColors[0])
         {
             leds.setPixelColor(i, rawOtherColors[0]);
+
         }
         
     }
@@ -1166,7 +1167,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
             // rgbColor rgbRail = railColors[j];
             // hsvColor hsvRail = RgbToHsv(rgbRail);
             // hsvRail.v = brightness2;
-            // // Serial.println (brightness2);
+             //Serial.println (rawOtherColors[0], HEX);
             // rgbRail = HsvToRgb(hsvRail);
             // Serial.println (hsvRail.h);
             // Serial.println (hsvRail.s);

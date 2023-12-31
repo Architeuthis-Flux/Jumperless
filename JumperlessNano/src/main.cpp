@@ -145,9 +145,7 @@ menu:
 dontshowmenu:
   connectFromArduino = '\0';
 
-  while (Serial.available() == 0 && connectFromArduino == '\0')
-    ;
-
+  while (Serial.available() == 0 && connectFromArduino == '\0')  
   {
     if (showReadings >= 1)
     {
@@ -172,16 +170,20 @@ skipinput:
   {
   case 'v':
 
-    if (showReadings >= 3)
+    if (showReadings >= 3 || (inaConnected == 0 && showReadings >= 1))
     {
       showReadings = 0;
-      // goto dontshowmenu;
       break;
     }
     else
     {
       showReadings++;
+      
       chooseShownReadings();
+      //Serial.println(showReadings);
+      
+
+
       // Serial.write("\033"); //these VT100/ANSI commands work on some terminals and not others so I took it out
       // Serial.write("\x1B\x5B");
       // Serial.write("1F");//scroll up one line
@@ -443,7 +445,7 @@ skipinput:
       // Serial.print("\n\r");
       // Serial.print("entering machine mode\n\r");
       machineMode();
-      // showLEDsCore2 = 1;
+       showLEDsCore2 = 1;
       goto dontshowmenu;  
       break;
     }
@@ -516,7 +518,7 @@ void machineMode(void) // read in commands in machine readable format
     lightUpNetsFromInputBuffer();
     //   lightUpNet();
     //assignNetColors();
-    showLEDsCore2 = 1;
+    //showLEDsCore2 = 1;
       break;
 
     // case getmeasurement:
@@ -655,7 +657,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     logoFlash = 0;
     logoFlashTimer = 0;
     // lightUpRail();
-    leds.setPixelColor(110, 0x550008);
+    leds.setPixelColor(110, rawOtherColors[1]);
     leds.show();
   }
 }

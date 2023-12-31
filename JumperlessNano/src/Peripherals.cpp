@@ -32,6 +32,7 @@ int showReadings = 0;
 
 int showADCreadings[4] = {1, 1, 1, 1};
 
+int inaConnected = 0;
 int showINA0[3] = {1, 1, 1}; // 0 = current, 1 = voltage, 2 = power
 int showINA1[3] = {0, 0, 0}; // 0 = current, 1 = voltage, 2 = power
 
@@ -285,6 +286,12 @@ void chooseShownReadings(void)
   showADCreadings[2] = 0;
   showADCreadings[3] = 0;
 
+  showINA0[0] = 0;
+  showINA0[1] = 0;
+  showINA0[2] = 0;
+
+  inaConnected = 0;
+
   for (int i = 0; i <= newBridgeIndex; i++)
   {
 
@@ -310,10 +317,15 @@ void chooseShownReadings(void)
 
     if (path[i].node1 == CURRENT_SENSE_PLUS || path[i].node1 == CURRENT_SENSE_PLUS || path[i].node2 == CURRENT_SENSE_MINUS || path[i].node2 == CURRENT_SENSE_MINUS)
     {
+      //Serial.println(showReadings);
+
+      inaConnected = 1;
 
       switch (showReadings)
       {
       case 0:
+      break;
+
 
       case 1:
         showINA0[0] = 1;
@@ -332,14 +344,29 @@ void chooseShownReadings(void)
         showINA0[2] = 1;
         break;
       }
+
+      // Serial.println(showINA0[0]);
+      // Serial.println(showINA0[1]);
+      // Serial.println(showINA0[2]);
+      // Serial.println(" ");
+    } 
+ }
+    if (inaConnected == 0)
+    {
+      showINA0[0] = 0;
+      showINA0[1] = 0;
+      showINA0[2] = 0;
+      //showReadings = 3;
     }
-  }
+
+ 
 }
 
 void showMeasurements(int samples)
 {
 
   while (Serial.available() == 0 && Serial1.available() == 0)
+  
   {
     // CSI
     // Serial.write("\x1B\x5B 2K");
@@ -358,6 +385,13 @@ void showMeasurements(int samples)
     int adc3ReadingUnscaled;
     float adc3Reading;
     int bs = 0;
+
+    // Serial.print(showINA0[0]);
+    // Serial.print(showINA0[1]);
+    // Serial.print(showINA0[2]);
+    // Serial.print("\t");
+
+
 
     if (showADCreadings[0] == 1)
     {
@@ -448,10 +482,22 @@ void showMeasurements(int samples)
     if (Serial.available() == 0 && Serial1.available() == 0)
     {
       delay(350);
-    }
+    } 
+    // else {
+    //   Serial.print("Serial.available =");
+    //   Serial.print(Serial.available());
+    //   Serial.print("\nSerial1.available =");
+    //   Serial.print(Serial1.available());
+    //   Serial.print("\n\r");
+    //   delay(1000);
+    //  // break;
+    // }
 
     
-  }
+  } 
+//   else{
+//     Serial.print("\r  nothing to sample                                                                     \r");
+// }
 }
 
 int readAdc(int channel, int samples)
