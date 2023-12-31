@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "NetsToChipConnections.h"
 #include "MatrixStateRP2040.h"
-#include "fileParsing.h"
+#include "FileParsing.h"
 
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
