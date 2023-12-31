@@ -79,7 +79,7 @@ const int nodesToPixelMap[120] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,1
                                     0,0,0,0,0,0,0,
 
                                     81,80,84,85,86,87,88,89,90,91,92,93,94,
-                                    95,82,97,98,99,100,101,102,103,104,105,106,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    95,82,97,98,99,100,101,102,103,104,105,106,107,108,109,110,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 
                                     };
 
@@ -92,7 +92,11 @@ const int  bbPixelToNodesMap[120] = { 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,1
                                     
                                     };
 
+extern uint32_t rawSpecialNetColors[8];// = {0x000000, 0x001C04, 0x1C0702, 0x1C0107, 0x231111, 0x230913, 0x232323, 0x232323};
 
+extern uint32_t rawOtherColors[8]; 
+
+extern uint32_t rawRailColors[3][4];
 
 const int railsToPixelMap[4][5] =  {{70,73,74,77,78},//top positive rail
                                    {71,72,75,76,79},//top negative rail 
@@ -113,10 +117,10 @@ void randomColors(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors (void);
-void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS);
+void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS, int supplySwitchPosition= 1);
 
 void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
-void lightUpNode (int node);
+void lightUpNode (int node, uint32_t color);
 rgbColor pcbColorCorrect (rgbColor colorToCorrect);
 hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);

@@ -621,29 +621,39 @@ void listNets(void) // list nets doesnt care about debugNM, don't call it if you
 {
     if (net[8].number == 0)
     {
-        // if(debugNM) Serial.print("No nets to list\n\r");
+          //Serial.print("No nets to list\n\r");
         // return;
     }
     else
     {
-        Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges");
+        Serial.print("\n\rIndex\tName\t\tNumber\tColor\t\tNodes\t");
 
         int tabs = 0;
         for (int i = 8; i < MAX_NETS; i++)
         {
             if (net[i].number == 0 || net[i].nodes[0] == -1) // stops searching if it gets to an unallocated net
             {
-                // Serial.print("Done listing nets");
+                //Serial.print("Done listing nets");
                 break;
             }
    
             Serial.print("\n\r");
             Serial.print(i);
             Serial.print("\t");
-            Serial.print(net[i].name);
-            Serial.print("\t\t");
+            int netNameLength = Serial.print(net[i].name);
+            if (netNameLength < 8)
+            {
+                Serial.print("\t");
+            }
+            Serial.print("\t");
             Serial.print(net[i].number);
-            Serial.print("\t\t");
+            Serial.print("\t0x");
+        netNameLength = Serial.print(net[i].rawColor, HEX);
+        if (netNameLength < 6)
+        {
+            Serial.print("\t");
+        }
+        Serial.print("\t");
             
             tabs = 0;
             for (int j = 0; j < MAX_NODES; j++)
@@ -721,7 +731,7 @@ Serial.print("\t\t");
 
 void listSpecialNets()
 {
-    Serial.print("\n\rIndex\tName\t\tNumber\t\tNodes\t\t\tBridges");//\t\t\t\tColor\t\tDo Not Intersects");
+    Serial.print("\n\rIndex\tName\t\tNumber\tColor\t\tNodes\t");//\t\t\t\tColor\t\tDo Not Intersects");
     int tabs = 0;
     for (int i = 0; i < 8; i++)
     {
@@ -734,10 +744,22 @@ void listSpecialNets()
         Serial.print("\n\r");
         Serial.print(i);
         Serial.print("\t");
-        Serial.print(net[i].name);
+
+        int netNameLength = Serial.print(net[i].name);
+        if (netNameLength < 8)
+        {
+            Serial.print("\t");
+        }
+
         Serial.print("\t");
         Serial.print(net[i].number);
-        Serial.print("\t\t");
+        Serial.print("\t0x");
+        netNameLength = Serial.print(net[i].rawColor, HEX);
+        if (netNameLength < 6)
+        {
+            Serial.print("\t");
+        }
+        Serial.print("\t");
 
         tabs = 0;
         for (int j = 0; j < MAX_NODES; j++)

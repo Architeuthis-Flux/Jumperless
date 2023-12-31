@@ -2,6 +2,7 @@
 #ifndef JUMPERLESSDEFINESRP2040_H
 #define JUMPERLESSDEFINESRP2040_H
 
+#define INPUTBUFFERLENGTH 8000
 
 #define PIOSTUFF 1 //comment these out to remove them
 #define EEPROMSTUFF 1

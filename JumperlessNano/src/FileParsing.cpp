@@ -8,27 +8,36 @@
 #include "JumperlessDefinesRP2040.h"
 #include "LEDs.h"
 #include <EEPROM.h>
+#include "MachineCommands.h"
+
+
+
+
+
+
 
 bool debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 bool debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
 
 createSafeString(nodeFileString, 1200);
 
-createSafeString(nodeString, 1200);
+int numConnsJson = 0;
 createSafeString(specialFunctionsString, 800);
 
-char inputBuffer[8000] = {0};
+char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
 ArduinoJson::StaticJsonDocument<8000> wokwiJson;
+
 
 String connectionsW[MAX_BRIDGES][5];
 
 File nodeFile;
+
 File wokwiFile;
 
 unsigned long timeToFP = 0;
 
-int numConnsJson = 0;
+
 
 void savePreformattedNodeFile(int source)
 {
@@ -389,17 +398,17 @@ void writeToNodeFile(void)
     {
         if (connectionsW[i][0] == "-1" && connectionsW[i][1] != "-1")
         {
-            lightUpNode(connectionsW[i][0].toInt());
+            //lightUpNode(connectionsW[i][0].toInt());
             continue;
         }
         if (connectionsW[i][1] == "-1" && connectionsW[i][0] != "-1")
         {
-            lightUpNode(connectionsW[i][1].toInt());
+            //lightUpNode(connectionsW[i][1].toInt());
             continue;
         }
         if (connectionsW[i][0] == connectionsW[i][1])
         {
-            lightUpNode(connectionsW[i][0].toInt());
+            //lightUpNode(connectionsW[i][0].toInt());
             continue;
         }
 
@@ -523,30 +532,59 @@ void splitStringToFields()
         if(debugFP)Serial.println("^\n\r");
         */
     replaceSFNamesWithDefinedInts();
+    replaceNanoNamesWithDefinedInts();
+    parseStringToBridges();
 }
 
 void replaceSFNamesWithDefinedInts(void)
 {
+    specialFunctionsString.toUpperCase();
     if (debugFP)
+    {
         Serial.println("replacing special function names with defined ints\n\r");
-
+        Serial.println(specialFunctionsString);
+    }
+    
+    
     specialFunctionsString.replace("GND", "100");
+    specialFunctionsString.replace("GROUND", "100");
     specialFunctionsString.replace("SUPPLY_5V", "105");
     specialFunctionsString.replace("SUPPLY_3V3", "103");
+
     specialFunctionsString.replace("DAC0_5V", "106");
     specialFunctionsString.replace("DAC1_8V", "107");
+    specialFunctionsString.replace("DAC0", "106");
+    specialFunctionsString.replace("DAC1", "107");
+
+    specialFunctionsString.replace("INA_N", "109");
+    specialFunctionsString.replace("INA_P", "108");
     specialFunctionsString.replace("I_N", "109");
     specialFunctionsString.replace("I_P", "108");
+    specialFunctionsString.replace("CURRENT_SENSE_MINUS", "109");
+    specialFunctionsString.replace("CURRENT_SENSE_PLUS", "108");
+
     specialFunctionsString.replace("EMPTY_NET", "127");
+
     specialFunctionsString.replace("ADC0_5V", "110");
     specialFunctionsString.replace("ADC1_5V", "111");
     specialFunctionsString.replace("ADC2_5V", "112");
     specialFunctionsString.replace("ADC3_8V", "113");
+    specialFunctionsString.replace("ADC0", "110");
+    specialFunctionsString.replace("ADC1", "111");
+    specialFunctionsString.replace("ADC2", "112");
+    specialFunctionsString.replace("ADC3", "113");
 
-    // if(debugFP)Serial.println(specialFunctionsString);
-    // if(debugFP)Serial.println("\n\n\r");
+    specialFunctionsString.replace("+5V", "105");
+    specialFunctionsString.replace("5V", "105");
+    specialFunctionsString.replace("3.3V", "103");
+    specialFunctionsString.replace("3V3", "103");
 
-    replaceNanoNamesWithDefinedInts();
+    specialFunctionsString.replace("RP_GPIO_0", "114");
+    specialFunctionsString.replace("RP_UART_TX", "116");
+    specialFunctionsString.replace("RP_UART_RX", "117");
+    specialFunctionsString.replace("GPIO_0", "114");
+    specialFunctionsString.replace("UART_TX", "116");
+    specialFunctionsString.replace("UART_RX", "117");
 }
 
 void replaceNanoNamesWithDefinedInts(void) // for dome reason Arduino's String wasn't replacing like 1 or 2 of the names, so I'm using SafeString now and it works
@@ -633,8 +671,6 @@ void replaceNanoNamesWithDefinedInts(void) // for dome reason Arduino's String w
         Serial.println(specialFunctionsString);
     if (debugFP)
         Serial.println("\n\n\r");
-
-    parseStringToBridges();
 }
 
 void parseStringToBridges(void)
@@ -645,7 +681,6 @@ void parseStringToBridges(void)
     int specialFunctionsStringLength = specialFunctionsString.length() - 1;
 
     int readLength = 0;
-
 
     newBridgeLength = 0;
     newBridgeIndex = 0;
@@ -663,32 +698,28 @@ void parseStringToBridges(void)
 
     for (int i = 0; i <= specialFunctionsStringLength; i++)
     {
-       
-        stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
+        stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
         buffer.toInt(path[newBridgeIndex].node1);
 
         if (debugFP)
         {
-        Serial.print("node1 = ");
-        Serial.println(path[newBridgeIndex].node1);
+            Serial.print("node1 = ");
+            Serial.println(path[newBridgeIndex].node1);
         }
 
         stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
-
 
         buffer.toInt(path[newBridgeIndex].node2);
 
         if (debugFP)
         {
-        Serial.print("node2 = ");
-        Serial.println(path[newBridgeIndex].node2);
+            Serial.print("node2 = ");
+            Serial.println(path[newBridgeIndex].node2);
         }
 
         readLength = stringIndex;
-        
-
 
         if (readLength == -1)
         {
@@ -698,15 +729,13 @@ void parseStringToBridges(void)
         newBridgeLength++;
         newBridgeIndex++;
 
-
         if (debugFP)
         {
-        Serial.print("readLength = ");
-        Serial.println(readLength);
-        Serial.print("specialFunctionsString.length() = ");
-        Serial.println(specialFunctionsString.length());
+            Serial.print("readLength = ");
+            Serial.println(readLength);
+            Serial.print("specialFunctionsString.length() = ");
+            Serial.println(specialFunctionsString.length());
         }
-        
 
         if (debugFP)
             Serial.print(newBridgeIndex);
@@ -714,8 +743,6 @@ void parseStringToBridges(void)
             Serial.print("-");
         if (debugFP)
             Serial.println(newBridge[newBridgeIndex][1]);
-
-
     }
 
     newBridgeIndex = 0;

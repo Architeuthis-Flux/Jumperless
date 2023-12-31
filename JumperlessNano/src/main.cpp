@@ -27,6 +27,7 @@
 #include "Peripherals.h"
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
+#include "MachineCommands.h"
 // #include <EEPROM.h>
 
 #ifdef EEPROMSTUFF
@@ -45,6 +46,11 @@
 #endif
 
 Adafruit_USBD_CDC USBSer1;
+
+int supplySwitchPosition = 0;
+
+void machineMode(void);
+// int machineMode = 0;
 
 volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
 
@@ -139,7 +145,7 @@ menu:
 dontshowmenu:
   connectFromArduino = '\0';
 
-  while (Serial.available() == 0 && connectFromArduino == '\0' )
+  while (Serial.available() == 0 && connectFromArduino == '\0')
     ;
 
   {
@@ -161,7 +167,7 @@ dontshowmenu:
   }
 
   // Serial.print(input);
-
+skipinput:
   switch (input)
   {
   case 'v':
@@ -249,15 +255,15 @@ dontshowmenu:
 
     savePreformattedNodeFile(serSource);
 
-    //Serial.print("savePFNF\n\r");
+    // Serial.print("savePFNF\n\r");
     openNodeFile();
     getNodesToConnect();
-    //Serial.print("openNF\n\r");
+    // Serial.print("openNF\n\r");
     digitalWrite(RESETPIN, HIGH);
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
-    //Serial.print("bridgesToPaths\n\r");
+    // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
 
@@ -274,11 +280,11 @@ dontshowmenu:
     if (connectFromArduino != '\0')
     {
       connectFromArduino = '\0';
-    //Serial.print("connectFromArduino\n\r");
-      // delay(2000);
+      // Serial.print("connectFromArduino\n\r");
+      //  delay(2000);
       input = ' ';
       readInNodesArduino = 0;
-       goto dontshowmenu;
+      goto dontshowmenu;
     }
 
     readInNodesArduino = 0;
@@ -418,9 +424,7 @@ dontshowmenu:
     if (toggleDebug >= 0 && toggleDebug <= 9)
     {
 
-#ifdef EEPROMSTUFF
       debugFlagSet(toggleDebug);
-#endif
 
       delay(10);
 
@@ -431,6 +435,22 @@ dontshowmenu:
       break;
     }
   }
+
+  case ':':
+
+    if (Serial.read() == ':')
+    {
+      // Serial.print("\n\r");
+      // Serial.print("entering machine mode\n\r");
+      machineMode();
+      // showLEDsCore2 = 1;
+      goto dontshowmenu;  
+      break;
+    }
+    else
+    {
+      break;
+    }
 
   default:
     while (Serial.available() > 0)
@@ -444,6 +464,78 @@ dontshowmenu:
 
   goto menu;
 }
+
+// #include <string> // Include the necessary header file
+
+void machineMode(void) // read in commands in machine readable format
+{
+  
+  enum machineModeInstruction receivedInstruction = parseMachineInstructions();
+
+  switch (receivedInstruction)
+  {
+  case netlist:
+    clearAllNTCC();
+
+    digitalWrite(RESETPIN, HIGH);
+    machineNetlistToNetstruct();
+    populateBridgesFromNodes();
+    bridgesToPaths();
+
+    clearLEDs();
+    assignNetColors();
+    // showNets();
+    digitalWrite(RESETPIN, LOW);
+    sendAllPathsCore2 = 1;
+    break;
+
+  case bridgelist:
+    clearAllNTCC();
+
+    writeNodeFileFromInputBuffer();
+
+    openNodeFile();
+    getNodesToConnect();
+    // Serial.print("openNF\n\r");
+    digitalWrite(RESETPIN, HIGH);
+    bridgesToPaths();
+    clearLEDs();
+    assignNetColors();
+    // Serial.print("bridgesToPaths\n\r");
+    digitalWrite(RESETPIN, LOW);
+    // showNets();
+
+    sendAllPathsCore2 = 1;
+    break;
+
+  case lightnode:
+    lightUpNodesFromInputBuffer();
+    break;
+
+  case lightnet:
+    lightUpNetsFromInputBuffer();
+    //   lightUpNet();
+    //assignNetColors();
+    showLEDsCore2 = 1;
+      break;
+
+    // case getmeasurement:
+    //   showMeasurements();
+    //   break;
+
+  case setsupplyswitch:
+    
+    supplySwitchPosition = setSupplySwitch();
+    showLEDsCore2 = 1;
+    break;
+
+  // case gpio:
+  //   break;
+  }
+
+  
+}
+
 unsigned long logoFlashTimer = 0;
 
 int arduinoReset = 0;
@@ -460,7 +552,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     // showNets();
     if (rails == 1)
     {
-      lightUpRail();
+      lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
     }
     if (rails > 3)
     {
@@ -492,12 +584,16 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     lastTimeReset = millis();
   }
 
+  // if (digitalRead(RP_GPIO_0) == 1)
+  // {
+  //   setDac0_5Vvoltage(5.0);
+  // } else
+  // {
+  //   setDac0_5Vvoltage(0.0);
+  // }
+
   while (arduinoReset == 1)
   {
-    // if (USBSer1.peek() == 0x30)
-    // {
-    //   resetArduino();
-    // }
 
     if (USBSer1.available())
     {

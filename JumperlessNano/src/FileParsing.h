@@ -11,7 +11,10 @@ extern bool debugNTCC;
 extern bool debugNTCC2;
 
 extern bool debugLEDs;
+extern bool debugMM;
 
+
+//extern File nodeFile;  
 
 
 //this just opens the file, takes out all the bullshit, and then populates the newBridge array
@@ -41,5 +44,8 @@ void debugFlagInit(void);
 void clearNodeFile(void);
 int lenHelper(int);
 int printLen(int);
+
+
+
 
 #endif

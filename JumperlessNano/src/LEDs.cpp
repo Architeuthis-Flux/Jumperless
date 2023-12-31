@@ -32,6 +32,26 @@ bool debugLEDs = 1; // EEPROM.read(DEBUG_LEDSADDRESS);
 bool debugLEDs = 1;
 #endif
 
+uint32_t rawSpecialNetColors[8] =
+    {0x000000,
+     0x001C04,
+     0x1C0702,
+     0x1C0107,
+     0x231111,
+     0x230913,
+     0x232323,
+     0x232323};
+
+uint32_t rawOtherColors[8] =
+    {0x020008, // dim header glow
+     0x550008, // logo glow
+     0x0055AA, // logo flash
+     0x301A02, // +8V
+     0x120932, // -8V
+     0x230913,
+     0x232323,
+     0x232323};
+
 rgbColor specialNetColors[8] =
     {{00, 00, 00},
      {0x00, 0xFF, 0x30},
@@ -48,6 +68,14 @@ rgbColor railColors[4] =
         {0x00, 0xFF, 0x30},
         {0xFF, 0x32, 0x30},
         {0x00, 0xFF, 0x30}};
+
+uint32_t rawRailColors[3][4] = // depends on supplySwitchPosition 0 = 3.3V, 1 = 5V, 2 = +-8V
+    {
+        {0x1C0110, 0x001C04, 0x1C0110, 0x001C04},
+
+        {0x210904, 0x001C04, 0x210904, 0x001C04},
+
+        {0x301A02, 0x001C04, 0x120932, 0x001C04}};
 
 void initLEDs(void)
 {
@@ -85,12 +113,11 @@ char LEDbrightnessMenu(void)
     Serial.print("\n\n\r\tb = Rainbow Bounce test");
     Serial.print("\n\r\tc = Random Color test\n\r");
 
-
     Serial.print("\n\r\tx = Exit\n\n\r");
     // Serial.print(leds.getBrightness());
     if (LEDbrightness > 50 || LEDbrightnessRail > 50 || LEDbrightnessSpecial > 70)
     {
-        //Serial.print("\tBrightness settings above ~50 will cause significant heating, it's not recommended\n\r");
+        // Serial.print("\tBrightness settings above ~50 will cause significant heating, it's not recommended\n\r");
         delay(10);
     }
 
@@ -177,7 +204,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightness > 50)
                 {
-                    //Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\r");
+                    // Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\r");
                 }
             }
         }
@@ -233,7 +260,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightnessRail > 50)
                 {
-                    //Serial.println("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r");
+                    // Serial.println("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r");
                 }
             }
         }
@@ -244,7 +271,7 @@ char LEDbrightnessMenu(void)
 
     else if (input == 's')
     {
-        //Serial.print("\n\r\t+ = increase\n\r\t- = decrease\n\r\tx = exit\n\n\r");
+        // Serial.print("\n\r\t+ = increase\n\r\t- = decrease\n\r\tx = exit\n\n\r");
         while (input == 's')
         {
 
@@ -262,7 +289,7 @@ char LEDbrightnessMenu(void)
                     LEDbrightnessSpecial = 200;
                 }
 
-                //showLEDsCore2 = 1;
+                // showLEDsCore2 = 1;
             }
             else if (input2 == '-')
             {
@@ -274,7 +301,7 @@ char LEDbrightnessMenu(void)
                     LEDbrightnessSpecial = 1;
                 }
 
-                //showLEDsCore2 = 1;
+                // showLEDsCore2 = 1;
             }
             else if (input2 == 'x')
             {
@@ -298,7 +325,7 @@ char LEDbrightnessMenu(void)
                 Serial.print("\n\r");
                 if (LEDbrightnessSpecial > 70)
                 {
-                    //Serial.print("Brightness settings above ~70 for special nets will cause significant heating, it's not recommended\n\n\r ");
+                    // Serial.print("Brightness settings above ~70 for special nets will cause significant heating, it's not recommended\n\n\r ");
                 }
             }
         }
@@ -375,13 +402,13 @@ char LEDbrightnessMenu(void)
             {
                 lightUpNet(i, -1, 1, LEDbrightness, 0);
             }
-            
+
             lightUpRail(-1, -1, 1, LEDbrightnessRail);
             for (int i = 0; i < 8; i++)
             {
                 lightUpNet(i, -1, 1, LEDbrightnessSpecial, 0);
             }
-showLEDsCore2 = 1;
+            showLEDsCore2 = 1;
 
             if (Serial.available() == 0)
             {
@@ -397,42 +424,38 @@ showLEDsCore2 = 1;
                 Serial.print("\n\r");
                 if (LEDbrightness > 50 || LEDbrightnessRail > 50 || LEDbrightnessSpecial > 70)
                 {
-                    //Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r ");
+                    // Serial.print("Brightness settings above ~50 will cause significant heating, it's not recommended\n\n\r ");
                 }
             }
         }
     }
-        else if (input == 'b')
+    else if (input == 'b')
     {
-        Serial.print ("\n\rPress any key to exit\n\n\r");
+        Serial.print("\n\rPress any key to exit\n\n\r");
         while (Serial.available() == 0)
         {
             rainbowBounce(40);
         }
 
         input = '!'; // this tells the main fuction to reset the leds
-
-
-
-    } else if (input == 'c')
+    }
+    else if (input == 'c')
     {
-        Serial.print ("\n\rPress any key to exit\n\n\r");
+        Serial.print("\n\rPress any key to exit\n\n\r");
         while (Serial.available() == 0)
         {
-            randomColors(0,90);
+            randomColors(0, 90);
         }
         delay(10000);
         input = '!';
-
-    
     }
     else
     {
-         EEPROM.write(LEDBRIGHTNESSADDRESS, LEDbrightness);
-         EEPROM.write(RAILBRIGHTNESSADDRESS, LEDbrightnessRail);
-         EEPROM.write(SPECIALBRIGHTNESSADDRESS, LEDbrightnessSpecial);
-         EEPROM.commit();
-         assignNetColors();
+        EEPROM.write(LEDBRIGHTNESSADDRESS, LEDbrightness);
+        EEPROM.write(RAILBRIGHTNESSADDRESS, LEDbrightnessRail);
+        EEPROM.write(SPECIALBRIGHTNESSADDRESS, LEDbrightnessSpecial);
+        EEPROM.commit();
+        assignNetColors();
 
         return input;
     }
@@ -455,7 +478,7 @@ void assignNetColors(void)
           0xFFC8C8,
           0xC8FFC8};
  */
-    leds.setPixelColor(110, 0x0055AA);
+    leds.setPixelColor(110, rawOtherColors[2]);
     logoFlash = 2;
     // showLEDsCore2 = 1;
     if (debugLEDs)
@@ -472,39 +495,46 @@ void assignNetColors(void)
 
     for (int i = 1; i < 8; i++)
     {
-        hsvColor netHsv = RgbToHsv(specialNetColors[i]);
-
-        if (i >= 1 && i <= 3)
+        if (net[i].machine == true)
         {
-            netHsv.v = LEDbrightnessRail;
+            rgbColor specialNetRgb = unpackRgb(rawSpecialNetColors[i]);
+
+            net[i].color = specialNetRgb;
+            specialNetColors[i] = specialNetRgb;
+
+            netColors[i] = specialNetRgb;
+            // continue;
         }
-        else if (i >= 4 && i <= 7)
+        else
         {
-            netHsv.v = LEDbrightnessSpecial;
+
+            hsvColor netHsv = RgbToHsv(specialNetColors[i]);
+
+            if (i >= 1 && i <= 3)
+            {
+                netHsv.v = LEDbrightnessRail;
+            }
+            else if (i >= 4 && i <= 7)
+            {
+                netHsv.v = LEDbrightnessSpecial;
+            }
+
+            rgbColor netRgb = HsvToRgb(netHsv);
+
+            specialNetColors[i] = netRgb;
+
+            netColors[i] = specialNetColors[i];
+            net[i].color = netColors[i];
         }
-
-        rgbColor netRgb = HsvToRgb(netHsv);
-
-        specialNetColors[i] = netRgb;
-
-        netColors[i] = specialNetColors[i];
-        net[i].color = netColors[i];
-
-        // for (int j = 0; j < MAX_NODES; j++)
-        // {
-        //     if (net[i].nodes[j] != -1 && net[i].nodes[j] != 0 )
-        //     {
-        //         leds.setPixelColor(net[i].nodes[j], net[i].color.r, net[i].color.g, net[i].color.b);
-        //     } else {
-        //         break;
-        //     }
-
-        // }
 
         if (debugLEDs)
         {
             Serial.print("\n\r");
-            Serial.print(net[i].name);
+            int netLength = Serial.print(net[i].name);
+            if (netLength < 8)
+            {
+                Serial.print("\t");
+            }
             Serial.print("\t");
             Serial.print(net[i].color.r, HEX);
             Serial.print("\t");
@@ -512,137 +542,133 @@ void assignNetColors(void)
             Serial.print("\t");
             Serial.print(net[i].color.b, HEX);
             Serial.print("\t\t");
-            Serial.print(netHsv.h);
+            // Serial.print(netHsv.h);
             Serial.print("\t");
-            Serial.print(netHsv.s);
+            // Serial.print(netHsv.s);
             Serial.print("\t");
-            Serial.print(netHsv.v);
+            // Serial.print(netHsv.v);
             delay(10);
         }
         //
     }
-
-    //     for (int i = 0; i < 5; i++)
-    //     {
-    //         for (int j = 0; j < 4; j++)
-    //         {
-    //             hsvColor netHsv = RgbToHsv(railColors[j]);
-
-    //             netHsv.v = LEDbrightnessRail;
-
-    //             rgbColor netRgb = HsvToRgb(netHsv);
-
-    //             uint32_t color = packRgb(netRgb.r, netRgb.g, netRgb.b); // packRgb(railColors[j].r, railColors[j].g, railColors[j].b);
-
-    //             //leds.setPixelColor(railsToPixelMap[j][i], color); // top positive rail
-    //         }
-    //         /*
-
-    //         leds.setPixelColor(railsToPixelMap[1][i], railColors[1]); // top negative rail
-
-    //         leds.setPixelColor(railsToPixelMap[2][i], railColors[2]); // bottom positive rail
-
-    //         leds.setPixelColor(railsToPixelMap[3][i], railColors[3]); // bottom negative rail
-    //  */
-    //     }
-    // leds.show();
-    // showLEDsCore2 = 1;
-    // delay(2);
 
     int skipSpecialColors = 0;
     uint8_t hue = 8;
 
     for (int i = 8; i < numberOfNets; i++)
     {
-        uint8_t r = 0;
-        uint8_t g = 0;
-        uint8_t b = 0;
-
-        int foundColor = 0;
-
-        for (uint8_t hueScan = hue + (colorDistance / 4); hueScan <= 254; hueScan += (colorDistance))
+        // if(net[i].nodes[0] == -1){
+        //     continue;
+        // }
+        
+        if (net[i].machine == true)
         {
-            for (int k = 0; k < 8; k++)
-            {
-                hsvColor snColor = RgbToHsv(specialNetColors[k]);
+            Serial.println("number of nets: ");
+            Serial.println(numberOfNets);
+            // rgbColor specialNetRgb = unpackRgb(rawSpecialNetColors[i]);
 
-                if (hueScan > snColor.h)
+            // net[i].color = specialNetRgb;
+            // specialNetColors[i] = specialNetRgb;
+
+            // netColors[i] = specialNetRgb;
+            // continue;
+            //leds.setPixelColor(nodesToPixelMap[i], net[i].rawColor);
+            netColors[i] = unpackRgb(net[i].rawColor);
+
+        }
+        else
+        {
+
+            uint8_t r = 0;
+            uint8_t g = 0;
+            uint8_t b = 0;
+
+            int foundColor = 0;
+
+            for (uint8_t hueScan = hue + (colorDistance / 4); hueScan <= 254; hueScan += (colorDistance))
+            {
+                for (int k = 0; k < 8; k++)
                 {
-                    if (hueScan - snColor.h < colorDistance / 2)
+                    hsvColor snColor = RgbToHsv(specialNetColors[k]);
+
+                    if (hueScan > snColor.h)
+                    {
+                        if (hueScan - snColor.h < colorDistance / 2)
+                        {
+                            skipSpecialColors = 1;
+                            // Serial.print("skipping special color: ");
+                            // Serial.print(k);
+
+                            // continue;
+                            break;
+                        }
+                    }
+                    else if (snColor.h - hueScan < colorDistance / 2)
                     {
                         skipSpecialColors = 1;
+                        // continue;
                         // Serial.print("skipping special color: ");
                         // Serial.print(k);
-
+                        break;
+                    }
+                    else if (hueScan - hue < colorDistance)
+                    {
+                        skipSpecialColors = 1;
                         // continue;
+                        // Serial.print("skipping special color: ");
+                        // Serial.print(k);
                         break;
                     }
                 }
-                else if (snColor.h - hueScan < colorDistance / 2)
+                if (skipSpecialColors == 1)
                 {
-                    skipSpecialColors = 1;
-                    // continue;
-                    // Serial.print("skipping special color: ");
-                    // Serial.print(k);
+                    skipSpecialColors = 0;
+                    continue;
+                }
+                else
+                {
+                    foundColor = 1;
+                    hue = hueScan;
                     break;
                 }
-                else if (hueScan - hue < colorDistance)
+
+                if (i == numberOfNets && foundColor == 0)
                 {
-                    skipSpecialColors = 1;
-                    // continue;
-                    // Serial.print("skipping special color: ");
-                    // Serial.print(k);
-                    break;
+                    // hueScan = 0;
                 }
             }
-            if (skipSpecialColors == 1)
+            if (foundColor == 0)
             {
-                skipSpecialColors = 0;
-                continue;
-            }
-            else
-            {
-                foundColor = 1;
-                hue = hueScan;
-                break;
             }
 
-            if (i == numberOfNets && foundColor == 0)
+            hsvColor netHsv = {hue, 254, LEDbrightness};
+            // netHsv.v = 200;
+            netColors[i] = HsvToRgb(netHsv);
+
+            // leds.setPixelColor(i, netColors[i]);
+
+            net[i].color.r = netColors[i].r;
+            net[i].color.g = netColors[i].g;
+            net[i].color.b = netColors[i].b;
+            if (debugLEDs)
             {
-                // hueScan = 0;
+
+                Serial.print("\n\r");
+                Serial.print(net[i].name);
+                Serial.print("\t\t");
+                Serial.print(net[i].color.r, DEC);
+                Serial.print("\t");
+                Serial.print(net[i].color.g, DEC);
+                Serial.print("\t");
+                Serial.print(net[i].color.b, DEC);
+                Serial.print("\t\t");
+                Serial.print(hue);
+                Serial.print("\t");
+                Serial.print(saturation);
+                Serial.print("\t");
+                Serial.print(LEDbrightness);
+                delay(3);
             }
-        }
-        if (foundColor == 0)
-        {
-        }
-
-        hsvColor netHsv = {hue, 254, LEDbrightness};
-        // netHsv.v = 200;
-        netColors[i] = HsvToRgb(netHsv);
-
-        // leds.setPixelColor(i, netColors[i]);
-
-        net[i].color.r = netColors[i].r;
-        net[i].color.g = netColors[i].g;
-        net[i].color.b = netColors[i].b;
-        if (debugLEDs)
-        {
-
-            Serial.print("\n\r");
-            Serial.print(net[i].name);
-            Serial.print("\t\t");
-            Serial.print(net[i].color.r, DEC);
-            Serial.print("\t");
-            Serial.print(net[i].color.g, DEC);
-            Serial.print("\t");
-            Serial.print(net[i].color.b, DEC);
-            Serial.print("\t\t");
-            Serial.print(hue);
-            Serial.print("\t");
-            Serial.print(saturation);
-            Serial.print("\t");
-            Serial.print(LEDbrightness);
-            delay(3);
         }
     }
     // logoFlash = 0;
@@ -659,7 +685,13 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
     int pcbExtinction = 0;
     int colorCorrection = 0;
     int pcbHueShift = 0;
+    // Serial.print("netNumber: ");
+    // Serial.print(netNumber);
 
+    //     Serial.print(" node: ");
+    //     Serial.print(node);
+    //     Serial.print(" onOff: ");
+    //     Serial.print(onOff);
     if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] <= NANO_A7)
     {
 
@@ -668,110 +700,154 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
             if (net[netNumber].nodes[j] <= 0)
             {
                 break;
+            
             }
-            if (net[netNumber].nodes[j] <= NANO_A7)
+
+            if (net[netNumber].machine == true)
             {
+
+
+
                 if (net[netNumber].nodes[j] == node || node == -1)
                 {
                     if (onOff == 1)
                     {
-
-                        pcbExtinction = 0;
-                        colorCorrection = 0;
-                        pcbHueShift = 0;
-
-                        if (net[netNumber].nodes[j] >= NANO_D0 && net[netNumber].nodes[j] <= NANO_A7)
+                        if (nodesToPixelMap[net[netNumber].nodes[j]] > 0)
                         {
-                            pcbExtinction = PCBEXTINCTION;
-                            
-                            //Serial.println (brightness2);
-                            // hueShift += PCBHUESHIFT;
-                            // colorCorrection = 1;
-                        }
-                        //pcbExtinction += (brightness2-DEFAULTBRIGHTNESS);
+                            leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], net[netNumber].rawColor);
+                        
 
-                        struct rgbColor colorToShift = {net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b};
-
-                        struct rgbColor shiftedColor = shiftHue(colorToShift, hueShift, pcbExtinction, 254);
-
-                        if (colorCorrection != 0)
-                        {
-                            shiftedColor = pcbColorCorrect(shiftedColor);
-                        }
-
-                        hsvColor shiftedColorHsv = RgbToHsv(shiftedColor);
-
-                        if (net[netNumber].specialFunction >= 100 && net[netNumber].specialFunction <= 105)
-                        {
-                            if (brightness2 != DEFAULTBRIGHTNESS)
-                            {
-                                shiftedColorHsv.v = brightness2;
-                            }
-                            else
-                            {
-                                shiftedColorHsv.v = LEDbrightnessRail;
-                            }
-                            shiftedColor = HsvToRgb(shiftedColorHsv);
-
-                            color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
-                            // color = packRgb((shiftedColor.r * LEDbrightnessRail) >> 8, (shiftedColor.g * LEDbrightnessRail) >> 8, (shiftedColor.b * LEDbrightnessRail) >> 8);
-                            // Serial.print("rail color: ");
-                            // Serial.print(color, HEX);
-                        }
-                        else if (net[netNumber].specialFunction >= 106 && net[netNumber].specialFunction <= 120)
-                        {
-                            if (brightness2 != DEFAULTBRIGHTNESS)
-                            {
-                                shiftedColorHsv.v = brightness2;
-                            }
-                            else
-                            {
-                                shiftedColorHsv.v = LEDbrightnessSpecial;
-                            }
-                           
-                            shiftedColor = HsvToRgb(shiftedColorHsv);
-
-                            color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
-                            // color = packRgb((shiftedColor.r * LEDbrightnessSpecial) >> 8, (shiftedColor.g * LEDbrightnessSpecial) >> 8, (shiftedColor.b * LEDbrightnessSpecial) >> 8);
-                        }
-                        else
-                        {
-                          if (brightness2 != DEFAULTBRIGHTNESS)
-                            {
-                                shiftedColorHsv.v = brightness2;
-                            }
-                            else
-                            {
-                                shiftedColorHsv.v = LEDbrightness;
-                            }
-                            
-                            shiftedColor = HsvToRgb(shiftedColorHsv);
-
-                            color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
-
-                            // color = packRgb((shiftedColor.r * LEDbrightness) >> 8, (shiftedColor.g * LEDbrightness) >> 8, (shiftedColor.b * LEDbrightness) >> 8);
-                        }
-
-                        leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
                         if (debugLEDs)
                         {
-                        Serial.print("net: ");
-                        Serial.print(netNumber);
-                        Serial.print(" node: ");
-                        Serial.print(net[netNumber].nodes[j]);
-                        Serial.print(" mapped to LED:");
+                            Serial.print("net: ");
+                            Serial.print(netNumber);
+                            Serial.print(" node: ");
+                            Serial.print(net[netNumber].nodes[j]);
+                            Serial.print(" mapped to LED:");
+                            Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
 
-                        Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
+                            Serial.print("rawColor: ");
+                            Serial.println(net[netNumber].rawColor, HEX);
                         }
+}
+                        // leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b);
                     }
                     else
                     {
+                        // Serial.print("net: ");
+                        // Serial.print(netNumber);
+                        // Serial.print("  onOff:  ");
+                        // Serial.println(onOff);
                         leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], 0);
                     }
                 }
             }
+            else
+            {
+                if (net[netNumber].nodes[j] <= NANO_A7)
+                {
+                    if (net[netNumber].nodes[j] == node || node == -1)
+                    {
+                        if (onOff == 1)
+                        {
+
+                            pcbExtinction = 0;
+                            colorCorrection = 0;
+                            pcbHueShift = 0;
+
+                            if (net[netNumber].nodes[j] >= NANO_D0 && net[netNumber].nodes[j] <= NANO_A7)
+                            {
+                                pcbExtinction = PCBEXTINCTION;
+
+                                // Serial.println (brightness2);
+                                //  hueShift += PCBHUESHIFT;
+                                //  colorCorrection = 1;
+                            }
+                            // pcbExtinction += (brightness2-DEFAULTBRIGHTNESS);
+
+                            struct rgbColor colorToShift = {net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b};
+
+                            struct rgbColor shiftedColor = shiftHue(colorToShift, hueShift, pcbExtinction, 254);
+
+                            if (colorCorrection != 0)
+                            {
+                                shiftedColor = pcbColorCorrect(shiftedColor);
+                            }
+
+                            hsvColor shiftedColorHsv = RgbToHsv(shiftedColor);
+
+                            if (net[netNumber].specialFunction >= 100 && net[netNumber].specialFunction <= 105)
+                            {
+                                if (brightness2 != DEFAULTBRIGHTNESS)
+                                {
+                                    shiftedColorHsv.v = brightness2;
+                                }
+                                else
+                                {
+                                    shiftedColorHsv.v = LEDbrightnessRail;
+                                }
+                                shiftedColor = HsvToRgb(shiftedColorHsv);
+
+                                color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
+                                // color = packRgb((shiftedColor.r * LEDbrightnessRail) >> 8, (shiftedColor.g * LEDbrightnessRail) >> 8, (shiftedColor.b * LEDbrightnessRail) >> 8);
+                                // Serial.print("rail color: ");
+                                // Serial.print(color, HEX);
+                            }
+                            else if (net[netNumber].specialFunction >= 106 && net[netNumber].specialFunction <= 120)
+                            {
+                                if (brightness2 != DEFAULTBRIGHTNESS)
+                                {
+                                    shiftedColorHsv.v = brightness2;
+                                }
+                                else
+                                {
+                                    shiftedColorHsv.v = LEDbrightnessSpecial;
+                                }
+
+                                shiftedColor = HsvToRgb(shiftedColorHsv);
+
+                                color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
+                                // color = packRgb((shiftedColor.r * LEDbrightnessSpecial) >> 8, (shiftedColor.g * LEDbrightnessSpecial) >> 8, (shiftedColor.b * LEDbrightnessSpecial) >> 8);
+                            }
+                            else
+                            {
+                                if (brightness2 != DEFAULTBRIGHTNESS)
+                                {
+                                    shiftedColorHsv.v = brightness2;
+                                }
+                                else
+                                {
+                                    shiftedColorHsv.v = LEDbrightness;
+                                }
+
+                                shiftedColor = HsvToRgb(shiftedColorHsv);
+
+                                color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
+
+                                // color = packRgb((shiftedColor.r * LEDbrightness) >> 8, (shiftedColor.g * LEDbrightness) >> 8, (shiftedColor.b * LEDbrightness) >> 8);
+                            }
+
+                            leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
+                            if (debugLEDs)
+                            {
+                                Serial.print("net: ");
+                                Serial.print(netNumber);
+                                Serial.print(" node: ");
+                                Serial.print(net[netNumber].nodes[j]);
+                                Serial.print(" mapped to LED:");
+
+                                Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
+                            }
+                        }
+                        else
+                        {
+                            leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], 0);
+                        }
+                    }
+                }
+            }
         }
-turnOffSkippedNodes();
+        turnOffSkippedNodes();
         /*                                                            Serial.print("color: ");
                                                             Serial.print(color,HEX);
                                                             Serial.print(" r: ");
@@ -798,12 +874,11 @@ void turnOffSkippedNodes(void)
 
         if (path[i].skip == true)
         {
-              leds.setPixelColor(nodesToPixelMap[path[i].node1], 0);
-                leds.setPixelColor(nodesToPixelMap[path[i].node2], 0);
-
-        }
+            leds.setPixelColor(nodesToPixelMap[path[i].node1], 0);
+            leds.setPixelColor(nodesToPixelMap[path[i].node2], 0);
         }
     }
+}
 
 struct rgbColor pcbColorCorrect(rgbColor colorToShift)
 {
@@ -1037,16 +1112,15 @@ struct rgbColor shiftHue(struct rgbColor colorToShift, int hueShift, int brightn
     return colorToShiftRgb;
 }
 
-void lightUpNode(int node)
+void lightUpNode(int node, uint32_t color)
 {
-    uint32_t randColor = random(0, 0xffffff);
-    leds.setPixelColor(node, (randColor));
+    
+    leds.setPixelColor(node,color);
     showLEDsCore2 = 1;
-    delay(2000);
-    leds.setPixelColor(node, 0);
+
 }
 
-void lightUpRail(int logo, int rail, int onOff, int brightness2)
+void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosition)
 {
     /*
     brightness2 = (uint8_t)LEDbrightnessRail;
@@ -1058,34 +1132,48 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2)
 */
 
     brightness2 = LEDbrightnessRail;
-    
+
     if (logo == -1 && logoFlash == 0)
     {
-        leds.setPixelColor(110, 0x550008);
+        leds.setPixelColor(110, rawOtherColors[1]);
         // Serial.println(RgbToHsv(unpackRgb(0x550008)).v);
     }
 
-    leds.setPixelColor(83, packRgb((railColors[1].r * brightness2) >> 8, (railColors[1].g * brightness2) >> 8, (railColors[1].b * brightness2) >> 8));
-    leds.setPixelColor(108, packRgb((railColors[1].r * brightness2) >> 8, (railColors[1].g * brightness2) >> 8, (railColors[1].b * brightness2) >> 8));
-    leds.setPixelColor(109, packRgb((railColors[0].r * brightness2) >> 8, (railColors[0].g * brightness2) >> 8, (railColors[0].b * brightness2) >> 8));
-    leds.setPixelColor(96, packRgb((railColors[2].r * brightness2) >> 8, (railColors[2].g * brightness2) >> 8, (railColors[2].b * brightness2) >> 8));
-    leds.setPixelColor(106, packRgb((railColors[0].r * brightness2) >> 8, (railColors[0].g * brightness2) >> 8, (railColors[0].b * brightness2) >> 8));
+    for (int i = 80; i <= 109; i++)
+    {
+        if (leds.getPixelColor(i) == 0 )
+        {
+            leds.setPixelColor(i, rawOtherColors[0]);
+        }
+        
+    }
 
+    leds.setPixelColor(83, rawSpecialNetColors[1]);
+    leds.setPixelColor(108, rawSpecialNetColors[1]);
+    leds.setPixelColor(109, rawSpecialNetColors[2]);
+    leds.setPixelColor(96, rawSpecialNetColors[3]);
+    leds.setPixelColor(106, rawSpecialNetColors[2]);
+
+    if (switchPosition == 2) //+-8V
+    {
+        rawRailColors[switchPosition][0] = rawOtherColors[3];
+        rawRailColors[switchPosition][2] = rawOtherColors[4];
+    }
     for (int j = 0; j < 4; j++)
     {
         if (j == rail || rail == -1)
         {
-            rgbColor rgbRail = railColors[j];
-            hsvColor hsvRail = RgbToHsv(rgbRail);
-            hsvRail.v = brightness2;
-            // Serial.println (brightness2);
-            rgbRail = HsvToRgb(hsvRail);
+            // rgbColor rgbRail = railColors[j];
+            // hsvColor hsvRail = RgbToHsv(rgbRail);
+            // hsvRail.v = brightness2;
+            // // Serial.println (brightness2);
+            // rgbRail = HsvToRgb(hsvRail);
             // Serial.println (hsvRail.h);
             // Serial.println (hsvRail.s);
             // Serial.println (hsvRail.v);
             // Serial.println ("\n\r");
 
-            uint32_t color = packRgb(rgbRail.r, rgbRail.g, rgbRail.b);
+            uint32_t color = rawRailColors[switchPosition][j];
             for (int i = 0; i < 5; i++)
             {
 
@@ -1093,7 +1181,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2)
                 {
                     // uint32_t color = packRgb((railColors[j].r * brightness2) >> 8, (railColors[j].g * brightness2) >> 8, (railColors[j].b * brightness2) >> 8);
 
-                    // Serial.println(color,HEX);
+                    /// Serial.println(color,HEX);
                     leds.setPixelColor(railsToPixelMap[j][i], color);
                 }
                 else
@@ -1113,6 +1201,7 @@ void showNets(void)
 
     for (int i = 0; i < numberOfNets; i++)
     {
+        //Serial.print(i);
 
         lightUpNet(i);
     }
@@ -1221,12 +1310,12 @@ void randomColors(uint32_t color, int wait)
     int count = 0;
 
     for (int i = 0; i < leds.numPixels(); i++)
-    {   
-    
-        count = random(0,8);
+    {
+
+        count = random(0, 8);
         if (i > 80)
         {
-            count = random(0,22);
+            count = random(0, 22);
         }
 
         byte colorValR = random(60, 0x3f);
@@ -1236,41 +1325,37 @@ void randomColors(uint32_t color, int wait)
         color = colorValR << 16 | colorValG << 8 | colorValB;
         switch (count)
         {
-            case 0:
-            color = color & 0x00ffff; 
+        case 0:
+            color = color & 0x00ffff;
             break;
-            case 1:
+        case 1:
             color = color & 0xff00ff;
             break;
-            case 2:
+        case 2:
             color = color & 0xffff00;
             break;
-            case 3:
-            color = color & 0x0000ff;   
+        case 3:
+            color = color & 0x0000ff;
             break;
-            case 4:
+        case 4:
             color = color & 0x00ff00;
             break;
-            case 5:
+        case 5:
             color = color & 0xff0000;
             break;
-            default:
+        default:
             color = color & 0x000000;
             break;
-
-
-
         }
-        //color = color | (color >> 1);
-
+        // color = color | (color >> 1);
 
         leds.setPixelColor(i, color); //  Set pixel's color (in RAM)
-        lightUpRail(-1,-1,1,LEDbrightnessRail);
-        showLEDsCore2 = 2;            //  Update strip to match
-                        //  Pause for a moment
+        lightUpRail(-1, -1, 1, LEDbrightnessRail);
+        showLEDsCore2 = 2; //  Update strip to match
+                           //  Pause for a moment
     }
     delay(500);
-    delay(wait);  
+    delay(wait);
 }
 
 void rainbowy(int saturation, int brightness, int wait)

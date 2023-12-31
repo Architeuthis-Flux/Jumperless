@@ -98,18 +98,36 @@ void clearAllNTCC(void)
         }
     }
 
-    net[0] = {127, "Empty Net", {EMPTY_NET}, {{}}, EMPTY_NET, {}, {EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET}, 0};
-    net[1] = {1, "GND\t", {GND}, {{}}, GND, {}, {SUPPLY_3V3, SUPPLY_5V, DAC0_5V, DAC1_8V}, 1};
-    net[2] = {2, "+5V\t", {SUPPLY_5V}, {{}}, SUPPLY_5V, {}, {GND, SUPPLY_3V3, DAC0_5V, DAC1_8V}, 1};
-    net[3] = {3, "+3.3V\t", {SUPPLY_3V3}, {{}}, SUPPLY_3V3, {}, {GND, SUPPLY_5V, DAC0_5V, DAC1_8V}, 1};
-    net[4] = {4, "DAC 0\t", {DAC0_5V}, {{}}, DAC0_5V, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC1_8V}, 1};
-    net[5] = {5, "DAC 1\t", {DAC1_8V}, {{}}, DAC1_8V, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC0_5V}, 1};
-    net[6] = {6, "I Sense +", {CURRENT_SENSE_PLUS}, {{}}, CURRENT_SENSE_PLUS, {}, {CURRENT_SENSE_MINUS}, 2};
-    net[7] = {7, "I Sense -", {CURRENT_SENSE_MINUS}, {{}}, CURRENT_SENSE_MINUS, {}, {CURRENT_SENSE_PLUS}, 2};
+    net[0] = {127, "Empty Net", {EMPTY_NET}, {{}}, EMPTY_NET, {}, {EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET}, 0, 0 };
+    net[1] = {1, "GND", {GND}, {{}}, GND, {}, {SUPPLY_3V3, SUPPLY_5V, DAC0_5V, DAC1_8V}, 1, 0 };
+    net[2] = {2, "+5V", {SUPPLY_5V}, {{}}, SUPPLY_5V, {}, {GND, SUPPLY_3V3, DAC0_5V, DAC1_8V}, 1, 0 };
+    net[3] = {3, "+3.3V", {SUPPLY_3V3}, {{}}, SUPPLY_3V3, {}, {GND, SUPPLY_5V, DAC0_5V, DAC1_8V}, 0 };
+    net[4] = {4, "DAC 0", {DAC0_5V}, {{}}, DAC0_5V, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC1_8V}, 1, 0 };
+    net[5] = {5, "DAC 1", {DAC1_8V}, {{}}, DAC1_8V, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC0_5V}, 1,   0, };
+    net[6] = {6, "I Sense +", {CURRENT_SENSE_PLUS}, {{}}, CURRENT_SENSE_PLUS, {}, {CURRENT_SENSE_MINUS}, 2, 0 };
+    net[7] = {7, "I Sense -", {CURRENT_SENSE_MINUS}, {{}}, CURRENT_SENSE_MINUS, {}, {CURRENT_SENSE_PLUS}, 2, 0 };
+
+
+net[1].rawColor = rawSpecialNetColors[1];
+net[2].rawColor = rawSpecialNetColors[2];
+net[3].rawColor = rawSpecialNetColors[3];
+net[4].rawColor = rawSpecialNetColors[4];
+net[5].rawColor = rawSpecialNetColors[5];
+net[6].rawColor = rawSpecialNetColors[6];
+net[7].rawColor = rawSpecialNetColors[7];
+
+net[1].machine = false;
+net[2].machine = false;
+net[3].machine = false;
+net[4].machine = false;
+net[5].machine = false;
+net[6].machine = false;
+net[7].machine = false;
+
 
     for (int i = 8; i < MAX_NETS; i++)
     {
-        net[i] = {0, " ", {}, {{}}, 0, {}, {}, 0};
+        net[i] = {0, " ", {}, {{}}, 0, {}, {}, 0, 0, 0, 0, false};
     }
 
     for (int i = 0; i < 12; i++)
@@ -125,6 +143,8 @@ void clearAllNTCC(void)
         }
     }
 }
+
+
 
 void sortPathsByNet(void) // not actually sorting, just copying the bridges and nets back from netStruct so they're both in the same order
 {
@@ -234,6 +254,9 @@ void sortPathsByNet(void) // not actually sorting, just copying the bridges and 
         Serial.println("us\n\r");
     }
 }
+
+
+
 
 void bridgesToPaths(void)
 {

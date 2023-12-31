@@ -26,7 +26,11 @@ uint8_t priority = 0; //priority = 1 means it will move connections to take the 
 
 rgbColor color; //color of the net in hex
 
+uint32_t rawColor; //color of the net in hex (for the machine)
+
 char *colorName; //name of the color
+
+bool machine = false; //whether this net was created by the machine or by the user
 };
 
 extern struct netStruct net[MAX_NETS];
@@ -144,6 +148,15 @@ struct pathStruct{
 
 
 extern struct pathStruct path[MAX_BRIDGES]; //this is the array of paths 
+
+ struct SFmapPair {
+        const char* name;
+        int replacement;
+    };
+
+extern struct SFmapPair sfMappings[100];
+
+
 
 
 /*
