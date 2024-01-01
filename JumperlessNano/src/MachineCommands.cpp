@@ -10,7 +10,6 @@
 #include <EEPROM.h>
 #include "MachineCommands.h"
 
-int testingSomething = 0;
 
 bool debugMM = false;
 // char inputBuffer[INPUTBUFFERLENGTH] = {0};
