@@ -23,7 +23,7 @@ ArduinoJson::DynamicJsonDocument machineModeJson(8000);
 
 enum machineModeInstruction lastReceivedInstruction = unknown;
 
-char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "bridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch"};
+char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch"};
 
 enum machineModeInstruction parseMachineInstructions(void)
 {
@@ -662,4 +662,120 @@ void lightUpNetsFromInputBuffer(void)
 
         // lightUpNode(nodesToPixelMap[nodeNumber], color);
     }
+}
+
+/**
+ * Lists the nets, in a machine-readable, line-based format.
+ *
+ * Example:
+ *   ::netlist-begin
+ *   ::net[1,1,GND,true,001c04,false,GND]
+ *   ::net[2,2,5V,true,1c0702,false,+5V]
+ *   ::net[3,3,3V3,true,1c0107,false,+3.3V]
+ *   ::net[4,4,DAC_0,true,231111,false,DAC 0]
+ *   ::net[5,5,DAC_1,true,230913,false,DAC 1]
+ *   ::net[6,6,I_POS,true,232323,false,I Sense +]
+ *   ::net[7,7,I_NEG,true,232323,false,I Sense -]
+ *   ::netlist-end
+ *
+ * Grammar:
+ *   netlist      = "::netlist-begin" CRLF net* "::netlist-end" CRLF
+ *   net          = "::net[" index "," number "," nodes "," special "," color
+ *                  "," machine "," name "]" CRLF
+ *   index        = [0-9]+
+ *   number       = [0-9]+
+ *   nodes        = node
+ *                | node ";" nodes
+ *   node         = special-node
+ *                | numeric-node
+ *   special-node = "GND"
+ *                | ... # (imagine a complete list of special nodes here)
+ *   numeric-node = [1-9][0-9]*
+ *   special      = "true"
+ *                | "false"
+ *   color        = [0-9a-f]{6}
+ *   machine      = "true"
+ *                | "false"
+ *   name         = [^\]\r\n]+
+ */
+void listNetsMachine(void) {
+  Serial.println("::netlist-begin");
+
+  // start with 1, to ignore empty net.
+  for (int i = 1; i < MAX_NETS; i++) {
+    struct netStruct *n = &net[i];
+
+    if (n->number == 0 || n->nodes[0] == -1) {
+      // net not allocated yet
+      break;
+    }
+
+    Serial.print("::net[");
+    // INDEX
+    Serial.print(i);
+    Serial.print(',');
+
+    // NUMBER
+    Serial.print(n->number);
+    Serial.print(',');
+
+    // NODES
+    for (int j = 0; j < MAX_NODES; j++) {
+      if (n->nodes[j] == 0) {
+        break;
+      }
+      if (j > 0) {
+        Serial.print(';');
+      }
+      printNodeOrName(n->nodes[j]);
+    }
+    Serial.print(',');
+
+    // SPECIAL
+    Serial.print(n->specialFunction ? "true," : "false,");
+
+    // COLOR
+    rgbColor color = unpackRgb(n->rawColor);
+    char buf[8];
+    snprintf(buf, 8, "%.2x%.2x%.2x,", color.r, color.g, color.b);
+    Serial.print(buf);
+
+    // MACHINE
+    Serial.print(n->machine ? "true," : "false,");
+
+    // NAME
+    Serial.print(n->name);
+
+    Serial.println("]");
+  }
+
+  Serial.println("::netlist-end");
+}
+
+void listBridgesMachine(void) {
+  Serial.print("::bridgelist[");
+  bool started = false;
+  for (int i = 1; i < MAX_NETS; i++) {
+    struct netStruct *n = &net[i];
+
+    if (n->number == 0 || n->nodes[0] == -1) {
+      // net not allocated yet
+      break;
+    }
+
+    for (int j = 0; j < MAX_NODES; j++) {
+      if (n->bridges[j][0] <= 0) {
+        continue;
+      }
+      if (started) {
+        Serial.print(",");
+      } else {
+        started = true;
+      }
+      printNodeOrName(n->bridges[j][0]);
+      Serial.print("-");
+      printNodeOrName(n->bridges[j][1]);
+    }
+  }
+  Serial.println("]");
 }
