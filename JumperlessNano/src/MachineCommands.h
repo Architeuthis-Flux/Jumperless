@@ -1,13 +1,15 @@
 #ifndef MACHINECOMMANDS_H
 #define MACHINECOMMANDS_H
 
-#define NUMBEROFINSTRUCTIONS 13
+#define NUMBEROFINSTRUCTIONS 15
 
 enum machineModeInstruction
 {
     unknown = 0,
     netlist,
+    getnetlist,
     bridgelist,
+    getbridgelist,
     lightnode,
     lightnet,
     getmeasurement,
@@ -37,5 +39,8 @@ void lightUpNodesFromInputBuffer(void);
 void lightUpNetsFromInputBuffer(void);
 
 int setSupplySwitch(void);
+
+void listNetsMachine(void);
+void listBridgesMachine(void);
 
 #endif

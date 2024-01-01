@@ -206,6 +206,7 @@ skipinput:
     Serial.print("\n\n\rnetlist\n\n\r");
     listSpecialNets();
     listNets();
+
     break;
   case 'b':
     Serial.print("\n\n\rBridge Array\n\r");
@@ -491,6 +492,10 @@ void machineMode(void) // read in commands in machine readable format
     sendAllPathsCore2 = 1;
     break;
 
+  case getnetlist:
+    listNetsMachine();
+    break;
+
   case bridgelist:
     clearAllNTCC();
 
@@ -508,6 +513,10 @@ void machineMode(void) // read in commands in machine readable format
     // showNets();
 
     sendAllPathsCore2 = 1;
+    break;
+
+  case getbridgelist:
+    listBridgesMachine();
     break;
 
   case lightnode:
