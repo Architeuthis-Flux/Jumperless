@@ -1114,8 +1114,9 @@ struct rgbColor shiftHue(struct rgbColor colorToShift, int hueShift, int brightn
 
 void lightUpNode(int node, uint32_t color)
 {
-    
-    leds.setPixelColor(node,color);
+
+
+    leds.setPixelColor(nodesToPixelMap[node],color);
     showLEDsCore2 = 1;
 
 }

@@ -130,6 +130,9 @@ void loop()
 menu:
   // showMeasurements();
 
+
+
+
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");

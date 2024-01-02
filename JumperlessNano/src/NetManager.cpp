@@ -899,6 +899,8 @@ int printNodeOrName(int node) // returns number of characters printed (for tabs)
         return Serial.print(node);
     }
 }
+
+
 char same[12] = "           ";
 const char *definesToChar(int defined) // converts the internally used #defined numbers into human readable strings
 {
