@@ -690,7 +690,7 @@ void parseStringToBridges(void)
         Serial.println("parsing bridges into array\n\r");
     }
     int stringIndex = 0;
-    char delimitersCh[] = ",- \n\r";
+    char delimitersCh[] = "[,- \n\r";
 
     createSafeString(buffer, 10);
     createSafeStringFromCharArray(delimiters, delimitersCh);
@@ -701,7 +701,17 @@ void parseStringToBridges(void)
 
         stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
+        Serial.print("buffer = ");
+        Serial.println(buffer);
+
+        Serial.print("stringIndex = ");
+        Serial.println(stringIndex);
+
+
         buffer.toInt(path[newBridgeIndex].node1);
+
+        Serial.print("path[newBridgeIndex].node1 = ");
+        Serial.println(path[newBridgeIndex].node1);
 
         if (debugFP)
         {
