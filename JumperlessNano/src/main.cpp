@@ -475,8 +475,8 @@ skipinput:
 
 void machineMode(void) // read in commands in machine readable format
 {
-  
-  enum machineModeInstruction receivedInstruction = parseMachineInstructions();
+  int sequenceNumber = -1;
+  enum machineModeInstruction receivedInstruction = parseMachineInstructions(&sequenceNumber);
 
   switch (receivedInstruction)
   {
@@ -545,9 +545,13 @@ void machineMode(void) // read in commands in machine readable format
 
   // case gpio:
   //   break;
+
+  case unknown:
+    machineModeRespond(sequenceNumber, false);
+    return;
   }
 
-  
+  machineModeRespond(sequenceNumber, true);
 }
 
 unsigned long logoFlashTimer = 0;

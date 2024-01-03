@@ -24,7 +24,8 @@ enum machineModeInstruction
 extern char inputBuffer[INPUTBUFFERLENGTH];
 extern char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20];
 
-enum machineModeInstruction parseMachineInstructions(void);
+enum machineModeInstruction parseMachineInstructions(int *sequenceNumber);
+void machineModeRespond(int sequenceNumber, bool ok);
 void machineNetlistToNetstruct(void);
 void populateBridgesFromNodes(void);
 int nodeTokenToInt(char *);
