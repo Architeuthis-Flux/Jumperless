@@ -701,17 +701,17 @@ void parseStringToBridges(void)
 
         stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
-        Serial.print("buffer = ");
-        Serial.println(buffer);
+        //Serial.print("buffer = ");
+        //Serial.println(buffer);
 
-        Serial.print("stringIndex = ");
-        Serial.println(stringIndex);
+       // Serial.print("stringIndex = ");
+        //Serial.println(stringIndex);
 
 
         buffer.toInt(path[newBridgeIndex].node1);
 
-        Serial.print("path[newBridgeIndex].node1 = ");
-        Serial.println(path[newBridgeIndex].node1);
+        //Serial.print("path[newBridgeIndex].node1 = ");
+       // Serial.println(path[newBridgeIndex].node1);
 
         if (debugFP)
         {
