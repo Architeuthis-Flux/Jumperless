@@ -24,7 +24,7 @@ enum machineModeInstruction lastReceivedInstruction = unknown;
 
 char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch"};
 
-enum machineModeInstruction parseMachineInstructions(void)
+enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 {
 
     int doneReading = 0;
@@ -55,15 +55,24 @@ enum machineModeInstruction parseMachineInstructions(void)
 
     char instructionBuffer[20] = {0};
 
+    int seqNumberSeparatorPos = -1;
+
     for (int i = 0; i < 20; i++)
     {
-        if (inputBuffer[i] == '[')
-        {
+        if (inputBuffer[i] == '[') {
             // inputBuffer[i] = ' ';
             break;
         }
+        if (inputBuffer[i] == ':') {
+          seqNumberSeparatorPos = i;
+        }
         instructionBuffer[i] = inputBuffer[i];
         inputBuffer[i] = ' ';
+    }
+
+    if (seqNumberSeparatorPos > 0) {
+        instructionBuffer[seqNumberSeparatorPos] = 0;
+        *sequenceNumber = atoi(instructionBuffer + seqNumberSeparatorPos + 1);
     }
 
     for (int i = 0; i < NUMBEROFINSTRUCTIONS; i++)
@@ -105,6 +114,15 @@ enum machineModeInstruction parseMachineInstructions(void)
 
     lastReceivedInstruction = static_cast<machineModeInstruction>(instructionNumber);
     return lastReceivedInstruction;
+}
+
+void machineModeRespond(int sequenceNumber, bool ok) {
+  Serial.print(ok ? "::ok" : "::error");
+  if (sequenceNumber >= 0) {
+        Serial.print(":");
+        Serial.print(sequenceNumber);
+  }
+  Serial.println("");
 }
 
 void machineNetlistToNetstruct(void)
