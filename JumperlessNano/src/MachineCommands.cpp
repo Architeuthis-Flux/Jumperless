@@ -11,7 +11,7 @@
 #include "MachineCommands.h"
 
 
-bool debugMM = true;
+bool debugMM = false;
 // char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
 File nodeFileMachineMode;
