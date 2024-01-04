@@ -26,7 +26,7 @@ int logoFlash = 0;
 
 #ifdef EEPROMSTUFF
 #include <EEPROM.h>
-bool debugLEDs = 1; // EEPROM.read(DEBUG_LEDSADDRESS);
+bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
 
 #else
 bool debugLEDs = 1;
@@ -48,8 +48,8 @@ uint32_t rawSpecialNetColors[8] =
      0x0055AA, // logoflash / statusflash
      0x301A02, // +8V
      0x120932, // -8V
-     0x230913, // unassigned
-     0x232323,  // unassigned
+     0x443434, // UART TX
+     0x324244,  // UART RX  
      0x232323}; // unassigned
 
 rgbColor specialNetColors[8] =
@@ -826,6 +826,8 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
 
                                 // color = packRgb((shiftedColor.r * LEDbrightness) >> 8, (shiftedColor.g * LEDbrightness) >> 8, (shiftedColor.b * LEDbrightness) >> 8);
                             }
+                            netColors[netNumber] = unpackRgb(color);
+                            net[netNumber].rawColor = color;
 
                             leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], color);
                             if (debugLEDs)
@@ -1142,7 +1144,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
 
     for (int i = 80; i <= 109; i++)
     {
-        if (leds.getPixelColor(i) == 0 || leds.getPixelColor(i) != rawOtherColors[0])
+        if (leds.getPixelColor(i) == 0 && leds.getPixelColor(i) != rawOtherColors[0])
         {
             leds.setPixelColor(i, rawOtherColors[0]);
 
