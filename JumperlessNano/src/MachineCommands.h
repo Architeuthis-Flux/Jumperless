@@ -1,7 +1,7 @@
 #ifndef MACHINECOMMANDS_H
 #define MACHINECOMMANDS_H
 
-#define NUMBEROFINSTRUCTIONS 15
+#define NUMBEROFINSTRUCTIONS 16
 
 enum machineModeInstruction
 {
@@ -18,7 +18,8 @@ enum machineModeInstruction
     arduinoflash,
     setnetcolor,
     setnodecolor,
-    setsupplyswitch
+    setsupplyswitch,
+    getsupplyswitch
 };
 
 extern char inputBuffer[INPUTBUFFERLENGTH];
@@ -39,6 +40,7 @@ void lightUpNodesFromInputBuffer(void);
 
 void lightUpNetsFromInputBuffer(void);
 
+void printSupplySwitch(int supplySwitchPos);
 int setSupplySwitch(void);
 
 void listNetsMachine(void);

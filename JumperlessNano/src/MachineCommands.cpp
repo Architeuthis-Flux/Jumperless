@@ -22,7 +22,7 @@ ArduinoJson::DynamicJsonDocument machineModeJson(8000);
 
 enum machineModeInstruction lastReceivedInstruction = unknown;
 
-char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch"};
+char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch"};
 
 enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 {
@@ -495,6 +495,12 @@ void lightUpNodesFromInputBuffer(void)
     }
 }
 
+void printSupplySwitch(int supplySwitchPos) {
+  const char *positionString[] = { "3.3V", "5V", "8V" };
+  Serial.print("::supplyswitch[");
+  Serial.print(positionString[supplySwitchPos]);
+  Serial.println("]");
+}
 
 int setSupplySwitch(void)
 {
