@@ -543,6 +543,10 @@ void machineMode(void) // read in commands in machine readable format
     showLEDsCore2 = 1;
     break;
 
+  case getsupplyswitch:
+    printSupplySwitch(supplySwitchPosition);
+    break;
+
   // case gpio:
   //   break;
 
