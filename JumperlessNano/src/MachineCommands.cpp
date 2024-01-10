@@ -351,6 +351,10 @@ int removeHexPrefix(const char *str)
         const char *hexValue = str + 2;
         return strtol(hexValue, nullptr, 16);
     }
+    if (str[0] == '#') {
+        const char *hexValue = str + 1;
+        return strtol(hexValue, nullptr, 16);
+    }
     return atoi(str);
 }
 
