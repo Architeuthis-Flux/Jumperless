@@ -18,7 +18,7 @@ void arduinoPrint(void);
 void uploadArduino(void);
 
 
-
+void setBaudRate(int baudRate);
 
 
 

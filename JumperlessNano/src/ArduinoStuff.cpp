@@ -29,6 +29,14 @@ void initArduino(void) // if the UART is set up, the Arduino won't flash from it
         delay(1);
 }
 
+void setBaudRate(int baudRate)
+{
+        Serial1.end();
+        delay(1);
+    Serial1.begin(baudRate);
+        delay(1);
+}
+
 void arduinoPrint(void)
 {
 }

@@ -121,6 +121,7 @@ char input;
 
 int serSource = 0;
 int readInNodesArduino = 0;
+int baudRate = 115200;
 
 void loop()
 {
@@ -139,7 +140,7 @@ menu:
   Serial.print("\tw = waveGen\n\r");
   Serial.print("\tv = toggle show current/voltage\n\r");
   Serial.print("\tf = load formatted nodeFile\n\r");
-  Serial.print("\tp = paste new Wokwi diagram\n\r");
+  Serial.print("\tu = set baud rate for USB-Serial\n\r");
   Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset Arduino\n\r");
@@ -391,6 +392,30 @@ skipinput:
 
     break;
 
+
+  case 'u':
+    Serial.print("\n\r");
+    Serial.print("enter baud rate\n\r");
+    while (Serial.available() == 0)
+      ;
+    baudRate = Serial.parseInt();
+    Serial.print("\n\r");
+    Serial.print("setting baud rate to ");
+    Serial.print(baudRate);
+    Serial.print("\n\r");
+
+
+
+
+
+
+
+
+    setBaudRate(baudRate);
+    break;
+
+
+
   case 'd':
   {
     debugFlagInit();
@@ -622,6 +647,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
       char ch = USBSer1.read();
       Serial1.write(ch);
+      
     }
 
     if (Serial1.available())
@@ -644,13 +670,14 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
       char ch = USBSer1.read();
       Serial1.write(ch);
+     // Serial.print(ch);
     }
 
     if (Serial1.available())
     {
       char ch = Serial1.read();
       USBSer1.write(ch);
-      // Serial.print(ch);
+       //Serial.print(ch);
 
       if (ch == 'f' && connectFromArduino == '\0')
       {
