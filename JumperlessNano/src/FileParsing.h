@@ -29,7 +29,7 @@ void openNodeFile();
 void splitStringToFields();
 
 void replaceSFNamesWithDefinedInts();
-
+void printNodeFile(void);
 void replaceNanoNamesWithDefinedInts();
 
 void parseStringToBridges();

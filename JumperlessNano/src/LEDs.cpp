@@ -1578,7 +1578,7 @@ struct rgbColor unpackRgb(uint32_t color)
 }
 void clearLEDs(void)
 {
-    for (int i = 0; i <= 254; i++)
+    for (int i = 0; i <= 116; i++)
     { // For each pixel in strip...
 
         leds.setPixelColor(i, 0); //  Set pixel's color (in RAM)

@@ -84,6 +84,33 @@ void savePreformattedNodeFile(int source)
 
     nodeFile.close();
 }
+
+void printNodeFile(void)
+{
+    nodeFile = LittleFS.open("nodeFile.txt", "r");
+    if (!nodeFile)
+    {
+        if (debugFP)
+            Serial.println("Failed to open nodeFile");
+        return;
+    }
+    else
+    {
+        if (debugFP)
+            Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
+    }
+    nodeFileString.clear();
+
+    nodeFileString.read(nodeFile);
+
+    nodeFile.close();
+
+    Serial.println(nodeFileString);
+
+    nodeFileString.clear();
+}
+
+
 void parseWokwiFileToNodeFile(void)
 {
 
