@@ -673,6 +673,71 @@ def removeLibraryLines(line):
     else:
         return True
         
+
+
+def findsketchindex(decoded):
+    
+    doneSearching = 0
+    index = 0
+    
+    while (doneSearching == 0):
+        if (decoded['props']['pageProps']['p']['files'][index]['name'] == "sketch.ino"):
+            doneSearching = 1
+            #print ("sketch found at index " , end='')
+            #print(index)
+            return index
+        else:
+            if (index > 7):
+                doneSearching = 1
+                return 0
+            
+            else:
+                index = index + 1
+        
+    
+    
+    
+def finddiagramindex(decoded):
+    
+    doneSearching = 0
+    index = 0
+    
+    while (doneSearching == 0):
+        if (decoded['props']['pageProps']['p']['files'][index]['name'] == "diagram.json"):
+            doneSearching = 1
+            #print ("diagram found at index " , end='')
+            #print(index)
+            return index
+        else:
+            if (index > 7):
+                doneSearching = 1
+                return 2
+            
+            else:
+                index = index + 1
+                
+                
+                
+def findlibrariesindex(decoded):
+    doneSearching = 0
+    index = 0
+    
+    while (doneSearching == 0):
+        if (decoded['props']['pageProps']['p']['files'][index]['name'] == "libraries.txt"):
+            doneSearching = 1
+            #print ("libraries found at index " , end='')
+            #print(index)
+            return index
+        else:
+            if (index > 7):
+                doneSearching = 1
+                return 3
+            
+            else:
+                index = index + 1
+    #print (decoded)
+    
+    
     
 
 port_controller = threading.Thread(target=serialTermOut, daemon=True)
@@ -722,27 +787,45 @@ while True:
         s = doc.find('script', type='application/json').get_text()
 
         stringex = str(s)
+        
+        #print (stringex)
 
         d = json.loads(stringex)
+        
+        decoded = json.loads(stringex)
+        
+        #print (decoded['props']['pageProps']['p']['files'][0]['name'])
+
+
+        
+
+
 
         librariesExist = 0
         
         
-
-        c = d['props']['pageProps']['p']['files'][0]['content']
-
         try:
-            l = d['props']['pageProps']['p']['files'][2]['content']
+            c = decoded['props']['pageProps']['p']['files'][findsketchindex(decoded)]['content']
+            sketchExists = 1
+        except:
+            sketchExists = 0
+            pass
+        
+        
+        try:
+            l = d['props']['pageProps']['p']['files'][findlibrariesindex(decoded)]['content']
             libraries = str(l)
             librariesExist = 1
         except:
             pass
 
-        d = d['props']['pageProps']['p']['files'][1]['content']
+        d = decoded['props']['pageProps']['p']['files'][finddiagramindex(decoded)]['content']
+        #print (d)
 
+        
         f = json.loads(d)
 
-    #    cf = json.loads(c)
+        #cf = json.loads(c)
 
         diagram = str(d)
         sketch = str(c)
@@ -760,7 +843,7 @@ while True:
 
         justFlashed = 0
             
-        if (sketch != lastsketch and disableArduinoFlashing == 0):
+        if (sketch != lastsketch and disableArduinoFlashing == 0 and sketchExists == 1):
             
             
             lastsketch = sketch

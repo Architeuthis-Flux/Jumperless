@@ -32,6 +32,7 @@ void populateBridgesFromNodes(void);
 int nodeTokenToInt(char *);
 int findReplacement(char *name);
 int removeHexPrefix(const char *);
+
 void populateBridgesFromNodes(void);
 
 void writeNodeFileFromInputBuffer(void);

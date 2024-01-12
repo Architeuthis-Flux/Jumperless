@@ -1,18 +1,9 @@
-
-
-
-void setup(){
-
-pinMode(2, OUTPUT);
-digitalWrite(2, HIGH);
+void setup() {
+  // put your setup code here, to run once:
 
 }
 
-void loop(){
-
-  digitalWrite(2, HIGH);
-  delay(400);
-  digitalWrite(2, LOW);
-  delay(300);
+void loop() {
+  // put your main code here, to run repeatedly:
 
 }

@@ -54,6 +54,6 @@
  False,
  False,
  [],
- 'arm64',
+ 'universal2',
  None,
  None)

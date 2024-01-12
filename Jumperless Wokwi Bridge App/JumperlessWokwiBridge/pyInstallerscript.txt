@@ -3,5 +3,6 @@ python3 -m PyInstaller \
 -y \
 --console \
 --windowed \
+--target-arch universal2 \
 --add-binary "arduino-cli:." \
 JumperlessWokwiBridge.py 

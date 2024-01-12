@@ -714,7 +714,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                     {
                         if (nodesToPixelMap[net[netNumber].nodes[j]] > 0)
                         {
-                            leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], net[netNumber].rawColor);
+                            leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], scaleDownBrightness(net[netNumber].rawColor));
                         
 
                         if (debugLEDs)
@@ -881,6 +881,34 @@ void turnOffSkippedNodes(void)
         }
     }
 }
+uint32_t scaleDownBrightness(uint32_t hexColor, int scaleFactor, int maxBrightness)
+{
+    int maxR = maxBrightness;
+    int maxG = maxBrightness;
+    int maxB = maxBrightness;
+
+    int r = (hexColor >> 16) & 0xFF;
+    int g = (hexColor >> 8) & 0xFF;
+    int b = hexColor & 0xFF;
+
+    int scaledBrightness = hexColor;
+
+    if (r > maxR || g > maxG || b > maxB)
+    {
+        scaledBrightness = 0;
+        r = r / scaleFactor;
+        g = g / scaleFactor;
+        b = b / scaleFactor;
+
+        scaledBrightness = scaledBrightness | (r << 16);
+        scaledBrightness = scaledBrightness | (g << 8);
+        scaledBrightness = scaledBrightness | b;
+    }
+
+    return scaledBrightness;
+
+}
+
 
 struct rgbColor pcbColorCorrect(rgbColor colorToShift)
 {
@@ -1186,7 +1214,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
                     // uint32_t color = packRgb((railColors[j].r * brightness2) >> 8, (railColors[j].g * brightness2) >> 8, (railColors[j].b * brightness2) >> 8);
 
                     /// Serial.println(color,HEX);
-                    leds.setPixelColor(railsToPixelMap[j][i], color);
+                    leds.setPixelColor(railsToPixelMap[j][i], scaleDownBrightness(color));
                 }
                 else
                 {
