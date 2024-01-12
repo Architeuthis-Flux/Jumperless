@@ -195,25 +195,25 @@ void machineNetlistToNetstruct(void)
 
         if (netIndex < 8)
         {
-            rawSpecialNetColors[netIndex] = scaleDownBrightness(rawColor);
+            rawSpecialNetColors[netIndex] = rawColor;
 
             switch (netIndex)
             {
             case 1:
                 for (int i = 0; i < 3; i++)
                 {
-                    rawRailColors[i][1] = scaleDownBrightness(rawColor);
-                    rawRailColors[i][3] = scaleDownBrightness(rawColor);
+                    rawRailColors[i][1] = rawColor;
+                    rawRailColors[i][3] = rawColor;
                 }
                 break;
             case 2:
-                rawRailColors[1][0] = scaleDownBrightness(rawColor);
-                rawRailColors[1][2] = scaleDownBrightness(rawColor);
+                rawRailColors[1][0] = rawColor;
+                rawRailColors[1][2] = rawColor;
 
                 break;
             case 3:
-                rawRailColors[0][0] = scaleDownBrightness(rawColor);
-                rawRailColors[0][2] = scaleDownBrightness(rawColor);
+                rawRailColors[0][0] = rawColor;
+                rawRailColors[0][2] = rawColor;
                 break;
             }
         }

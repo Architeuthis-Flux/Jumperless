@@ -1180,16 +1180,16 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
         
     }
 
-    leds.setPixelColor(83, rawSpecialNetColors[1]);
-    leds.setPixelColor(108, rawSpecialNetColors[1]);
-    leds.setPixelColor(109, rawSpecialNetColors[2]);
-    leds.setPixelColor(96, rawSpecialNetColors[3]);
-    leds.setPixelColor(106, rawSpecialNetColors[2]);
+    leds.setPixelColor(83, scaleDownBrightness( rawSpecialNetColors[1]));
+    leds.setPixelColor(108,scaleDownBrightness( rawSpecialNetColors[1]));
+    leds.setPixelColor(109, scaleDownBrightness(rawSpecialNetColors[2]));
+    leds.setPixelColor(96, scaleDownBrightness(rawSpecialNetColors[3]));
+    leds.setPixelColor(106, scaleDownBrightness(rawSpecialNetColors[2]));
 
     if (switchPosition == 2) //+-8V
     {
-        rawRailColors[switchPosition][0] = rawOtherColors[3];
-        rawRailColors[switchPosition][2] = rawOtherColors[4];
+        rawRailColors[switchPosition][0] = scaleDownBrightness(rawOtherColors[3]);
+        rawRailColors[switchPosition][2] = scaleDownBrightness(rawOtherColors[4]);
     }
     for (int j = 0; j < 4; j++)
     {
