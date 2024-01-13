@@ -50,6 +50,10 @@ Adafruit_USBD_CDC USBSer1;
 int supplySwitchPosition = 0;
 
 void machineMode(void);
+void lastNetConfirm(int forceLastNet = 0);
+
+
+unsigned long lastNetConfirmTimer = 0;
 // int machineMode = 0;
 
 volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
@@ -94,65 +98,8 @@ void setup()
   setDac1_8Vvoltage(1.9);
 
   clearAllNTCC();
-  while (tud_connected() == 0 && millis() < 500);
 
-    if (tud_connected() == 0 )
-  {
-
-    int bootselPressed = 0;
-    openNodeFile();
-    getNodesToConnect();
-    // Serial.print("openNF\n\r");
-    digitalWrite(RESETPIN, HIGH);
-    bridgesToPaths();
-    clearLEDs();
-    assignNetColors();
-
-    sendAllPathsCore2 = 1;
-
-    delay(250);
-    if (BOOTSEL)
-    {
-      bootselPressed = 1;
-      
-    }
-  
-  while (tud_connected() == 0 )
-  {
-    if (BOOTSEL) bootselPressed = 1;
-    clearLEDs();
-    showLEDsCore2 = 1;
-    if (BOOTSEL) bootselPressed = 1;
-    delay(250);
-    sendAllPathsCore2 = 1;
-    if (BOOTSEL) bootselPressed = 1;
-    delay(250);
-
-    if (bootselPressed == 1)
-    {
-      unsigned long longPressTimer = millis();
-      while (BOOTSEL)
-      {
-        if (millis() - longPressTimer > 1500)
-        {
-          clearAllNTCC();
-          clearLEDs();
-          sendAllPathsCore2 = 1;
-          break; 
-        }
-
-      }
-
-     digitalWrite(RESETPIN, LOW);
-     sendAllPathsCore2 = 1;
-      break;
-    }
-
-  }
-  }
-
-
-  
+  lastNetConfirm(0);
 }
 
 void setup1()
@@ -195,361 +142,451 @@ menu:
 
   // //   }
 
+  Serial.print("\n\n\r\t\t\tMenu\n\n\r");
+  Serial.print("\tn = show netlist\n\r");
+  Serial.print("\tb = show bridge array\n\r");
+  Serial.print("\tw = waveGen\n\r");
+  Serial.print("\tv = toggle show current/voltage\n\r");
+  Serial.print("\tf = load formatted nodeFile\n\r");
+  Serial.print("\tu = set baud rate for USB-Serial\n\r");
+  Serial.print("\tl = LED brightness / test\n\r");
+  Serial.print("\td = toggle debug flags\n\r");
+  Serial.print("\tr = reset Arduino\n\r");
+  Serial.print("\n\n\r");
 
+dontshowmenu:
+  connectFromArduino = '\0';
 
-Serial.print("\n\n\r\t\t\tMenu\n\n\r");
-Serial.print("\tn = show netlist\n\r");
-Serial.print("\tb = show bridge array\n\r");
-Serial.print("\tw = waveGen\n\r");
-Serial.print("\tv = toggle show current/voltage\n\r");
-Serial.print("\tf = load formatted nodeFile\n\r");
-Serial.print("\tu = set baud rate for USB-Serial\n\r");
-Serial.print("\tl = LED brightness / test\n\r");
-Serial.print("\td = toggle debug flags\n\r");
-Serial.print("\tr = reset Arduino\n\r");
-Serial.print("\n\n\r");
-
-dontshowmenu : connectFromArduino = '\0';
-
-while (Serial.available() == 0 && connectFromArduino == '\0')
-{
-  if (showReadings >= 1)
+  while (Serial.available() == 0 && connectFromArduino == '\0')
   {
-    showMeasurements();
+    if (showReadings >= 1)
+    {
+      showMeasurements();
+    }
+    if (BOOTSEL)
+    {
+      lastNetConfirm(1);
+    }
   }
-}
 
-if (connectFromArduino != '\0')
-{
-  input = 'f';
-  // connectFromArduino = '\0';
-}
-else
-{
-  input = Serial.read();
-  Serial.print("\n\r");
-}
+  if (connectFromArduino != '\0')
+  {
+    input = 'f';
+    // connectFromArduino = '\0';
+  }
+  else
+  {
+    input = Serial.read();
+    Serial.print("\n\r");
+  }
 
 // Serial.print(input);
-skipinput : switch (input)
-{
-case 'v':
-
-  if (showReadings >= 3 || (inaConnected == 0 && showReadings >= 1))
+skipinput:
+  switch (input)
   {
-    showReadings = 0;
+  case 'v':
+
+    if (showReadings >= 3 || (inaConnected == 0 && showReadings >= 1))
+    {
+      showReadings = 0;
+      break;
+    }
+    else
+    {
+      showReadings++;
+
+      chooseShownReadings();
+      // Serial.println(showReadings);
+
+      // Serial.write("\033"); //these VT100/ANSI commands work on some terminals and not others so I took it out
+      // Serial.write("\x1B\x5B");
+      // Serial.write("1F");//scroll up one line
+      // Serial.write("\x1B\x5B");
+      // Serial.write("\033");
+      // Serial.write("2K");//clear line
+      // Serial.write("\033");
+      // Serial.write("\x1B\x5B");
+      // Serial.write("1F");//scroll up one line
+      // Serial.write("\x1B\x5B");
+      // Serial.write("\033");
+      // Serial.write("2K");//clear line
+
+      goto dontshowmenu;
+      // break;
+    }
+
+  case 'n':
+
+    Serial.print("\n\n\rnetlist\n\n\r");
+    listSpecialNets();
+    listNets();
+
     break;
-  }
-  else
-  {
-    showReadings++;
-
-    chooseShownReadings();
-    // Serial.println(showReadings);
-
-    // Serial.write("\033"); //these VT100/ANSI commands work on some terminals and not others so I took it out
-    // Serial.write("\x1B\x5B");
-    // Serial.write("1F");//scroll up one line
-    // Serial.write("\x1B\x5B");
-    // Serial.write("\033");
-    // Serial.write("2K");//clear line
-    // Serial.write("\033");
-    // Serial.write("\x1B\x5B");
-    // Serial.write("1F");//scroll up one line
-    // Serial.write("\x1B\x5B");
-    // Serial.write("\033");
-    // Serial.write("2K");//clear line
-
-    goto dontshowmenu;
-    // break;
-  }
-
-case 'n':
-
-  Serial.print("\n\n\rnetlist\n\n\r");
-  listSpecialNets();
-  listNets();
-
-  break;
-case 'b':
-  Serial.print("\n\n\rBridge Array\n\r");
-  printBridgeArray();
-  Serial.print("\n\n\n\rPaths\n\r");
-  printPathsCompact();
-  Serial.print("\n\n\rChip Status\n\r");
-  printChipStatus();
-  Serial.print("\n\n\r");
-  Serial.print("Revision ");
-  Serial.print(revisionNumber);
-  Serial.print("\n\n\r");
-  break;
-
-case 'm':
-
-  break;
-
-case '!':
-  printNodeFile();
-  break;
-
-case 'w':
-
-  if (waveGen() == 1)
-  {
-    break;
-  }
-
-  // case 'a':
-  // {
-  //   resetArduino(); // reset works
-  //   // uploadArduino(); //this is unwritten
-  // }
-
-case 'f':
-  readInNodesArduino = 1;
-  clearAllNTCC();
-
-  // sendAllPathsCore2 = 1;
-  timer = millis();
-
-  clearNodeFile();
-
-  if (connectFromArduino != '\0')
-  {
-    serSource = 1;
-  }
-  else
-  {
-    serSource = 0;
-  }
-
-  savePreformattedNodeFile(serSource);
-
-  // Serial.print("savePFNF\n\r");
-  openNodeFile();
-  getNodesToConnect();
-  // Serial.print("openNF\n\r");
-  digitalWrite(RESETPIN, HIGH);
-  bridgesToPaths();
-  clearLEDs();
-  assignNetColors();
-  // Serial.print("bridgesToPaths\n\r");
-  digitalWrite(RESETPIN, LOW);
-  // showNets();
-
-  sendAllPathsCore2 = 1;
-
-  if (debugNMtime)
-  {
+  case 'b':
+    Serial.print("\n\n\rBridge Array\n\r");
+    printBridgeArray();
+    Serial.print("\n\n\n\rPaths\n\r");
+    printPathsCompact();
+    Serial.print("\n\n\rChip Status\n\r");
+    printChipStatus();
     Serial.print("\n\n\r");
-    Serial.print("took ");
-    Serial.print(millis() - timer);
-    Serial.print("ms");
-  }
+    Serial.print("Revision ");
+    Serial.print(revisionNumber);
+    Serial.print("\n\n\r");
+    break;
 
-  if (connectFromArduino != '\0')
-  {
-    connectFromArduino = '\0';
-    // Serial.print("connectFromArduino\n\r");
-    //  delay(2000);
-    input = ' ';
+  case 'm':
+
+    break;
+
+  case '!':
+    printNodeFile();
+    break;
+
+  case 'w':
+
+    if (waveGen() == 1)
+    {
+      break;
+    }
+
+    // case 'a':
+    // {
+    //   resetArduino(); // reset works
+    //   // uploadArduino(); //this is unwritten
+    // }
+
+  case 'f':
+    readInNodesArduino = 1;
+    clearAllNTCC();
+
+    // sendAllPathsCore2 = 1;
+    timer = millis();
+
+    clearNodeFile();
+
+    if (connectFromArduino != '\0')
+    {
+      serSource = 1;
+    }
+    else
+    {
+      serSource = 0;
+    }
+
+    savePreformattedNodeFile(serSource);
+
+    // Serial.print("savePFNF\n\r");
+    openNodeFile();
+    getNodesToConnect();
+    // Serial.print("openNF\n\r");
+    digitalWrite(RESETPIN, HIGH);
+    bridgesToPaths();
+    clearLEDs();
+    assignNetColors();
+    // Serial.print("bridgesToPaths\n\r");
+    digitalWrite(RESETPIN, LOW);
+    // showNets();
+
+    sendAllPathsCore2 = 1;
+
+    if (debugNMtime)
+    {
+      Serial.print("\n\n\r");
+      Serial.print("took ");
+      Serial.print(millis() - timer);
+      Serial.print("ms");
+    }
+
+    if (connectFromArduino != '\0')
+    {
+      connectFromArduino = '\0';
+      // Serial.print("connectFromArduino\n\r");
+      //  delay(2000);
+      input = ' ';
+      readInNodesArduino = 0;
+      goto dontshowmenu;
+    }
+
     readInNodesArduino = 0;
-    goto dontshowmenu;
-  }
+    break;
 
-  readInNodesArduino = 0;
-  break;
+  case '\n':
+    goto menu;
+    break;
 
-case '\n':
-  goto menu;
-  break;
+  case 'p':
 
-case 'p':
+    // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
 
-  // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
-
-  digitalWrite(RESETPIN, HIGH);
-  delay(1);
+    digitalWrite(RESETPIN, HIGH);
+    delay(1);
 #ifdef FSSTUFF
-  clearNodeFile();
+    clearNodeFile();
 #endif
-  digitalWrite(RESETPIN, LOW);
-  clearAllNTCC();
-  clearLEDs();
+    digitalWrite(RESETPIN, LOW);
+    clearAllNTCC();
+    clearLEDs();
 
-  timer = millis();
+    timer = millis();
 
 #ifdef FSSTUFF
 
-  parseWokwiFileToNodeFile();
+    parseWokwiFileToNodeFile();
 
-  openNodeFile();
-  getNodesToConnect();
+    openNodeFile();
+    getNodesToConnect();
 #endif
-  Serial.println("\n\n\rnetlist\n\n\r");
+    Serial.println("\n\n\rnetlist\n\n\r");
 
-  bridgesToPaths();
-  assignNetColors();
+    bridgesToPaths();
+    assignNetColors();
 
 #ifdef PIOSTUFF
 
-  sendAllPaths();
+    sendAllPaths();
 #endif
 
-  if (debugNMtime)
-  {
-    Serial.print("\n\n\r");
-    Serial.print("took ");
-    Serial.print(millis() - timer);
-    Serial.print("ms");
-  }
-  break;
+    if (debugNMtime)
+    {
+      Serial.print("\n\n\r");
+      Serial.print("took ");
+      Serial.print(millis() - timer);
+      Serial.print("ms");
+    }
+    break;
 
-case 't':
+  case 't':
 #ifdef FSSTUFF
-  clearNodeFile();
+    clearNodeFile();
 #endif
 
 #ifdef EEPROMSTUFF
-  lastCommandWrite(input);
+    lastCommandWrite(input);
 
-  runCommandAfterReset('t');
+    runCommandAfterReset('t');
 #endif
 
 #ifdef FSSTUFF
-  openNodeFile();
-  getNodesToConnect();
+    openNodeFile();
+    getNodesToConnect();
 #endif
-  Serial.println("\n\n\rnetlist\n\n\r");
+    Serial.println("\n\n\rnetlist\n\n\r");
 
-  bridgesToPaths();
+    bridgesToPaths();
 
-  listSpecialNets();
-  listNets();
-  printBridgeArray();
-  Serial.print("\n\n\r");
-  Serial.print(numberOfNets);
+    listSpecialNets();
+    listNets();
+    printBridgeArray();
+    Serial.print("\n\n\r");
+    Serial.print(numberOfNets);
 
-  Serial.print("\n\n\r");
-  Serial.print(numberOfPaths);
+    Serial.print("\n\n\r");
+    Serial.print(numberOfPaths);
 
-  assignNetColors();
+    assignNetColors();
 #ifdef PIOSTUFF
-  sendAllPaths();
+    sendAllPaths();
 #endif
 
-  break;
+    break;
 
-case 'l':
-  if (LEDbrightnessMenu() == '!')
+  case 'l':
+    if (LEDbrightnessMenu() == '!')
+    {
+      clearLEDs();
+      delayMicroseconds(9200);
+      sendAllPathsCore2 = 1;
+    }
+    break;
+
+  case 'r':
+
+    resetArduino();
+
+    break;
+
+  case 'u':
+    Serial.print("\n\r");
+    Serial.print("enter baud rate\n\r");
+    while (Serial.available() == 0)
+      ;
+    baudRate = Serial.parseInt();
+    Serial.print("\n\r");
+    Serial.print("setting baud rate to ");
+    Serial.print(baudRate);
+    Serial.print("\n\r");
+
+    setBaudRate(baudRate);
+    break;
+
+  case 'd':
   {
-    clearLEDs();
-    delayMicroseconds(9200);
-    sendAllPathsCore2 = 1;
+    debugFlagInit();
+
+  debugFlags:
+
+    Serial.print("\n\r0.   all off");
+    Serial.print("\n\r9.   all on");
+    Serial.print("\n\ra-z. exit\n\r");
+
+    Serial.print("\n\r1. file parsing           =    ");
+    Serial.print(debugFP);
+    Serial.print("\n\r2. file parsing time      =    ");
+    Serial.print(debugFPtime);
+
+    Serial.print("\n\r3. net manager            =    ");
+    Serial.print(debugNM);
+    Serial.print("\n\r4. net manager time       =    ");
+    Serial.print(debugNMtime);
+
+    Serial.print("\n\r5. chip connections       =    ");
+    Serial.print(debugNTCC);
+    Serial.print("\n\r6. chip conns alt paths   =    ");
+    Serial.print(debugNTCC2);
+    Serial.print("\n\r7. LEDs                   =    ");
+    Serial.print(debugLEDs);
+
+    Serial.print("\n\n\r");
+
+    while (Serial.available() == 0)
+      ;
+
+    int toggleDebug = Serial.read();
+    Serial.write(toggleDebug);
+    toggleDebug -= '0';
+
+    if (toggleDebug >= 0 && toggleDebug <= 9)
+    {
+
+      debugFlagSet(toggleDebug);
+
+      delay(10);
+
+      goto debugFlags;
+    }
+    else
+    {
+      break;
+    }
   }
-  break;
 
-case 'r':
+  case ':':
 
-  resetArduino();
+    if (Serial.read() == ':')
+    {
+      // Serial.print("\n\r");
+      // Serial.print("entering machine mode\n\r");
+      machineMode();
+      showLEDsCore2 = 1;
+      goto dontshowmenu;
+      break;
+    }
+    else
+    {
+      break;
+    }
 
-  break;
+  default:
+    while (Serial.available() > 0)
+    {
+      int f = Serial.read();
+      delayMicroseconds(50);
+    }
 
-case 'u':
-  Serial.print("\n\r");
-  Serial.print("enter baud rate\n\r");
-  while (Serial.available() == 0)
-    ;
-  baudRate = Serial.parseInt();
-  Serial.print("\n\r");
-  Serial.print("setting baud rate to ");
-  Serial.print(baudRate);
-  Serial.print("\n\r");
-
-  setBaudRate(baudRate);
-  break;
-
-case 'd':
-{
-  debugFlagInit();
-
-debugFlags:
-
-  Serial.print("\n\r0.   all off");
-  Serial.print("\n\r9.   all on");
-  Serial.print("\n\ra-z. exit\n\r");
-
-  Serial.print("\n\r1. file parsing           =    ");
-  Serial.print(debugFP);
-  Serial.print("\n\r2. file parsing time      =    ");
-  Serial.print(debugFPtime);
-
-  Serial.print("\n\r3. net manager            =    ");
-  Serial.print(debugNM);
-  Serial.print("\n\r4. net manager time       =    ");
-  Serial.print(debugNMtime);
-
-  Serial.print("\n\r5. chip connections       =    ");
-  Serial.print(debugNTCC);
-  Serial.print("\n\r6. chip conns alt paths   =    ");
-  Serial.print(debugNTCC2);
-  Serial.print("\n\r7. LEDs                   =    ");
-  Serial.print(debugLEDs);
-
-  Serial.print("\n\n\r");
-
-  while (Serial.available() == 0)
-    ;
-
-  int toggleDebug = Serial.read();
-  Serial.write(toggleDebug);
-  toggleDebug -= '0';
-
-  if (toggleDebug >= 0 && toggleDebug <= 9)
-  {
-
-    debugFlagSet(toggleDebug);
-
-    delay(10);
-
-    goto debugFlags;
-  }
-  else
-  {
     break;
   }
-}
 
-case ':':
-
-  if (Serial.read() == ':')
-  {
-    // Serial.print("\n\r");
-    // Serial.print("entering machine mode\n\r");
-    machineMode();
-    showLEDsCore2 = 1;
-    goto dontshowmenu;
-    break;
-  }
-  else
-  {
-    break;
-  }
-
-default:
-  while (Serial.available() > 0)
-  {
-    int f = Serial.read();
-    delayMicroseconds(50);
-  }
-
-  break;
-}
-
-goto menu;
+  goto menu;
 }
 
 // #include <string> // Include the necessary header file
+
+
+void lastNetConfirm(int forceLastNet)
+{
+  while (tud_connected() == 0 && millis() < 500)
+    ;
+
+  if (millis() - lastNetConfirmTimer < 3000 && tud_connected() == 1)
+  {
+    //Serial.println(lastNetConfirmTimer);
+
+    //lastNetConfirmTimer = millis();
+    return;
+  }
+
+  if (tud_connected() == 0 || forceLastNet == 1)
+  {
+
+    int bootselPressed = 0;
+    openNodeFile();
+    getNodesToConnect();
+    // Serial.print("openNF\n\r");
+    digitalWrite(RESETPIN, HIGH);
+    bridgesToPaths();
+    clearLEDs();
+    assignNetColors();
+
+    sendAllPathsCore2 = 1;
+
+    delay(250);
+    if (BOOTSEL)
+    {
+      bootselPressed = 1;
+    }
+
+    while (tud_connected() == 0 || forceLastNet == 1)
+    {
+      if (BOOTSEL)
+        bootselPressed = 1;
+      clearLEDs();
+      showLEDsCore2 = 1;
+      if (BOOTSEL)
+        bootselPressed = 1;
+      delay(250);
+      sendAllPathsCore2 = 1;
+      if (BOOTSEL)
+        bootselPressed = 1;
+      //delay(250);
+
+      if (bootselPressed == 1)
+      {
+        unsigned long longPressTimer = millis();
+        int fade = 8;
+        while (BOOTSEL)
+        {
+
+
+          sendAllPathsCore2 = 1;
+          delay(250);
+          clearLEDs();
+          showLEDsCore2 = 1;
+
+          if (fade <= 0)
+          {
+            clearAllNTCC();
+            clearLEDs();
+            startupColors();
+            sendAllPathsCore2 = 1;
+            lastNetConfirmTimer = millis();
+            //delay(1000);
+            return;
+          }
+
+          
+          delay(fade * 10);
+          fade--;
+        }
+
+        digitalWrite(RESETPIN, LOW);
+        sendAllPathsCore2 = 1;
+        return;
+      }
+      delay(250);
+    }
+  }
+}
 
 void machineMode(void) // read in commands in machine readable format
 {
