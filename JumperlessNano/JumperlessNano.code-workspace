@@ -16,8 +16,7 @@
 			"initializer_list": "cpp",
 			"ranges": "cpp",
 			"cstring": "cpp",
-			"cmath": "cpp",
-			"typeinfo": "cpp"
+			"cmath": "cpp"
 		}
 	}
 }

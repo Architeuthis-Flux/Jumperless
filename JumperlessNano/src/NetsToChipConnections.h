@@ -72,7 +72,7 @@ void duplicateSFnets (void);
 void swapDuplicateNode (int);
 
 void resolveUncommittedHops(void);
-
+void resolveUncommittedHops2(void);
 
 
 

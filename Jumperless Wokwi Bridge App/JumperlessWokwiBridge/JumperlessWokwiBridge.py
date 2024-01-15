@@ -45,10 +45,12 @@ def resource_path(relative_path):
 
 #### If you're running this in thonny, make sure you download arduino-cli and put it in the same folder as this script
 #### then uncomment this below and comment the one above
-# arduino = pyduinocli.Arduino("./arduino-cli")
+arduino = pyduinocli.Arduino("./arduino-cli")
 
 
-arduino = pyduinocli.Arduino(resource_path("arduino-cli"))
+
+#arduino = pyduinocli.Arduino(resource_path("arduino-cli"))
+##print (resource_path("arduino-cli"))
 
 arduinoPort = 0
 
@@ -896,8 +898,9 @@ while True:
                     
                    
                     
-                
-            except:
+            except Exception as e:
+                print(e)
+            
                 print ("Couldn't Flash Arduino")
 
                 #continue
