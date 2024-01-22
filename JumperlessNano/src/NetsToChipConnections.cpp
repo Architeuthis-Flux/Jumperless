@@ -821,7 +821,7 @@ void resolveAltPaths(void)
                                 path[i].y[1] = bb;
                                 path[i].y[2] = 0;
                                 // path[i].chip[2] = bb;
-                                // path[i].y[3] = 0;
+                                path[i].y[3] = 0;
                             }
                             else if (freeLane == 1)
                             {
@@ -840,7 +840,7 @@ void resolveAltPaths(void)
                                 path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
                                 path[i].y[1] = bb;
                                 path[i].y[2] = 0;
-                                // path[i].y[3] = 0;
+                                path[i].y[3] = 0;
                             }
 
                             foundPath = 1;
@@ -994,6 +994,7 @@ void resolveAltPaths(void)
                             path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
                             path[i].y[1] = yMapSF;
                             path[i].y[2] = -2;
+                            path[i].y[3] = -2;
 
                             ch[path[i].chip[0]].yStatus[path[i].y[0]] = path[i].net;
 
@@ -1021,6 +1022,7 @@ void resolveAltPaths(void)
                             path[i].y[0] = yMapForNode(path[i].node1, path[i].chip[0]);
                             path[i].y[1] = yMapSF;
                             path[i].y[2] = -2;
+                            path[i].y[3] = -2;
 
                             ch[path[i].chip[0]].yStatus[path[i].y[0]] = path[i].net;
 
@@ -1242,7 +1244,7 @@ void resolveAltPaths(void)
                         bb = 0;
                         giveUpOnL = 0;
                         swapped = 1;
-                        //Serial.println("\t\t\tt\t\t\tt\t\tswapped");
+                        // Serial.println("\t\t\tt\t\t\tt\t\tswapped");
                         swapDuplicateNode(i);
                     }
                     else if (bb == 7 && giveUpOnL == 0 && swapped == 1)
@@ -1590,12 +1592,14 @@ void resolveAltPaths(void)
                         if (ch[CHIP_L].xStatus[whichADC + 2] != -1 && ch[CHIP_L].xStatus[whichADC + 2] != path[i].net)
                         // if (true)
                         {
-                            Serial.print("\n\rCouldn't find a path for ");
-                            printNodeOrName(path[i].node1);
-                            Serial.print(" to ");
-                            printNodeOrName(path[i].node2);
-                            Serial.println("  \n\n\n\n\n\r");
-
+                            if (debugNTCC2)
+                            {
+                                Serial.print("\n\rCouldn't find a path for ");
+                                printNodeOrName(path[i].node1);
+                                Serial.print(" to ");
+                                printNodeOrName(path[i].node2);
+                                Serial.println("  \n\n\n\n\n\r");
+                            }
                             // path[i].skip = true;
                             // / path[i].chip[0] = -1;
                             // path[i].chip[1] = -1;
@@ -1622,7 +1626,7 @@ void resolveAltPaths(void)
 
                                     Serial.println();
                                 }
-                                if (ch[hopBB].xStatus[xMapForChipLane0(hopBB, path[i].chip[whichIsSF])] == -1 && ch[hopBB].yStatus[0] == -1)
+                                if ((ch[hopBB].xStatus[xMapForChipLane0(hopBB, path[i].chip[whichIsSF])] == -1) && (ch[hopBB].yStatus[0] == -1))
                                 {
                                     if (debugNTCC2)
                                     {
@@ -1630,6 +1634,7 @@ void resolveAltPaths(void)
                                         Serial.println(hopBB);
                                     }
                                     path[i].chip[2] = hopBB;
+                                    path[i].chip[3] = hopBB;
 
                                     path[i].x[whichIsSF] = xMapForNode(path[i].node1, path[i].chip[whichIsSF]);
                                     path[i].y[whichIsSF] = hopBB;
@@ -1639,15 +1644,16 @@ void resolveAltPaths(void)
 
                                     path[i].x[2] = xMapForChipLane0(hopBB, path[i].chip[whichIsSF]);
 
-                                    path[i].y[2] = 0;
+                                    path[i].y[2] = -2;
+                                    path[i].y[3] = -2;
 
                                     path[i].altPathNeeded = false;
 
                                     ch[hopBB].xStatus[xMapForChipLane0(hopBB, path[i].chip[whichIsSF])] = path[i].net;
-                                    ch[hopBB].yStatus[0] = path[i].net;
 
                                     ch[hopBB].xStatus[xMapForChipLane0(hopBB, path[i].chip[whichIsL])] = path[i].net;
 
+                                    ch[hopBB].yStatus[0] = path[i].net;
                                     ch[CHIP_L].yStatus[hopBB] = path[i].net;
 
                                     if (whichIsL == 0)
@@ -1706,6 +1712,7 @@ void resolveAltPaths(void)
                         }
                         else
                         {
+                            // Serial.print("\n\r\t\t\t\t\tfuck ");
 
                             path[i].x[whichIsL] = whichADC + 2;
                             ch[CHIP_L].xStatus[whichADC + 2] = path[i].net;
@@ -1755,6 +1762,10 @@ void resolveAltPaths(void)
                                 ch[sfChip2].xStatus[path[i].x[whichIsSF]] = path[i].net;
                                 ch[sfChip2].xStatus[xMapForNode(path[i].node2, sfChip2)] = path[i].net;
                                 ch[sfChip1].xStatus[xMapForNode(path[i].node1, sfChip1)] = path[i].net;
+
+                                // ch[sfChip1].yStatus[0] = path[i].net;
+                                /// ch[sfChip2].yStatus[0] = path[i].net;
+                                // ch[hopBB].yStatus[0] = path[i].net;
                             }
                             else // l is the second chip
                             {
@@ -1772,80 +1783,88 @@ void resolveAltPaths(void)
                                 ch[sfChip1].xStatus[path[i].x[whichIsSF]] = path[i].net;
                                 ch[sfChip1].xStatus[xMapForNode(path[i].node1, sfChip1)] = path[i].net;
                                 ch[sfChip2].xStatus[xMapForNode(path[i].node2, sfChip2)] = path[i].net;
+
+                                // ch[sfChip1].yStatus[0] = path[i].net;
+                                // ch[sfChip2].yStatus[0] = path[i].net;
+                                // ch[hopBB].yStatus[0] = path[i].net;
                             }
-                            //printPathsCompact();
+                            // printPathsCompact();
 
                             // foundPath = 1;
                             path[i].altPathNeeded = false;
-                            // path[i].sameChip = true;
+                            path[i].sameChip = true;
 
-                            // resolveUncommittedHops();
-                            // for (int ySearch = 0; ySearch < 8; ySearch++)
-                            // {
-                            //     if (ch[sfChip1].yStatus[ySearch] == -1 || ch[sfChip1].yStatus[ySearch] == path[i].net) //&& ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] == -1 || ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] == path[i].net)
-                            //     {
-                            //         if (debugNTCC3)
-                            //         {
-                            //             Serial.print("ySearch: ");
-                            //             Serial.println(ySearch);
-                            //             Serial.print("sfChip1: ");
-                            //             Serial.println(sfChip1);
-                            //             Serial.print("xMapForChipLane0(ySearch, sfChip1): ");
-                            //             Serial.println(xMapForChipLane0(ySearch, sfChip1));
-                            //             Serial.print("ch[ySearch].yStatus[xMapForChipLane0(ySearch, sfChip1)]: ");
-                            //             Serial.println(ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)]);
-                            //         }
-                            //         //
+                            resolveUncommittedHops();
+                            // printChipStatus();
+                            for (int ySearch = 0; ySearch < 8; ySearch++)
+                            {
+                                if ((ch[sfChip1].yStatus[ySearch] == -1 || ch[sfChip1].yStatus[ySearch] == path[i].net) && (ch[ySearch].yStatus[0] == -1 || ch[ySearch].yStatus[0] == path[i].net)) // && ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] == -1 || ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] == path[i].net)
+                                {
+                                    if (debugNTCC2)
+                                    {
+                                        Serial.print("ySearch: ");
+                                        Serial.println(ySearch);
+                                        Serial.print("sfChip1: ");
+                                        Serial.println(sfChip1);
+                                        Serial.print("xMapForChipLane0(ySearch, sfChip1): ");
+                                        Serial.println(xMapForChipLane0(ySearch, sfChip1));
+                                        Serial.print("ch[ySearch].yStatus[xMapForChipLane0(ySearch, sfChip1)]: ");
+                                        Serial.println(ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)]);
+                                    }
+                                    //
 
-                            //         if (whichIsL == 0)
-                            //         {
-                            //             path[i].y[1] = ySearch;
-                            //             path[i].y[2] = ySearch;
-                            //             ch[ySearch].yStatus[0] = path[i].net;
-                            //             ch[sfChip1].yStatus[ySearch] = path[i].net;
-                            //         }
-                            //         else
-                            //         {
-                            //             path[i].y[0] = ySearch;
-                            //             path[i].y[3] = ySearch;
-                            //             ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] = path[i].net;
-                            //             ch[sfChip1].yStatus[ySearch] = path[i].net;
-                            //         }
+                                    if (whichIsL == 0)
+                                    {
+                                        path[i].y[1] = ySearch;
+                                        path[i].y[2] = ySearch;
+                                        ch[ySearch].yStatus[0] = path[i].net;
+                                        ch[sfChip1].yStatus[ySearch] = path[i].net;
+                                    }
+                                    else
+                                    {
+                                        path[i].y[0] = ySearch;
+                                        path[i].y[3] = ySearch;
+                                        ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip1)] = path[i].net;
+                                        ch[sfChip1].yStatus[ySearch] = path[i].net;
+                                    }
 
-                            //         path[i].y[whichIsL] = ySearch;
-                            //         path[i].y[whichIsL + 2] = ySearch;
-                            //         // ch[sfChip2].yStatus[ySearch] = path[i].net;
-                            //         break;
-                            //     }
-                            // }
-                            // for (int ySearch = 0; ySearch < 8; ySearch++)
-                            // {
-                            //     if (ch[sfChip2].yStatus[ySearch] == -1 || ch[sfChip2].yStatus[ySearch] == path[i].net) // && ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] == -1 || ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] == path[i].net)
-                            //     {
-                            //         ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] = path[i].net;
-                            //         ch[sfChip2].yStatus[ySearch] = path[i].net;
-                            //         // ch[ySearch].yStatus[0] = path[i].net;
+                                    path[i].y[whichIsL] = ySearch;
+                                    path[i].y[whichIsL + 2] = ySearch;
+                                    // ch[sfChip2].yStatus[ySearch] = path[i].net;
+                                    break;
+                                }
+                            }
 
-                            //         if (whichIsL == 0)
-                            //         {
-                            //             path[i].y[0] = ySearch;
-                            //             path[i].y[3] = ySearch;
-                            //             ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] = path[i].net;
-                            //             ch[sfChip2].yStatus[ySearch] = path[i].net;
-                            //         }
-                            //         else
-                            //         {
-                            //             path[i].y[1] = ySearch;
-                            //             path[i].y[2] = ySearch;
-                            //             ch[ySearch].yStatus[0] = path[i].net;
-                            //             ch[sfChip2].yStatus[ySearch] = path[i].net;
-                            //         }
+                            for (int ySearch = 0; ySearch < 8; ySearch++)
+                            {
+                                if ((ch[sfChip2].yStatus[ySearch] == -1 || ch[sfChip2].yStatus[ySearch] == path[i].net) && (ch[ySearch].yStatus[0] == -1 || ch[ySearch].yStatus[0] == path[i].net)) // && ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] == -1 || ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] == path[i].net)
+                                {
+                                    ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] = path[i].net;
+                                    // ch[sfChip2].yStatus[ySearch] = path[i].net;
+                                    ch[ySearch].yStatus[0] = path[i].net;
 
-                            //         // path[i].y[whichIsSF] = ySearch;
-                            //         // path[i].y[whichIsSF + 2] = ySearch;
-                            //         break;
-                            //     }
-                            // }
+                                    if (whichIsL == 0)
+                                    {
+                                        path[i].y[0] = ySearch;
+                                        path[i].y[3] = ySearch;
+                                        ch[ySearch].xStatus[xMapForChipLane0(ySearch, sfChip2)] = path[i].net;
+                                        ch[sfChip2].yStatus[ySearch] = path[i].net;
+                                    }
+                                    else
+                                    {
+                                        path[i].y[1] = ySearch;
+                                        path[i].y[2] = ySearch;
+                                        // ch[ySearch].yStatus[0] = path[i].net;
+                                        // Serial.println("\t\t\t\t\tySearch");
+                                        ch[sfChip2].yStatus[ySearch] = path[i].net;
+                                    }
+
+                                    // path[i].y[whichIsSF] = ySearch;
+                                    // path[i].y[whichIsSF + 2] = ySearch;
+                                    break;
+                                }
+                            }
+                            // printChipStatus();
                         }
                     }
                     else
@@ -2058,6 +2077,7 @@ void resolveAltPaths(void)
             }
         }
     }
+    // resolveUncommittedHops();
 
     // printPathsCompact();
     // printChipStatus();
@@ -2069,7 +2089,6 @@ void resolveUncommittedHops2(void)
 
 void resolveUncommittedHops(void)
 {
-    // printPathsCompact();
 
     /// return;
 
@@ -2094,6 +2113,8 @@ void resolveUncommittedHops(void)
 
     for (int i = 0; i < numberOfPaths; i++)
     {
+        printPathsCompact();
+        printChipStatus();
         pathsWithSameXChips[i] = -1;
         pathsWithSameYChips[i] = -1;
         int sameChips[2][4] = {//[x,y][chip]
@@ -2128,16 +2149,16 @@ void resolveUncommittedHops(void)
                         {
 
                             sameChips[0][chip] = path[i].chip[chip];
-                            // Serial.print("sameChips[0][chip]: ");
-                            // Serial.println(sameChips[0][chip]);
+                            //  Serial.print("sameChips[0][chip]: ");
+                            //  Serial.println(sameChips[0][chip]);
 
                             pathsWithSameXChips[i] = 1;
                         }
                         if (yFlag == 1)
                         {
                             sameChips[1][chip] = path[i].chip[chip];
-                            // Serial.print("sameChips[1][chip]: ");
-                            // Serial.println(sameChips[1][chip]);
+                            //  Serial.print("sameChips[1][chip]: ");
+                            //  Serial.println(sameChips[1][chip]);
 
                             pathsWithSameYChips[i] = 1;
                         }
@@ -2322,6 +2343,10 @@ void resolveUncommittedHops(void)
                 //     }
                 // }
                 // else
+
+                // if (path[i].chip[0] == path[i].chip[1])
+                // {
+
                 for (int chip = 0; chip < 4; chip++)
                 {
 
@@ -2329,31 +2354,83 @@ void resolveUncommittedHops(void)
                     {
                         for (int freeXidx = 0; freeXidx < 16; freeXidx++)
                         {
+                            int otherChipXStatus = 99;
 
                             if (freeXSearchOrder[sameChips[0][chip]][freeXidx] == -1)
                             {
                                 continue;
                             }
 
-                            if (ch[sameChips[0][chip]].xStatus[freeXSearchOrder[sameChips[0][chip]][freeXidx]] == -1)
+                            if (ch[sameChips[0][chip]].xStatus[freeXSearchOrder[sameChips[0][chip]][freeXidx]] == -1 || ch[sameChips[0][chip]].xStatus[freeXSearchOrder[sameChips[0][chip]][freeXidx]] == path[i].net)
                             {
+                                int otherChip = ch[sameChips[0][chip]].xMap[freeXSearchOrder[sameChips[0][chip]][freeXidx]];
+                                int thisChip = sameChips[0][chip];
+                                Serial.print("other Chip = ");
+                                Serial.println(chipNumToChar(otherChip));
+                                int otherChipFree = 0;
+                                int otherChipX = -1;
+                                
+
+                                for (int xOtherCheck = 0; xOtherCheck < 16; xOtherCheck++)
+                                {
+                                    //             int lane = -1;
+                                    int lane = -1;
+
+                                    if (sameChips[0][chip] < 8)
+                                    {
+                                        otherChip = ch[thisChip].xMap[freeXSearchOrder[thisChip][freeXidx]];
+
+                                        if (freeXidx % 2 == 0)
+                                        {
+                                            lane = 0;
+                                        }
+                                        else
+                                        {
+                                            lane = 1;
+                                        }
+
+                                        if (lane == 1)
+                                        {
+                                            otherChipX = xMapForChipLane1(otherChip, thisChip);
+                                        }
+                                        else if (lane == 0)
+                                        {
+                                            otherChipX = xMapForChipLane0(otherChip, thisChip);
+                                        }
+
+                                        otherChipXStatus = ch[otherChip].xStatus[otherChipX];
+                                    }
+
+                                    // if (ch[otherChip].xMap[xOtherCheck] == sameChips[0][chip])
+                                    // {
+                                    //     if (ch[otherChip].xStatus[xOtherCheck] == -1 || ch[otherChip].xStatus[xOtherCheck] == path[i].net)
+                                    //     {
+
+                                    //     }
+                                    // }
+                                }
+                                if (otherChipXStatus == -1 || otherChipXStatus == path[i].net)
+                                {
                                 freeX = freeXSearchOrder[sameChips[0][chip]][freeXidx];
                                 break;
+                                }
                             }
+
+
                         }
 
-                        if (chip >= 2)
-                        {
-                            path[i].x[2] = freeX;
-                            path[i].x[3] = freeX;
-                            ch[sameChips[0][chip]].xStatus[freeX] = path[i].net;
-                        }
-                        else
-                        {
-                            path[i].x[chip] = freeX;
+                        // if (chip >= 2)
+                        // {
+                        //     path[i].x[2] = freeX;
+                        //     path[i].x[3] = freeX;
+                        //     ch[sameChips[0][chip]].xStatus[freeX] = path[i].net;
+                        // }
+                        // else
+                        // {
+                        path[i].x[chip] = freeX;
 
-                            ch[sameChips[0][chip]].xStatus[freeX] = path[i].net;
-                        }
+                        ch[sameChips[0][chip]].xStatus[freeX] = path[i].net;
+                        //}
                     }
                 }
             }
@@ -2406,12 +2483,12 @@ void resolveUncommittedHops(void)
                     }
                 }
 
-                // Serial.print("\n\n\rchipPairs[0]: ");
-                // Serial.println(chipPairs[0]);
-                // Serial.print("chipPairs[1]: ");
-                // Serial.println(chipPairs[1]);
+                Serial.print("\n\n\rchipPairs[0]: ");
+                Serial.println(chipPairs[0]);
+                Serial.print("chipPairs[1]: ");
+                Serial.println(chipPairs[1]);
 
-                // Serial.println("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+                Serial.println("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
 
                 for (int pairs = 0; pairs < 2; pairs++)
                 {
@@ -2431,13 +2508,13 @@ void resolveUncommittedHops(void)
                                     continue;
                                 }
 
-                                // Serial.print("path: ");
-                                // Serial.print(i);
-                                // Serial.print("\nfreeYsearch: ");
-                                // Serial.print(freeYsearch);
-                                // Serial.print("  status: ");
-                                // Serial.print(ch[sameChips[1][chip]].yStatus[freeYsearch]);
-                                // Serial.println(" ");
+                                Serial.print("path: ");
+                                Serial.print(i);
+                                Serial.print("\nfreeYsearch: ");
+                                Serial.print(freeYsearch);
+                                Serial.print("  status: ");
+                                Serial.print(ch[sameChips[1][chip]].yStatus[freeYsearch]);
+                                Serial.println(" ");
 
                                 if (ch[sameChips[1][chip]].yStatus[freeYsearch] == -1 || ch[sameChips[1][chip]].yStatus[freeYsearch] == path[i].net)
                                 {
@@ -2446,26 +2523,24 @@ void resolveUncommittedHops(void)
                                     // Serial.print("freeY: ");
                                     // Serial.println(freeY);
 
+                                    if (path[i].y[chip] == -2)
+                                    {
+                                        // Serial.print("\n\n\rfreeY After search : ");
+                                        // Serial.print(freeY);
 
-                                            if (path[i].y[chip] == -2)
-                                            {
-                                                // Serial.print("\n\n\rfreeY After search : ");
-                                                // Serial.print(freeY);
+                                        path[i].y[chip] = freeY;
 
-                                                path[i].y[chip] = freeY;
+                                        ch[sameChips[1][chip]].yStatus[freeY] = path[i].net;
 
-                                                ch[sameChips[1][chip]].yStatus[freeY] = path[i].net;
+                                        // Serial.print("\t ");
+                                        // Serial.print(path[i].y[y]);
 
-                                                // Serial.print("\t ");
-                                                // Serial.print(path[i].y[y]);
+                                        // Serial.print("\t ");
+                                        // Serial.print("sameChips[1][chip]: ");
+                                        // printChipNumToChar(sameChips[1][chip]);
+                                        break;
+                                    }
 
-                                                // Serial.print("\t ");
-                                                // Serial.print("sameChips[1][chip]: ");
-                                                // printChipNumToChar(sameChips[1][chip]);
-                                                break;
-                                            }
-                                        
-                                    
                                     /// Serial.println(" \r\n");
                                     // break;
                                 }
@@ -2473,44 +2548,43 @@ void resolveUncommittedHops(void)
                         }
                     }
                 }
-            
+            }
         }
-    }
 
-    // Serial.println(" ");
-    // Serial.print("checking singular -2s for path: ");
-    // Serial.println(i);
-    for (int xCheck = 0; xCheck < 4; xCheck++)
-    {
-        // Serial.print("xCheck: ");
-        // Serial.println(xCheck);
-        // Serial.print("path[i].x[xCheck]: ");
-        // Serial.println(path[i].x[xCheck]);
-
-        if (path[i].x[xCheck] == -2)
+        // Serial.println(" ");
+        // Serial.print("checking singular -2s for path: ");
+        // Serial.println(i);
+        for (int xCheck = 0; xCheck < 4; xCheck++)
         {
-            for (int findFree = 0; findFree < 16; findFree++)
+            // Serial.print("xCheck: ");
+            // Serial.println(xCheck);
+            // Serial.print("path[i].x[xCheck]: ");
+            // Serial.println(path[i].x[xCheck]);
+
+            if (path[i].x[xCheck] == -2)
             {
-                // Serial.println(" ");
-                // Serial.println(findFree);
-
-                if (ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] == -1 || ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] == path[i].net)
+                for (int findFree = 0; findFree < 16; findFree++)
                 {
-                    // Serial.print("found free x: ");
-                    // Serial.print(freeXSearchOrder[path[i].chip[xCheck]][findFree]);
-                    // Serial.print(" on chip: ");
-                    // Serial.println(path[i].chip[xCheck]);
-                    path[i].x[xCheck] = freeXSearchOrder[path[i].chip[xCheck]][findFree];
+                    // Serial.println(" ");
+                    // Serial.println(findFree);
 
-                    ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] = path[i].net;
-                    path[i].altPathNeeded = false;
+                    if (ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] == -1 || ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] == path[i].net)
+                    {
+                        // Serial.print("found free x: ");
+                        // Serial.print(freeXSearchOrder[path[i].chip[xCheck]][findFree]);
+                        // Serial.print(" on chip: ");
+                        // Serial.println(path[i].chip[xCheck]);
+                        path[i].x[xCheck] = freeXSearchOrder[path[i].chip[xCheck]][findFree];
 
-                    break;
+                        ch[path[i].chip[xCheck]].xStatus[freeXSearchOrder[path[i].chip[xCheck]][findFree]] = path[i].net;
+                        path[i].altPathNeeded = false;
+
+                        break;
+                    }
                 }
             }
         }
     }
-}
 }
 
 void swapDuplicateNode(int pathIndex)
@@ -2582,19 +2656,15 @@ void printPathsCompact(void)
             Serial.print(" \t");
             Serial.print(path[i].y[3]);
         }
-        // if (path[i].chip[3] != -1)
-        // {
-        //     Serial.print(" \t");
-        //     Serial.print(chipNumToChar(path[i].chip[3]));
-        //     Serial.print(" \t");
-        //     Serial.print(path[i].x[4]);
-        //     Serial.print(" \t");
-        //     Serial.print(path[i].y[4]);
-        //     Serial.print(" \t");
-        //     Serial.print(path[i].x[5]);
-        //     Serial.print(" \t");
-        //     Serial.print(path[i].y[5]);
-        // }
+        if (debugNTCC2)
+        {
+            if (path[i].chip[3] != -1)
+            {
+                Serial.print(" \t");
+                Serial.print(chipNumToChar(path[i].chip[3]));
+                Serial.print(" \t");
+            }
+        }
 
         Serial.println(" ");
     }

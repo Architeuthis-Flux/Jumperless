@@ -746,7 +746,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
       USBSer1.write(ch);
     }
 
-    if (millis() - lastTimeReset > 3000) // if the arduino hasn't been reset in a second, reset the flag
+    if (millis() - lastTimeReset > 4000) // if the arduino hasn't been reset in a second, reset the flag
     {
       arduinoReset = 0;
     }
@@ -771,9 +771,9 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
       if (ch == 'f' && connectFromArduino == '\0')
       {
-        // input = 'f';
+        input = 'f';
 
-        connectFromArduino = 'f';
+        //connectFromArduino = 'f';
         // Serial.print("!!!!");
       }
       else
