@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from bs4 import BeautifulSoup
 
 
