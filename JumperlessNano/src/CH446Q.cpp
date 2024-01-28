@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 
 #include "CH446Q.h"
 #include "MatrixStateRP2040.h"

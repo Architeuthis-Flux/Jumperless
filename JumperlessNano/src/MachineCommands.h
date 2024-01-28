@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef MACHINECOMMANDS_H
 #define MACHINECOMMANDS_H
 

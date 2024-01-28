@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 
 #include <Arduino.h>
 #include "JumperlessDefinesRP2040.h"

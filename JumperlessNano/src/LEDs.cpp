@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "LEDs.h"
 #include <Adafruit_NeoPixel.h>
 #include "NetsToChipConnections.h"

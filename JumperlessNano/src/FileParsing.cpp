@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "FileParsing.h"
 #include <Arduino.h>
 #include "LittleFS.h"
