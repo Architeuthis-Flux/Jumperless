@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef PERIPHERALS_H
 #define PERIPHERALS_H
 //#include "Adafruit_MCP4725.h"

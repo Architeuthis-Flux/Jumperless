@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef MATRIXSTATE_H
 #define MATRIXSTATE_H
 

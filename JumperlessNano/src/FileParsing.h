@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef FILEPARSING_H
 #define FILEPARSING_H
 

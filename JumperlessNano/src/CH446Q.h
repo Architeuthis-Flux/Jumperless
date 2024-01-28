@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef CH446Q_H
 #define CH446Q_H
 

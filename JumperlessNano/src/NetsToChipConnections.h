@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef NETTOCHIPCONNECTIONS_H
 #define NETTOCHIPCONNECTIONS_H
 

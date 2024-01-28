@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef ARDUINOSTUFF_H
 #define ARDUINOSTUFF_H
 

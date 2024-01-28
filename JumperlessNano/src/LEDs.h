@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef LEDS_H
 #define LEDS_H
 

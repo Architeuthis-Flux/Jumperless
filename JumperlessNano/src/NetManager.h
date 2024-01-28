@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 
 #ifndef NETMANAGER_H
 #define NETMANAGER_H
