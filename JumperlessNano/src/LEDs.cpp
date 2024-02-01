@@ -564,8 +564,8 @@ void assignNetColors(void)
         
         if (net[i].machine == true)
         {
-            Serial.println("number of nets: ");
-            Serial.println(numberOfNets);
+            // Serial.println("number of nets: ");
+            // Serial.println(numberOfNets);
             // rgbColor specialNetRgb = unpackRgb(rawSpecialNetColors[i]);
 
             // net[i].color = specialNetRgb;
@@ -826,6 +826,13 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                                 color = packRgb(shiftedColor.r, shiftedColor.g, shiftedColor.b);
 
                                 // color = packRgb((shiftedColor.r * LEDbrightness) >> 8, (shiftedColor.g * LEDbrightness) >> 8, (shiftedColor.b * LEDbrightness) >> 8);
+                            }
+
+                            if (hueShift != 0)
+                            {
+                                rgbColor colorToShift = unpackRgb(color);
+                                colorToShift = shiftHue(colorToShift, hueShift);
+                                color = packRgb(colorToShift.r, colorToShift.g, colorToShift.b);
                             }
                             netColors[netNumber] = unpackRgb(color);
                             net[netNumber].rawColor = color;

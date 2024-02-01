@@ -47,17 +47,29 @@ def resource_path(relative_path):
 
 #### If you're running this in thonny, make sure you download arduino-cli and put it in the same folder as this script
 #### then uncomment this below and comment the one above
-arduino = pyduinocli.Arduino("./arduino-cli")
-
-
-
-#arduino = pyduinocli.Arduino(resource_path("arduino-cli"))
-##print (resource_path("arduino-cli"))
+# arduino = pyduinocli.Arduino("./arduino-cli")
+noArduinocli = False
+try:
+    arduino = pyduinocli.Arduino(resource_path("arduino-cli"))
+except:
+    try:
+        arduino = pyduinocli.Arduino("arduino-cli")
+    except:
+        try:
+            arduino = pyduinocli.Arduino("./arduino-cli")
+        except:
+            print ("Couldn't find arduino-cli")
+            noArduinocli = True
+            pass
+    
 
 arduinoPort = 0
 
-disableArduinoFlashing = 0
-
+if (noArduinocli == True):
+    
+    disableArduinoFlashing = 1
+else:
+    disableArduinoFlashing = 0
 
 def openSerial():
     global portName
@@ -73,11 +85,25 @@ def openSerial():
     while portSelected == False:
         autodetected = -1
         ports = serial.tools.list_ports.comports()
+        
         i = 0
         for port, desc, hwid in ports:
             i = i + 1
+            
+            hwidString = hwid
+            splitAt = "VID:PID="
+            splitInd = hwidString.find(splitAt)
+            
+            hwidString = hwidString[splitInd+8:splitInd+17]
+            #print (hwidString)
+            
+            
+            vid = hwidString[0:4]
+            pid = hwidString[5:9]
+            #print ("vid = " + vid)
+            #print ("pid = " + pid)
             print("{}: {} [{}]".format(i, port, desc))
-            if desc == "Jumperless":
+            if desc == "Jumperless" or pid == "ACAB" or pid == "1312":
                 autodetected = i
                 foundports.append(ports[autodetected-1][0])
                 
@@ -356,12 +382,13 @@ def openProject():
             
             
         url_link = linkInput
-            
-        autoFlash = input("\n\nDo you want to enable Auto-flashing the Arduino from Wokwi? y/n\n\n")
-        if (autoFlash == 'y' or autoFlash == 'Y'):
-            disableArduinoFlashing = 0
-        else:
-            disableArduinoFlashing = 1
+        
+        if (noArduinocli == False):
+            autoFlash = input("\n\nDo you want to enable Auto-flashing the Arduino from Wokwi? y/n\n\n")
+            if (autoFlash == 'y' or autoFlash == 'Y'):
+                disableArduinoFlashing = 0
+            else:
+                disableArduinoFlashing = 1
         
 
     f.close()
@@ -808,14 +835,9 @@ while True:
         librariesExist = 0
         
         
-        try:
-            c = decoded['props']['pageProps']['p']['files'][findsketchindex(decoded)]['content']
-            sketchExists = 1
-        except:
-            sketchExists = 0
-            pass
-        
-        
+
+        c = decoded['props']['pageProps']['p']['files'][findsketchindex(decoded)]['content']
+
         try:
             l = d['props']['pageProps']['p']['files'][findlibrariesindex(decoded)]['content']
             libraries = str(l)
@@ -847,7 +869,7 @@ while True:
 
         justFlashed = 0
             
-        if (sketch != lastsketch and disableArduinoFlashing == 0 and sketchExists == 1):
+        if (sketch != lastsketch and disableArduinoFlashing == 0):
             
             
             lastsketch = sketch
@@ -856,12 +878,14 @@ while True:
             
             try:
                 newpath = './WokwiSketch'
+                compilePath = './WokwiSketch/compile'
                 
                 if not os.path.exists(newpath):
                     os.makedirs(newpath)
+                    os.makedirs(compilePath)
+                
 
-
-                print("\n\rFlashing Arduino")
+                #print("\n\rFlashing Arduino")
                 sk = open("./WokwiSketch/WokwiSketch.ino", "w")
                 sk.write(sketch)
                 sk.close()
@@ -895,18 +919,32 @@ while True:
                         print (filteredLibs)
                 
                 
-                ser.write('r\n'.encode())
-                arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", upload=True)  
-                    
+                #ser.write('r\n'.encode())
+                time.sleep(0.1)
+                
+                #arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", upload=True)
+               # try:
+                    #arduino.config("-v")
+                print ("Compiling...")
+                compiledCode = arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", build_path="./WokwiSketch/compile" )
+                
+                print ("Flashing Arduino...")
+                arduino.upload( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", input_dir="./WokwiSketch/compile"  )
+                print ("Arduino flashed successfully!")
+                time.sleep(0.1)
+               # except:# Exception as ardEx:
+                    #print (arduino.errors)
+                  #  print (ardEx)
                    
                     
+                
             except Exception as e:
-                print(e)
-            
+                print (e)
                 print ("Couldn't Flash Arduino")
 
                 #continue
-            
+                
+            ser.write('m\n'.encode())
   
             
 

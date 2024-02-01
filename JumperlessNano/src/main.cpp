@@ -71,8 +71,12 @@ void setup()
   USBDevice.setProductDescriptor("Jumperless");
   USBDevice.setManufacturerDescriptor("Architeuthis Flux");
   USBDevice.setSerialDescriptor("0");
-  USBDevice.setID(0xACAB, 0x1312);
+  USBDevice.setID(0x1D50, 0xACAB);
+  USBDevice.addStringDescriptor("Jumperless");
+  USBDevice.addStringDescriptor("Architeuthis Flux");
+
   USBSer1.setStringDescriptor("Jumperless USB Serial");
+  
 
   USBSer1.begin(115200);
 
@@ -163,6 +167,8 @@ dontshowmenu:
     if (showReadings >= 1)
     {
       showMeasurements();
+      //Serial.print("\n\n\r");
+      //showLEDsCore2 = 1;
     }
     if (BOOTSEL)
     {
@@ -492,7 +498,7 @@ skipinput:
     while (Serial.available() > 0)
     {
       int f = Serial.read();
-      delayMicroseconds(50);
+      delayMicroseconds(30);
     }
 
     break;
@@ -588,15 +594,35 @@ void lastNetConfirm(int forceLastNet)
     }
   }
 }
+unsigned long lastTimeNetlistLoaded = 0;
+unsigned long lastTimeCommandRecieved = 0;
 
 void machineMode(void) // read in commands in machine readable format
 {
   int sequenceNumber = -1;
+
+lastTimeCommandRecieved = millis();
+
+if (millis() - lastTimeCommandRecieved > 100)
+{
+  machineModeRespond(sequenceNumber, true);
+  return;
+}
   enum machineModeInstruction receivedInstruction = parseMachineInstructions(&sequenceNumber);
+
+
+
+
+// Serial.print("receivedInstruction: ");
+// Serial.print(receivedInstruction);
+// Serial.print("\n\r");
+
+
 
   switch (receivedInstruction)
   {
   case netlist:
+    lastTimeNetlistLoaded = millis();
     clearAllNTCC();
 
     digitalWrite(RESETPIN, HIGH);
@@ -612,7 +638,15 @@ void machineMode(void) // read in commands in machine readable format
     break;
 
   case getnetlist:
+  if (millis() - lastTimeNetlistLoaded > 300)
+  {
+    
     listNetsMachine();
+  } else {
+    machineModeRespond(0, true);
+    //Serial.print ("too soon bro\n\r");
+    return;
+  }
     break;
 
   case bridgelist:
@@ -660,7 +694,15 @@ void machineMode(void) // read in commands in machine readable format
     break;
 
   case getsupplyswitch:
+    if (millis() - lastTimeNetlistLoaded > 300)
+  {
+    
     printSupplySwitch(supplySwitchPosition);
+  }else {
+    //Serial.print ("\n\rtoo soon bro\n\r");
+    machineModeRespond(0, true);
+    return;
+  }
     break;
 
     // case gpio:

@@ -59,7 +59,7 @@ void savePreformattedNodeFile(int source)
         while (Serial.available() > 0)
         {
             nodeFile.write(Serial.read());
-            delay(1);
+            delayMicroseconds(800);
         }
     }
     if (source == 1)
@@ -72,7 +72,7 @@ void savePreformattedNodeFile(int source)
         while (Serial1.available() > 0)
         {
             nodeFile.write(Serial1.read());
-            delayMicroseconds(900);
+            delayMicroseconds(800);
             // Serial.println(Serial1.available());
         }
 
@@ -177,10 +177,10 @@ void parseWokwiFileToNodeFile(void)
     }
 
     createSafeStringFromCharArray(wokwiFileString, inputBuffer);
-    delay(10);
+    delay(3);
     wokwiFile.write(inputBuffer, numCharsRead);
 
-    delay(10);
+    delay(3);
 
     wokwiFile.seek(0);
 
@@ -408,7 +408,7 @@ void writeToNodeFile(void)
 {
 
     LittleFS.remove("nodeFile.txt");
-    delay(10);
+    delayMicroseconds(100);
     nodeFile = LittleFS.open("nodeFile.txt", "w+");
     if (!nodeFile)
     {

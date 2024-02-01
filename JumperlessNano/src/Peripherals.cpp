@@ -298,22 +298,22 @@ void chooseShownReadings(void)
 
     if (path[i].node1 == ADC0_5V || path[i].node2 == ADC0_5V)
     {
-      showADCreadings[0] = 1;
+      showADCreadings[0] = path[i].net;
     }
 
     if (path[i].node1 == ADC1_5V || path[i].node2 == ADC1_5V)
     {
-      showADCreadings[1] = 1;
+      showADCreadings[1] = path[i].net;
     }
 
     if (path[i].node1 == ADC2_5V || path[i].node2 == ADC2_5V)
     {
-      showADCreadings[2] = 1;
+      showADCreadings[2] = path[i].net;
     }
 
     if (path[i].node1 == ADC3_8V || path[i].node2 == ADC3_8V)
     {
-      showADCreadings[3] = 1;
+      showADCreadings[3] = path[i].net;
     }
 
     if (path[i].node1 == CURRENT_SENSE_PLUS || path[i].node1 == CURRENT_SENSE_PLUS || path[i].node2 == CURRENT_SENSE_MINUS || path[i].node2 == CURRENT_SENSE_MINUS)
@@ -394,7 +394,7 @@ void showMeasurements(int samples)
 
 
 
-    if (showADCreadings[0] == 1)
+    if (showADCreadings[0] != 0)
     {
 
       adc0ReadingUnscaled = readAdc(0, samples);
@@ -403,9 +403,14 @@ void showMeasurements(int samples)
       bs += Serial.print("D0: ");
       bs += Serial.print(adc0Reading);
       bs += Serial.print("V\t");
+
+      int mappedAdc0Reading = map(adc0ReadingUnscaled, 0, 4095, 5, 80);
+      lightUpNet(showADCreadings[0], -1, 1, mappedAdc0Reading, 0);
+      showLEDsCore2 = 1;
+      
     }
 
-    if (showADCreadings[1] == 1)
+    if (showADCreadings[1] != 0)
     {
 
       adc1ReadingUnscaled = readAdc(1, samples);
@@ -414,9 +419,16 @@ void showMeasurements(int samples)
       bs += Serial.print("D1: ");
       bs += Serial.print(adc1Reading);
       bs += Serial.print("V\t");
+      int mappedAdc1Reading = map(adc1ReadingUnscaled, 0, 4095, 5, 80);
+
+      
+      lightUpNet(showADCreadings[1], -1, 1, mappedAdc1Reading, 0);
+showLEDsCore2 = 1;
+
+
     }
 
-    if (showADCreadings[2] == 1)
+    if (showADCreadings[2] != 0)
     {
 
       adc2ReadingUnscaled = readAdc(2, samples);
@@ -426,9 +438,12 @@ void showMeasurements(int samples)
       bs += Serial.print("D2: ");
       bs += Serial.print(adc2Reading);
       bs += Serial.print("V\t");
+      int mappedAdc2Reading = map(adc2ReadingUnscaled, 0, 4095, 5, 80);
+      lightUpNet(showADCreadings[2], -1, 1, mappedAdc2Reading, 0);
+      showLEDsCore2 = 1;
     }
 
-    if (showADCreadings[3] == 1)
+    if (showADCreadings[3] != 0)
     {
 
       adc3ReadingUnscaled = readAdc(3, samples);
@@ -437,6 +452,17 @@ void showMeasurements(int samples)
       bs += Serial.print("D3: ");
       bs += Serial.print(adc3Reading);
       bs += Serial.print("V\t");
+      int mappedAdc3Reading = map(adc3ReadingUnscaled, 0, 4095, -80, 80);
+      int hueShift = 0;
+
+      if (mappedAdc3Reading < 0)
+      {
+        hueShift = map(mappedAdc3Reading, -80, 0, 0, 200);
+        mappedAdc3Reading = abs(mappedAdc3Reading);
+      }
+
+      lightUpNet(showADCreadings[3], -1, 1, mappedAdc3Reading, hueShift);
+      showLEDsCore2 = 1;
     }
 
     if (showINA0[0] == 1 || showINA0[1] == 1 || showINA0[2] == 1)

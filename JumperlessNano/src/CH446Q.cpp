@@ -165,7 +165,7 @@ void initCH446Q(void)
   pinMode(RESETPIN, OUTPUT);
 
   digitalWrite(RESETPIN, HIGH);
-  delay(10);
+  delay(2);
   digitalWrite(RESETPIN, LOW);
 }
 

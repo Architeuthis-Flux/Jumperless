@@ -938,7 +938,7 @@ const char *definesToChar(int defined) // converts the internally used #defined 
 void clearAllPaths (void)
 {
     digitalWrite(RESETPIN, HIGH);
-    delay(1);
+    delayMicroseconds(600);
     digitalWrite(RESETPIN, LOW);
 
     for (int i = 0; i < MAX_BRIDGES; i++)

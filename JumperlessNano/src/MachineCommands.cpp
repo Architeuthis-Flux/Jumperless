@@ -11,7 +11,6 @@
 #include <EEPROM.h>
 #include "MachineCommands.h"
 
-
 bool debugMM = false;
 // char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
@@ -44,14 +43,14 @@ enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
             inputBuffer[i] = Serial.read();
         }
 
-        delayMicroseconds(100);
-
         if (inputBuffer[i] == ']')
         {
             doneReading = 1;
             // inputBuffer[i] = ' '; //eof
             // break;
         }
+
+        delayMicroseconds(300);
     }
 
     char instructionBuffer[20] = {0};
@@ -60,18 +59,21 @@ enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 
     for (int i = 0; i < 20; i++)
     {
-        if (inputBuffer[i] == '[') {
+        if (inputBuffer[i] == '[')
+        {
             // inputBuffer[i] = ' ';
             break;
         }
-        if (inputBuffer[i] == ':') {
-          seqNumberSeparatorPos = i;
+        if (inputBuffer[i] == ':')
+        {
+            seqNumberSeparatorPos = i;
         }
         instructionBuffer[i] = inputBuffer[i];
         inputBuffer[i] = ' ';
     }
 
-    if (seqNumberSeparatorPos > 0) {
+    if (seqNumberSeparatorPos > 0)
+    {
         instructionBuffer[seqNumberSeparatorPos] = 0;
         *sequenceNumber = atoi(instructionBuffer + seqNumberSeparatorPos + 1);
     }
@@ -100,7 +102,7 @@ enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 
             instructionNumber = 0;
             lastReceivedInstruction = static_cast<machineModeInstruction>(instructionNumber);
-            
+
             return lastReceivedInstruction;
         }
     }
@@ -117,22 +119,23 @@ enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
     return lastReceivedInstruction;
 }
 
-void machineModeRespond(int sequenceNumber, bool ok) {
-  Serial.print(ok ? "::ok" : "::error");
-  if (sequenceNumber >= 0) {
+void machineModeRespond(int sequenceNumber, bool ok)
+{
+    Serial.print(ok ? "::ok" : "::error");
+    if (sequenceNumber >= 0)
+    {
         Serial.print(":");
         Serial.print(sequenceNumber);
-  }
-  Serial.println("");
+    }
+    Serial.println("");
 }
 
 void machineNetlistToNetstruct(void)
 {
     char names[MAX_NETS][32] = {0};
-    //char *numbers[MAX_NETS] = {0};
-    //char *colors[MAX_NETS] = {0};
-    //char *nodes[MAX_NETS] = {0};
-
+    // char *numbers[MAX_NETS] = {0};
+    // char *colors[MAX_NETS] = {0};
+    // char *nodes[MAX_NETS] = {0};
 
     if (debugMM)
     {
@@ -160,13 +163,9 @@ void machineNetlistToNetstruct(void)
 
         netIndex = machineModeJson[i]["index"];
 
+        strcpy(names[i], machineModeJson[i]["name"]);
 
-
-        strcpy(names[i] , machineModeJson[i]["name"]);
-
-
-       net[netIndex].name = names[i];
-
+        net[netIndex].name = names[i];
 
         if (debugMM)
         {
@@ -352,13 +351,13 @@ int removeHexPrefix(const char *str)
         const char *hexValue = str + 2;
         return strtol(hexValue, nullptr, 16);
     }
-    if (str[0] == '#') {
+    if (str[0] == '#')
+    {
         const char *hexValue = str + 1;
         return strtol(hexValue, nullptr, 16);
     }
     return atoi(str);
 }
-
 
 int nodeTokenToInt(char *nodeToken)
 {
@@ -396,7 +395,7 @@ int nodeTokenToInt(char *nodeToken)
 void writeNodeFileFromInputBuffer(void)
 {
     LittleFS.remove("nodeFile.txt");
-    delay(6);
+    delayMicroseconds(60);
 
     nodeFileMachineMode = LittleFS.open("nodeFile.txt", "w+");
 
@@ -501,27 +500,28 @@ void lightUpNodesFromInputBuffer(void)
     }
 }
 
-void printSupplySwitch(int supplySwitchPos) {
-  const char *positionString[] = { "3.3V", "5V", "8V" };
-  Serial.print("::supplyswitch[");
-  Serial.print(positionString[supplySwitchPos]);
-  Serial.println("]");
+void printSupplySwitch(int supplySwitchPos)
+{
+    const char *positionString[] = {"3.3V", "5V", "8V"};
+    Serial.print("::supplyswitch[");
+    Serial.print(positionString[supplySwitchPos]);
+    Serial.println("]");
 }
 
 int setSupplySwitch(void)
 {
-    
+
     char *token[2];
 
     const char *supplySwitchPositionString[] = {"3.3V", "3V3", "+3.3V", "+3V3", "5V", "+5V", "+-8V", "8V"};
-    int supplySwitchPositionInt [] = {0,0,0,0,1,1,2,2};
+    int supplySwitchPositionInt[] = {0, 0, 0, 0, 1, 1, 2, 2};
     int supplySwitch = 1;
     token[0] = strtok(inputBuffer, ",:[] \"");
 
-//Serial.println(token[0]);
+    // Serial.println(token[0]);
 
-    //int supplySwitchPosition = atoi(token[0]);
-    
+    // int supplySwitchPosition = atoi(token[0]);
+
     for (int i = 0; i < 8; i++)
     {
         if (strcasecmp(token[0], supplySwitchPositionString[i]) == 0)
@@ -531,25 +531,15 @@ int setSupplySwitch(void)
         }
     }
 
-
-
-
     return supplySwitch;
-
-
-    
-
-
 }
 
-
 void lightUpNetsFromInputBuffer(void)
-{   
-    const int numberOfNRNs = 10;//how many commands there are below
-    const char *notReallyNets[] = { "headerglow", "glow", "hg", "+8v", "8v", "-8v", "logo", "status", "logoflash", "statusflash"};
-    int notReallyNetsInt[] = { 0, 0, 0, 3, 3, 4, 1, 1, 2, 2};//these correspond to an index in rawOtherColors[]
+{
+    const int numberOfNRNs = 10; // how many commands there are below
+    const char *notReallyNets[] = {"headerglow", "glow", "hg", "+8v", "8v", "-8v", "logo", "status", "logoflash", "statusflash"};
+    int notReallyNetsInt[] = {0, 0, 0, 3, 3, 4, 1, 1, 2, 2}; // these correspond to an index in rawOtherColors[]
     char *token[50];
-
 
     token[0] = strtok(inputBuffer, ",:[] ");
 
@@ -565,12 +555,11 @@ void lightUpNetsFromInputBuffer(void)
 
         if (token[i] == nullptr)
         {
-            //Serial.println("token is null");
-            //Serial.println(i - 1);
+            // Serial.println("token is null");
+            // Serial.println(i - 1);
             numTokens = i - 1;
             break;
         }
-
     }
 
     //     for (int i = 0; i < INPUTBUFFERLENGTH-1; i++)
@@ -579,9 +568,9 @@ void lightUpNetsFromInputBuffer(void)
     // }
 
     uint32_t color = (uint32_t)removeHexPrefix(token[numTokens]);
-  
-    //Serial.print("color = ");
-    //Serial.println(color);
+
+    // Serial.print("color = ");
+    // Serial.println(color);
 
     for (int i = 0; i < numTokens; i++)
     {
@@ -590,7 +579,7 @@ void lightUpNetsFromInputBuffer(void)
             break;
         }
 
-    int wasNRN = 0;
+        int wasNRN = 0;
 
         for (int j = 0; j < numberOfNRNs; j++)
         {
@@ -605,14 +594,13 @@ void lightUpNetsFromInputBuffer(void)
                 switch (notReallyNetsInt[j])
                 {
                 case 3:
-                    rawRailColors[2][0] = color; 
+                    rawRailColors[2][0] = color;
                     break;
 
                 case 4:
-                    rawRailColors[2][2] = color; 
+                    rawRailColors[2][2] = color;
                     break;
                 }
-
 
                 wasNRN = 1;
                 break;
@@ -623,14 +611,14 @@ void lightUpNetsFromInputBuffer(void)
         {
             continue;
         }
-       int netNumber = atoi(token[i]);
+        int netNumber = atoi(token[i]);
 
         // if (netNumber == 0)
         // {
         //     break;
         // }
-       // Serial.print("netNumber = ");   
-       // Serial.println(netNumber);
+        // Serial.print("netNumber = ");
+        // Serial.println(netNumber);
 
         if (netNumber < 8)
         {
@@ -642,8 +630,8 @@ void lightUpNetsFromInputBuffer(void)
             case 1:
                 for (int j = 0; j < 3; j++)
                 {
-                rawRailColors[j][1] = color;
-                rawRailColors[j][3] = color;
+                    rawRailColors[j][1] = color;
+                    rawRailColors[j][3] = color;
                 }
                 break;
             case 2:
@@ -663,31 +651,31 @@ void lightUpNetsFromInputBuffer(void)
 
         if (debugMM)
         {
-        Serial.print("net[");
-        Serial.print(netNumber);
-        Serial.print("].rawColor = ");
-        Serial.println(net[netNumber].rawColor, HEX);
+            Serial.print("net[");
+            Serial.print(netNumber);
+            Serial.print("].rawColor = ");
+            Serial.println(net[netNumber].rawColor, HEX);
 
-        Serial.print("net[");
-        Serial.print(netNumber);
-        Serial.print("].name = ");
-        Serial.println(net[netNumber].name);
+            Serial.print("net[");
+            Serial.print(netNumber);
+            Serial.print("].name = ");
+            Serial.println(net[netNumber].name);
 
-        Serial.print("net[");
-        Serial.print('1');
-        Serial.print("].name = ");
-        Serial.println(net[1].name);
+            Serial.print("net[");
+            Serial.print('1');
+            Serial.print("].name = ");
+            Serial.println(net[1].name);
 
-        Serial.print("inputBuffer = "); 
-        Serial.println(inputBuffer);
+            Serial.print("inputBuffer = ");
+            Serial.println(inputBuffer);
         }
-    //     Serial.print("inputBufferCopy = ");
-    //     Serial.println(inputBufferCopy);
+        //     Serial.print("inputBufferCopy = ");
+        //     Serial.println(inputBufferCopy);
 
-    // for (int i = 0; i < INPUTBUFFERLENGTH-1; i++)
-    //  {
-    //          inputBuffer[i] = '\0';
-    //  }
+        // for (int i = 0; i < INPUTBUFFERLENGTH-1; i++)
+        //  {
+        //          inputBuffer[i] = '\0';
+        //  }
 
         // lightUpNode(nodesToPixelMap[nodeNumber], color);
     }
@@ -727,84 +715,98 @@ void lightUpNetsFromInputBuffer(void)
  *                | "false"
  *   name         = [^\]\r\n]+
  */
-void listNetsMachine(void) {
-  Serial.println("::netlist-begin");
+void listNetsMachine(void)
+{
+    Serial.println("\n\r::netlist-begin");
 
-  // start with 1, to ignore empty net.
-  for (int i = 1; i < MAX_NETS; i++) {
-    struct netStruct *n = &net[i];
+    // start with 1, to ignore empty net.
+    for (int i = 1; i < MAX_NETS; i++)
+    {
+        struct netStruct *n = &net[i];
 
-    if (n->number == 0 || n->nodes[0] == -1) {
-      // net not allocated yet
-      break;
+        if (n->number == 0 || n->nodes[0] == -1)
+        {
+            // net not allocated yet
+            break;
+        }
+
+        Serial.print("::net[");
+        // INDEX
+        Serial.print(i);
+        Serial.print(',');
+
+        // NUMBER
+        Serial.print(n->number);
+        Serial.print(',');
+
+        // NODES
+        for (int j = 0; j < MAX_NODES; j++)
+        {
+            if (n->nodes[j] == 0)
+            {
+                break;
+            }
+            if (j > 0)
+            {
+                Serial.print(';');
+            }
+            printNodeOrName(n->nodes[j]);
+        }
+        Serial.print(',');
+
+        // SPECIAL
+        Serial.print(n->specialFunction ? "true," : "false,");
+
+        // COLOR
+        rgbColor color = unpackRgb(n->rawColor);
+        char buf[8];
+        snprintf(buf, 8, "%.2x%.2x%.2x,", color.r, color.g, color.b);
+        Serial.print(buf);
+
+        // MACHINE
+        Serial.print(n->machine ? "true," : "false,");
+
+        // NAME
+        Serial.print(n->name);
+
+        Serial.println("]");
     }
 
-    Serial.print("::net[");
-    // INDEX
-    Serial.print(i);
-    Serial.print(',');
-
-    // NUMBER
-    Serial.print(n->number);
-    Serial.print(',');
-
-    // NODES
-    for (int j = 0; j < MAX_NODES; j++) {
-      if (n->nodes[j] == 0) {
-        break;
-      }
-      if (j > 0) {
-        Serial.print(';');
-      }
-      printNodeOrName(n->nodes[j]);
-    }
-    Serial.print(',');
-
-    // SPECIAL
-    Serial.print(n->specialFunction ? "true," : "false,");
-
-    // COLOR
-    rgbColor color = unpackRgb(n->rawColor);
-    char buf[8];
-    snprintf(buf, 8, "%.2x%.2x%.2x,", color.r, color.g, color.b);
-    Serial.print(buf);
-
-    // MACHINE
-    Serial.print(n->machine ? "true," : "false,");
-
-    // NAME
-    Serial.print(n->name);
-
-    Serial.println("]");
-  }
-
-  Serial.println("::netlist-end");
+    Serial.println("::netlist-end");
 }
 
-void listBridgesMachine(void) {
-  Serial.print("::bridgelist[");
-  bool started = false;
-  for (int i = 1; i < MAX_NETS; i++) {
-    struct netStruct *n = &net[i];
+void listBridgesMachine(void)
+{
+    Serial.print("::bridgelist[");
+    bool started = false;
+    for (int i = 1; i < MAX_NETS; i++)
+    {
+        struct netStruct *n = &net[i];
 
-    if (n->number == 0 || n->nodes[0] == -1) {
-      // net not allocated yet
-      break;
-    }
+        if (n->number == 0 || n->nodes[0] == -1)
+        {
+            // net not allocated yet
+            break;
+        }
 
-    for (int j = 0; j < MAX_NODES; j++) {
-      if (n->bridges[j][0] <= 0) {
-        continue;
-      }
-      if (started) {
-        Serial.print(",");
-      } else {
-        started = true;
-      }
-      printNodeOrName(n->bridges[j][0]);
-      Serial.print("-");
-      printNodeOrName(n->bridges[j][1]);
+        for (int j = 0; j < MAX_NODES; j++)
+        {
+            if (n->bridges[j][0] <= 0)
+            {
+                continue;
+            }
+            if (started)
+            {
+                Serial.print(",");
+            }
+            else
+            {
+                started = true;
+            }
+            printNodeOrName(n->bridges[j][0]);
+            Serial.print("-");
+            printNodeOrName(n->bridges[j][1]);
+        }
     }
-  }
-  Serial.println("]");
+    Serial.println("]");
 }

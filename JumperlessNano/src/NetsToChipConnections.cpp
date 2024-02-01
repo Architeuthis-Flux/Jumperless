@@ -189,11 +189,11 @@ void sortPathsByNet(void) // not actually sorting, just copying the bridges and 
         }
     }
     // printPathArray();
-    if (debugNTCC)
-    {
-        Serial.print("number of nets: ");
-        Serial.println(numberOfNets);
-    }
+    // if (debugNTCC)
+    // {
+    //     Serial.print("number of nets: ");
+    //     Serial.println(numberOfNets);
+    // }
 
     for (int j = 1; j <= MAX_NETS; j++)
     {
@@ -2113,8 +2113,8 @@ void resolveUncommittedHops(void)
 
     for (int i = 0; i < numberOfPaths; i++)
     {
-        printPathsCompact();
-        printChipStatus();
+        //printPathsCompact();
+        //printChipStatus();
         pathsWithSameXChips[i] = -1;
         pathsWithSameYChips[i] = -1;
         int sameChips[2][4] = {//[x,y][chip]
@@ -2365,8 +2365,8 @@ void resolveUncommittedHops(void)
                             {
                                 int otherChip = ch[sameChips[0][chip]].xMap[freeXSearchOrder[sameChips[0][chip]][freeXidx]];
                                 int thisChip = sameChips[0][chip];
-                                Serial.print("other Chip = ");
-                                Serial.println(chipNumToChar(otherChip));
+                               // Serial.print("other Chip = ");
+                               // Serial.println(chipNumToChar(otherChip));
                                 int otherChipFree = 0;
                                 int otherChipX = -1;
                                 
@@ -2412,6 +2412,7 @@ void resolveUncommittedHops(void)
                                 if (otherChipXStatus == -1 || otherChipXStatus == path[i].net)
                                 {
                                 freeX = freeXSearchOrder[sameChips[0][chip]][freeXidx];
+                                ch[otherChip].xStatus[otherChipX] = path[i].net;
                                 break;
                                 }
                             }
@@ -2483,12 +2484,12 @@ void resolveUncommittedHops(void)
                     }
                 }
 
-                Serial.print("\n\n\rchipPairs[0]: ");
-                Serial.println(chipPairs[0]);
-                Serial.print("chipPairs[1]: ");
-                Serial.println(chipPairs[1]);
+                // Serial.print("\n\n\rchipPairs[0]: ");
+                // Serial.println(chipPairs[0]);
+                // Serial.print("chipPairs[1]: ");
+                // Serial.println(chipPairs[1]);
 
-                Serial.println("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+                // Serial.println("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
 
                 for (int pairs = 0; pairs < 2; pairs++)
                 {
@@ -2508,13 +2509,13 @@ void resolveUncommittedHops(void)
                                     continue;
                                 }
 
-                                Serial.print("path: ");
-                                Serial.print(i);
-                                Serial.print("\nfreeYsearch: ");
-                                Serial.print(freeYsearch);
-                                Serial.print("  status: ");
-                                Serial.print(ch[sameChips[1][chip]].yStatus[freeYsearch]);
-                                Serial.println(" ");
+                                // Serial.print("path: ");
+                                // Serial.print(i);
+                                // Serial.print("\nfreeYsearch: ");
+                                // Serial.print(freeYsearch);
+                                // Serial.print("  status: ");
+                                // Serial.print(ch[sameChips[1][chip]].yStatus[freeYsearch]);
+                                // Serial.println(" ");
 
                                 if (ch[sameChips[1][chip]].yStatus[freeYsearch] == -1 || ch[sameChips[1][chip]].yStatus[freeYsearch] == path[i].net)
                                 {
@@ -2593,13 +2594,17 @@ void swapDuplicateNode(int pathIndex)
     {
         if ((duplucateSFnodes[i][0] == path[pathIndex].chip[1]) && (duplucateSFnodes[i][1] == xMapForNode(path[pathIndex].node2, path[pathIndex].chip[1])))
         {
+            if (debugNTCC2)
+            {
             Serial.print("swapping ");
             printChipNumToChar(path[pathIndex].chip[1]);
             Serial.print(" with ");
             printChipNumToChar(duplucateSFnodes[i][2]);
+            }
 
             path[pathIndex].chip[1] = duplucateSFnodes[i][2];
             break;
+
             // path[pathIndex].x[1] = duplucateSFnodes[i][3];
         }
     }
