@@ -884,16 +884,16 @@ void printBridgeArray(void)
         Serial.print("ms to run net manager\n\r");
 }
 
-int printNodeOrName(int node) // returns number of characters printed (for tabs)
+int printNodeOrName(int node, int longOrShort) // returns number of characters printed (for tabs)
 {
 
     if (node >= 100)
     {
-        return Serial.print(definesToChar(node));
+        return Serial.print(definesToChar(node, longOrShort));
     }
     else if (node >= NANO_D0)
     {
-        return Serial.print(definesToChar(node));
+        return Serial.print(definesToChar(node, longOrShort));
     }
     else
     {
@@ -903,25 +903,48 @@ int printNodeOrName(int node) // returns number of characters printed (for tabs)
 
 
 char same[12] = "           ";
-const char *definesToChar(int defined) // converts the internally used #defined numbers into human readable strings
+const char *definesToChar(int defined, int longOrShort) // converts the internally used #defined numbers into human readable strings
 {
          // Serial.print("defined = ");
         //Serial.println(defined);
 
-    const char *defNanoToChar[26] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "RESET", "AREF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"};
 
-    const char *defSpecialToChar[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3", "GPIO_0", "NOT_DEFINED", "UART_Tx", "UART_Rx"};
+    const char *defNanoToCharShort[26] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "RESET", "AREF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"};
+
+    const char *defSpecialToCharShort[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "3V3", "NOT_DEFINED", "5V", "DAC_0", "DAC_1", "I_POS", "I_NEG", "ADC_0" , "ADC_1" , "ADC_2" , "ADC_3", "GPIO_0", "NOT_DEFINED", "UART_Tx", "UART_Rx", "GPIO_18", "GPIO_19"};
+
+
+    const char *defNanoToCharLong[26] = {"NANO_D0", "NANO_D1", "NANO_D2", "NANO_D3", "NANO_D4", "NANO_D5", "NANO_D6", "NANO_D7", "NANO_D8", "NANO_D9", "NANO_D10", "NANO_D11", "NANO_D12", "NANO_D13", "NANO_RESET", "NANO_AREF", "NANO_A0", "NANO_A1", "NANO_A2", "NANO_A3", "NANO_A4", "NANO_A5", "NANO_A6", "NANO_A7"};
+
+    const char *defSpecialToCharLong[20] = {"GND", "NOT_DEFINED", "NOT_DEFINED", "SUPPLY_3V3", "NOT_DEFINED", "SUPPLY_5V", "DAC0", "DAC1", "ISENSE_PLUS", "ISENSE_MINUS", "ADC0" , "ADC1" , "ADC2" , "ADC3", "RP_GPIO_0", "NOT_DEFINED", "RP_UART_Tx", "RP_UART_Rx", "RP_GPIO_18", "RP_GPIO_19"};
+
 
     const char *emptyNet[] = {"EMPTY_NET", "?"};
 
     if (defined >= 70 && defined <= 93)
     {
-        return defNanoToChar[defined - 70];
+        if (longOrShort == 1)
+        {
+            return defNanoToCharLong[defined - 70];
+        }
+        else
+        {
+            return defNanoToCharShort[defined - 70];
+        }
+        
     }
-    else if (defined >= 100 && defined <= RP_UART_RX)
+    else if (defined >= 100 && defined <= RP_GPIO_19)
     {
   
-        return defSpecialToChar[defined - 100];
+        if (longOrShort == 1)
+        {
+            return defSpecialToCharLong[defined - 100];
+        }
+        else
+        {
+            return defSpecialToCharShort[defined - 100];
+        }
+        
     }
     else if (defined == EMPTY_NET)
     {

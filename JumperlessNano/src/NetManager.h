@@ -16,7 +16,7 @@ extern bool debugNMtime;
 
 void writeJSONtoFile();
 
-int printNodeOrName(int node);
+int printNodeOrName(int node, int longOrShort = 0); //0 = short, 1 = long
 
 void getNodesToConnect(); //read in the nodes you'd like to connect
 
@@ -50,7 +50,7 @@ void deleteBridge();
 
 void deleteNode(); //disconnects everything connected to that one node
 
-const char* definesToChar (int defined);
+const char* definesToChar (int defined, int longOrShort = 0); //0 = short, 1 = long
 
 void printBridgeArray();
 

@@ -750,7 +750,7 @@ void listNetsMachine(void)
             {
                 Serial.print(';');
             }
-            printNodeOrName(n->nodes[j]);
+            printNodeOrName(n->nodes[j], 1);
         }
         Serial.print(',');
 
@@ -803,9 +803,9 @@ void listBridgesMachine(void)
             {
                 started = true;
             }
-            printNodeOrName(n->bridges[j][0]);
+            printNodeOrName(n->bridges[j][0],1);
             Serial.print("-");
-            printNodeOrName(n->bridges[j][1]);
+            printNodeOrName(n->bridges[j][1],1);
         }
     }
     Serial.println("]");

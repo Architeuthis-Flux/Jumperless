@@ -100,23 +100,23 @@ void clearAllNTCC(void)
     }
 
     net[0] = {127, "Empty Net", {EMPTY_NET}, {{}}, EMPTY_NET, {}, {EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET, EMPTY_NET}, 0, 0};
-    net[1] = {1, "GND", {GND}, {{}}, GND, {}, {SUPPLY_3V3, SUPPLY_5V, DAC0_5V, DAC1_8V}, 1, 0};
-    net[2] = {2, "+5V", {SUPPLY_5V}, {{}}, SUPPLY_5V, {}, {GND, SUPPLY_3V3, DAC0_5V, DAC1_8V}, 1, 0};
-    net[3] = {3, "+3.3V", {SUPPLY_3V3}, {{}}, SUPPLY_3V3, {}, {GND, SUPPLY_5V, DAC0_5V, DAC1_8V}, 0};
-    net[4] = {4, "DAC 0", {DAC0_5V}, {{}}, DAC0_5V, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC1_8V}, 1, 0};
+    net[1] = {1, "GND", {GND}, {{}}, GND, {}, {SUPPLY_3V3, SUPPLY_5V, DAC0, DAC1}, 1, 0};
+    net[2] = {2, "+5V", {SUPPLY_5V}, {{}}, SUPPLY_5V, {}, {GND, SUPPLY_3V3, DAC0, DAC1}, 1, 0};
+    net[3] = {3, "+3.3V", {SUPPLY_3V3}, {{}}, SUPPLY_3V3, {}, {GND, SUPPLY_5V, DAC0, DAC1}, 0};
+    net[4] = {4, "DAC 0", {DAC0}, {{}}, DAC0, {}, {GND, SUPPLY_5V, SUPPLY_3V3, DAC1}, 1, 0};
     net[5] = {
         5,
         "DAC 1",
-        {DAC1_8V},
+        {DAC1},
         {{}},
-        DAC1_8V,
+        DAC1,
         {},
-        {GND, SUPPLY_5V, SUPPLY_3V3, DAC0_5V},
+        {GND, SUPPLY_5V, SUPPLY_3V3, DAC0},
         1,
         0,
     };
-    net[6] = {6, "I Sense +", {CURRENT_SENSE_PLUS}, {{}}, CURRENT_SENSE_PLUS, {}, {CURRENT_SENSE_MINUS}, 2, 0};
-    net[7] = {7, "I Sense -", {CURRENT_SENSE_MINUS}, {{}}, CURRENT_SENSE_MINUS, {}, {CURRENT_SENSE_PLUS}, 2, 0};
+    net[6] = {6, "I Sense +", {ISENSE_PLUS}, {{}}, ISENSE_PLUS, {}, {ISENSE_MINUS}, 2, 0};
+    net[7] = {7, "I Sense -", {ISENSE_MINUS}, {{}}, ISENSE_MINUS, {}, {ISENSE_PLUS}, 2, 0};
 
     net[1].rawColor = rawSpecialNetColors[1];
     net[2].rawColor = rawSpecialNetColors[2];
@@ -1720,15 +1720,15 @@ void resolveAltPaths(void)
 
                             if (whichIsSF == 0)
                             {
-                                path[i].x[whichIsSF] = xMapForNode(ADC0_5V + whichADC, sfChip1);
+                                path[i].x[whichIsSF] = xMapForNode(ADC0 + whichADC, sfChip1);
                                 ch[sfChip1].xStatus[path[i].x[whichIsSF]] = path[i].net;
-                                // path[i].x[whichIsL] = xMapForNode(ADC0_5V + whichADC, sfChip2);
+                                // path[i].x[whichIsL] = xMapForNode(ADC0 + whichADC, sfChip2);
                             }
                             else
                             {
-                                path[i].x[whichIsSF] = xMapForNode(ADC0_5V + whichADC, sfChip2);
+                                path[i].x[whichIsSF] = xMapForNode(ADC0 + whichADC, sfChip2);
                                 ch[sfChip2].xStatus[path[i].x[whichIsSF]] = path[i].net;
-                                // path[i].x[whichIsL] = xMapForNode(ADC0_5V + whichADC, sfChip1);
+                                // path[i].x[whichIsL] = xMapForNode(ADC0 + whichADC, sfChip1);
                             }
 
                             if (debugNTCC2)
@@ -3614,20 +3614,20 @@ const int8_t xMapL[24]  =  { -1     , -1     , -1     , -1     , -1     , -1    
 // xMapIJKL[]    will tell you the X pin that it's connected to on that sf chip
 // xStatusIJKL[] says whether that x pin is being used (this should be the same as mt[8-10].xMap[] if theyre all stacked on top of each other)
 //              I haven't decided whether to make this just a flag, or store that signal's destination
-const int8_t reversePinMap[110] = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11, NANO_D12, NANO_D13, NANO_RESET, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,GND,101,102,SUPPLY_3V3,104,SUPPLY_5V,DAC0_5V,DAC1_8V,CURRENT_SENSE_PLUS,CURRENT_SENSE_MINUS};
+const int8_t reversePinMap[110] = {NANO_D0, NANO_D1, NANO_D2, NANO_D3, NANO_D4, NANO_D5, NANO_D6, NANO_D7, NANO_D8, NANO_D9, NANO_D10, NANO_D11, NANO_D12, NANO_D13, NANO_RESET, NANO_AREF, NANO_A0, NANO_A1, NANO_A2, NANO_A3, NANO_A4, NANO_A5, NANO_A6, NANO_A7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,GND,101,102,SUPPLY_3V3,104,SUPPLY_5V,DAC0,DAC1_8V,ISENSE_PLUS,ISENSE_MINUS};
 
 };
 
 struct netStruct net[MAX_NETS] = { //these are the special function nets that will always be made
 //netNumber,       ,netName          ,memberNodes[]         ,memberBridges[][2]     ,specialFunction        ,intsctNet[] ,doNotIntersectNodes[]                 ,priority
     {     127      ,"Empty Net"      ,{EMPTY_NET}           ,{{}}                   ,EMPTY_NET              ,{}          ,{EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET,EMPTY_NET} , 0},
-    {     1        ,"GND\t"          ,{GND}                 ,{{}}                   ,GND                    ,{}          ,{SUPPLY_3V3,SUPPLY_5V,DAC0_5V,DAC1_8V}    , 1},
-    {     2        ,"+5V\t"          ,{SUPPLY_5V}           ,{{}}                   ,SUPPLY_5V              ,{}          ,{GND,SUPPLY_3V3,DAC0_5V,DAC1_8V}          , 1},
-    {     3        ,"+3.3V\t"        ,{SUPPLY_3V3}          ,{{}}                   ,SUPPLY_3V3             ,{}          ,{GND,SUPPLY_5V,DAC0_5V,DAC1_8V}           , 1},
-    {     4        ,"DAC 0\t"        ,{DAC0_5V}             ,{{}}                   ,DAC0_5V                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC1_8V}        , 1},
-    {     5        ,"DAC 1\t"        ,{DAC1_8V}             ,{{}}                   ,DAC1_8V                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC0_5V}        , 1},
-    {     6        ,"I Sense +"      ,{CURRENT_SENSE_PLUS}  ,{{}}                   ,CURRENT_SENSE_PLUS     ,{}          ,{CURRENT_SENSE_MINUS}                     , 2},
-    {     7        ,"I Sense -"      ,{CURRENT_SENSE_MINUS} ,{{}}                   ,CURRENT_SENSE_MINUS    ,{}          ,{CURRENT_SENSE_PLUS}                      , 2},
+    {     1        ,"GND\t"          ,{GND}                 ,{{}}                   ,GND                    ,{}          ,{SUPPLY_3V3,SUPPLY_5V,DAC0,DAC1_8V}    , 1},
+    {     2        ,"+5V\t"          ,{SUPPLY_5V}           ,{{}}                   ,SUPPLY_5V              ,{}          ,{GND,SUPPLY_3V3,DAC0,DAC1_8V}          , 1},
+    {     3        ,"+3.3V\t"        ,{SUPPLY_3V3}          ,{{}}                   ,SUPPLY_3V3             ,{}          ,{GND,SUPPLY_5V,DAC0,DAC1_8V}           , 1},
+    {     4        ,"DAC 0\t"        ,{DAC0}             ,{{}}                   ,DAC0                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC1_8V}        , 1},
+    {     5        ,"DAC 1\t"        ,{DAC1_8V}             ,{{}}                   ,DAC1_8V                ,{}          ,{GND,SUPPLY_5V,SUPPLY_3V3,DAC0}        , 1},
+    {     6        ,"I Sense +"      ,{ISENSE_PLUS}  ,{{}}                   ,ISENSE_PLUS     ,{}          ,{ISENSE_MINUS}                     , 2},
+    {     7        ,"I Sense -"      ,{ISENSE_MINUS} ,{{}}                   ,ISENSE_MINUS    ,{}          ,{ISENSE_PLUS}                      , 2},
 };
 
 
@@ -3714,7 +3714,7 @@ struct chipStatus ch[12] = {
   {8,'I',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
-  {NANO_A0, NANO_D1, NANO_A2, NANO_D3, NANO_A4, NANO_D5, NANO_A6, NANO_D7, NANO_D11, NANO_D9, NANO_D13, NANO_RESET, DAC0_5V, ADC0_5V, SUPPLY_3V3, GND},
+  {NANO_A0, NANO_D1, NANO_A2, NANO_D3, NANO_A4, NANO_D5, NANO_A6, NANO_D7, NANO_D11, NANO_D9, NANO_D13, NANO_RESET, DAC0, ADC0, SUPPLY_3V3, GND},
   {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}},
 
   {9,'J',
@@ -3732,7 +3732,7 @@ struct chipStatus ch[12] = {
   {11,'L',
   {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}, // x status
   {-1,-1,-1,-1,-1,-1,-1,-1}, //y status
-  {CURRENT_SENSE_MINUS, CURRENT_SENSE_PLUS, ADC0_5V, ADC1_5V, ADC2_5V, ADC3_8V, DAC1_8V, DAC0_5V, t1, t30, b1, b30, NANO_A4, NANO_A5, SUPPLY_5V, GND},
+  {ISENSE_MINUS, ISENSE_PLUS, ADC0, ADC1_5V, ADC2_5V, ADC3_8V, DAC1_8V, DAC0, t1, t30, b1, b30, NANO_A4, NANO_A5, SUPPLY_5V, GND},
   {CHIP_A,CHIP_B,CHIP_C,CHIP_D,CHIP_E,CHIP_F,CHIP_G,CHIP_H}}
   };
 

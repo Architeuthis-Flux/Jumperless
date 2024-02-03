@@ -191,21 +191,71 @@
 #define SUPPLY_3V3  103
 #define SUPPLY_5V  105
 
-#define DAC0_5V  106 
-#define DAC1_8V  107
+#define DAC0  106 
+#define DAC1  107
 
-#define CURRENT_SENSE_PLUS  108
-#define CURRENT_SENSE_MINUS  109
+#define ISENSE_PLUS  108
+#define ISENSE_MINUS  109
 
-#define ADC0_5V 110
-#define ADC1_5V 111
-#define ADC2_5V 112
-#define ADC3_8V 113
+#define ADC0 110
+#define ADC1 111
+#define ADC2 112
+#define ADC3 113
 
 #define RP_GPIO_0 114
-#define RP_UART_TX 116
-#define RP_UART_RX 117
 
+#define RP_UART_TX 116  //also GPIO_16
+#define RP_GPIO_16 116  //these are the same as the UART pins
+
+#define RP_UART_RX 117  //also GPIO_17
+#define RP_GPIO_17 117  //but if we want to use them as GPIO we should use these names
+
+
+
+#define RP_GPIO_18 118  //these aren't actually connected to anything
+#define RP_GPIO_19 119  //but we might as well define names for them
+
+#define SUPPLY_8V_P 120   //not actually connected to anything
+#define SUPPLY_8V_N 121   //not actually connected to anything
+
+
+
+/*
+
+#define GND  100 
+#define 3V3  103
+#define 5V  105
+
+#define 8V  120
+
+#define DAC0 106 
+#define DAC1  107
+
+#define I_P  108
+#define I_N  109
+
+#define ADC0 110
+#define ADC1 111
+#define ADC2 112
+#define ADC3 113
+
+#define GPIO_0 114
+
+#define UART_TX 116
+#define GPIO_16 116  //these are the same as the UART pins
+
+#define UART_RX 117
+#define GPIO_17 117  //but if we want to use them as GPIO we should use these names
+
+
+#define GPIO_18 118  //these aren't actually connected to anything
+#define GPIO_19 119  //but we might as well define names for them
+
+
+
+
+
+*/
 
 #define EMPTY_NET 127
 

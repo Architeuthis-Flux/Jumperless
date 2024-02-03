@@ -296,27 +296,27 @@ void chooseShownReadings(void)
   for (int i = 0; i <= newBridgeIndex; i++)
   {
 
-    if (path[i].node1 == ADC0_5V || path[i].node2 == ADC0_5V)
+    if (path[i].node1 == ADC0 || path[i].node2 == ADC0)
     {
       showADCreadings[0] = path[i].net;
     }
 
-    if (path[i].node1 == ADC1_5V || path[i].node2 == ADC1_5V)
+    if (path[i].node1 == ADC1 || path[i].node2 == ADC1)
     {
       showADCreadings[1] = path[i].net;
     }
 
-    if (path[i].node1 == ADC2_5V || path[i].node2 == ADC2_5V)
+    if (path[i].node1 == ADC2 || path[i].node2 == ADC2)
     {
       showADCreadings[2] = path[i].net;
     }
 
-    if (path[i].node1 == ADC3_8V || path[i].node2 == ADC3_8V)
+    if (path[i].node1 == ADC3 || path[i].node2 == ADC3)
     {
       showADCreadings[3] = path[i].net;
     }
 
-    if (path[i].node1 == CURRENT_SENSE_PLUS || path[i].node1 == CURRENT_SENSE_PLUS || path[i].node2 == CURRENT_SENSE_MINUS || path[i].node2 == CURRENT_SENSE_MINUS)
+    if (path[i].node1 == ISENSE_PLUS || path[i].node1 == ISENSE_PLUS || path[i].node2 == ISENSE_MINUS || path[i].node2 == ISENSE_MINUS)
     {
       //Serial.println(showReadings);
 
