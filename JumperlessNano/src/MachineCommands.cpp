@@ -22,7 +22,7 @@ ArduinoJson::DynamicJsonDocument machineModeJson(8000);
 
 enum machineModeInstruction lastReceivedInstruction = unknown;
 
-char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch"};
+char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch", "getchipstatus"};
 
 enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 {
@@ -809,4 +809,25 @@ void listBridgesMachine(void)
         }
     }
     Serial.println("]");
+}
+
+void printChipStatusMachine() {
+  Serial.println("::chipstatus-begin");
+  for (int i = 0; i < 12; i++) {
+    Serial.print("::chipstatus[");
+    Serial.print(chipNumToChar(i));
+    Serial.print(",");
+    for (int j = 0; j < 16; j++) {
+      Serial.print(ch[i].xStatus[j]);
+      Serial.print(",");
+    }
+    for (int j = 0; j < 8; j++) {
+      Serial.print(ch[i].yStatus[j]);
+      if (j != 7) {
+        Serial.print(",");
+      }
+    }
+    Serial.println("]");
+  }
+  Serial.println("::chipstatus-end");
 }

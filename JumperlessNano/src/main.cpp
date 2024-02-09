@@ -705,6 +705,10 @@ if (millis() - lastTimeCommandRecieved > 100)
   }
     break;
 
+  case getchipstatus:
+    printChipStatusMachine();
+    break;
+
     // case gpio:
     //   break;
 
