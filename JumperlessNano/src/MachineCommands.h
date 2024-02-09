@@ -2,7 +2,7 @@
 #ifndef MACHINECOMMANDS_H
 #define MACHINECOMMANDS_H
 
-#define NUMBEROFINSTRUCTIONS 16
+#define NUMBEROFINSTRUCTIONS 17
 
 enum machineModeInstruction
 {
@@ -20,7 +20,8 @@ enum machineModeInstruction
     setnetcolor,
     setnodecolor,
     setsupplyswitch,
-    getsupplyswitch
+    getsupplyswitch,
+    getchipstatus
 };
 
 extern char inputBuffer[INPUTBUFFERLENGTH];
@@ -47,5 +48,7 @@ int setSupplySwitch(void);
 
 void listNetsMachine(void);
 void listBridgesMachine(void);
+
+void printChipStatusMachine();
 
 #endif
