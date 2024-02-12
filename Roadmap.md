@@ -1,4 +1,5 @@
 # Jumperlab/Jumperless/jlctl Roadmap
+###### this is just random stuff I thought of right now, there will be more
 
 
 ## Jumperlab/jlctl
