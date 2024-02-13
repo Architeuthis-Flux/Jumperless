@@ -135,6 +135,8 @@ int serSource = 0;
 int readInNodesArduino = 0;
 int baudRate = 115200;
 
+const char firmwareVersion[] = "1.2.0";   //// remember to update this
+
 void loop()
 {
 
@@ -160,6 +162,7 @@ menu:
   Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset Arduino\n\r");
+  Serial.print("\tp = probe connections\n\r");
   Serial.print("\n\n\r");
 
 dontshowmenu:
@@ -194,6 +197,12 @@ dontshowmenu:
 skipinput:
   switch (input)
   {
+  case '?':
+  {
+    Serial.print("Jumperless firmware version: ");
+    Serial.println(firmwareVersion);
+    break;
+  }
   case 'v':
 
     if (showReadings >= 3 || (inaConnected == 0 && showReadings >= 1))
@@ -224,6 +233,46 @@ skipinput:
       goto dontshowmenu;
       // break;
     }
+  case 'p':
+  {
+  //clearLEDs();
+  int lastRow[10];
+  int pokedNumber = 0;
+  Serial.print("Press any key to exit\n\n\r");
+  while(Serial.available() == 0){
+     int row = scanRows(0);
+
+     if (row != -1 )
+     {
+      
+       delay(10);
+       lastRow[pokedNumber] = row;
+       pokedNumber++;
+
+      printNodeOrName(row);
+      Serial.print("\r\t");
+       if (pokedNumber >= 2)
+        {
+        Serial.print("\r            \r");
+        printNodeOrName(lastRow[0]);
+        Serial.print(" - ");
+        printNodeOrName(lastRow[1]);
+        Serial.print("\n\r");
+        scanRows(0, true);
+        delay(18);
+
+        pokedNumber = 0;
+        }
+     }
+     delayMicroseconds(1000);
+     
+  }
+  pinMode(19, INPUT);
+
+    break;
+
+
+  }
 
   case 'n':
 
@@ -325,46 +374,46 @@ skipinput:
     goto menu;
     break;
 
-  case 'p':
+//   case 'p':
 
-    // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
+//     // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
 
-    digitalWrite(RESETPIN, HIGH);
-    delay(1);
-#ifdef FSSTUFF
-    clearNodeFile();
-#endif
-    digitalWrite(RESETPIN, LOW);
-    clearAllNTCC();
-    clearLEDs();
+//     digitalWrite(RESETPIN, HIGH);
+//     delay(1);
+// #ifdef FSSTUFF
+//     clearNodeFile();
+// #endif
+//     digitalWrite(RESETPIN, LOW);
+//     clearAllNTCC();
+//     clearLEDs();
 
-    timer = millis();
+//     timer = millis();
 
-#ifdef FSSTUFF
+// #ifdef FSSTUFF
 
-    parseWokwiFileToNodeFile();
+//     parseWokwiFileToNodeFile();
 
-    openNodeFile();
-    getNodesToConnect();
-#endif
-    Serial.println("\n\n\rnetlist\n\n\r");
+//     openNodeFile();
+//     getNodesToConnect();
+// #endif
+//     Serial.println("\n\n\rnetlist\n\n\r");
 
-    bridgesToPaths();
-    assignNetColors();
+//     bridgesToPaths();
+//     assignNetColors();
 
-#ifdef PIOSTUFF
+// #ifdef PIOSTUFF
 
-    sendAllPaths();
-#endif
+//     sendAllPaths();
+// #endif
 
-    if (debugNMtime)
-    {
-      Serial.print("\n\n\r");
-      Serial.print("took ");
-      Serial.print(millis() - timer);
-      Serial.print("ms");
-    }
-    break;
+//     if (debugNMtime)
+//     {
+//       Serial.print("\n\n\r");
+//       Serial.print("took ");
+//       Serial.print(millis() - timer);
+//       Serial.print("ms");
+//     }
+//     break;
 
   case 't':
 #ifdef FSSTUFF
@@ -693,19 +742,24 @@ if (millis() - lastTimeCommandRecieved > 100)
   case setsupplyswitch:
 
     supplySwitchPosition = setSupplySwitch();
+    //printSupplySwitch(supplySwitchPosition);
+    machineModeRespond(sequenceNumber, true);
+
     showLEDsCore2 = 1;
     break;
 
   case getsupplyswitch:
-    if (millis() - lastTimeNetlistLoaded > 300)
-  {
+    //if (millis() - lastTimeNetlistLoaded > 100)
+  //{
     
     printSupplySwitch(supplySwitchPosition);
-  }else {
+    //machineModeRespond(sequenceNumber, true);
+
+ // }else {
     //Serial.print ("\n\rtoo soon bro\n\r");
-    machineModeRespond(0, true);
-    return;
-  }
+   // machineModeRespond(0, true);
+   // return;
+ // }
     break;
 
   case getchipstatus:

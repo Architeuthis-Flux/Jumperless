@@ -136,6 +136,7 @@ void machineNetlistToNetstruct(void)
     // char *numbers[MAX_NETS] = {0};
     // char *colors[MAX_NETS] = {0};
     // char *nodes[MAX_NETS] = {0};
+    int netIndex = 0;
 
     if (debugMM)
     {
@@ -153,15 +154,16 @@ void machineNetlistToNetstruct(void)
 
     for (int i = 0; i < MAX_NETS; i++)
     {
-        int netIndex = 0;
+        
         int nodesIndex = 0;
 
         if (machineModeJson[i].isNull() == true)
         {
-            break;
+            continue;
+            //break;
         }
-
-        netIndex = machineModeJson[i]["index"];
+netIndex ++;
+        //netIndex = machineModeJson[i]["index"];
 
         strcpy(names[i], machineModeJson[i]["name"]);
 
@@ -294,7 +296,8 @@ void populateBridgesFromNodes(void)
         {
             if (net[i].nodes[j] == -1 || net[i].nodes[j] == 0)
             {
-                break;
+                continue;
+                //break;
             }
 
             if (net[i].nodes[j] == net[i].nodes[0])
@@ -727,7 +730,8 @@ void listNetsMachine(void)
         if (n->number == 0 || n->nodes[0] == -1)
         {
             // net not allocated yet
-            break;
+            continue; //this allows us to delete nets and have jumperlab work
+            //break;
         }
 
         Serial.print("::net[");
@@ -758,7 +762,10 @@ void listNetsMachine(void)
         Serial.print(n->specialFunction ? "true," : "false,");
 
         // COLOR
-        rgbColor color = unpackRgb(n->rawColor);
+
+
+
+        rgbColor color = unpackRgb(scaleUpBrightness(n->rawColor));
         char buf[8];
         snprintf(buf, 8, "%.2x%.2x%.2x,", color.r, color.g, color.b);
         Serial.print(buf);

@@ -127,7 +127,7 @@ hsvColor RgbToHsv(rgbColor rgb);
 rgbColor HsvToRgb(hsvColor hsv);
 void applyBrightness (int brightness);
 rgbColor unpackRgb(uint32_t color);
-
+uint32_t scaleUpBrightness(uint32_t hexColor, int scaleFactor = 8, int minBrightness = 0x45);
 uint32_t scaleDownBrightness(uint32_t hexColor, int scaleFactor = 5, int maxBrightness = 0x45);
 void turnOffSkippedNodes();
 

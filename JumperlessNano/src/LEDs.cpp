@@ -33,7 +33,7 @@ bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
 bool debugLEDs = 1;
 #endif
 
-uint32_t rawSpecialNetColors[8] =
+uint32_t rawSpecialNetColors[8] = //dim
     {0x000000,
      0x001C04,
      0x1C0702,
@@ -917,6 +917,47 @@ uint32_t scaleDownBrightness(uint32_t hexColor, int scaleFactor, int maxBrightne
 
 }
 
+uint32_t scaleUpBrightness(uint32_t hexColor, int scaleFactor, int minBrightness)
+{
+    int minR = minBrightness;
+    int minG = minBrightness;
+    int minB = minBrightness;
+
+    int r = (hexColor >> 16) & 0xFF;
+    int g = (hexColor >> 8) & 0xFF;
+    int b = hexColor & 0xFF;
+
+    int scaledBrightness = hexColor;
+
+    if (r < minR && g < minG && b < minB)
+    {
+        scaledBrightness = 0;
+        r = r * scaleFactor;
+        g = g * scaleFactor;
+        b = b * scaleFactor;
+
+        if (r > 254)
+        {
+            r = 254;
+        }
+        if (g > 254)
+        {
+            g = 254;
+        }
+        if (b > 254)
+        {
+            b = 254;
+        }
+
+        scaledBrightness = scaledBrightness | (r << 16);
+        scaledBrightness = scaledBrightness | (g << 8);
+        scaledBrightness = scaledBrightness | b;
+    }
+
+
+    return scaledBrightness;
+
+}
 
 struct rgbColor pcbColorCorrect(rgbColor colorToShift)
 {
@@ -1239,7 +1280,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
 void showNets(void)
 {
 
-    for (int i = 0; i < numberOfNets; i++)
+    for (int i = 0; i <= numberOfNets; i++)
     {
         //Serial.print(i);
 

@@ -18,6 +18,7 @@ import shutil
 from urllib.request import urlretrieve
 
 
+
 #import platform
 
 #from watchedserial import WatchedReaderThread
@@ -26,6 +27,7 @@ import serial.tools.list_ports
 
 
 debug = False
+
 
 
 justreconnected = 0
@@ -120,13 +122,23 @@ def openSerial():
         #print(sortedports)
         print ("\n\n")
         
+        jumperlessIndex = chooseJumperlessPort(sortedports)
+        arduinoIndex = (jumperlessIndex + 1) % 2
+        
+        #print (jumperlessIndex)
+        #print (arduinoIndex)
+        
         if autodetected != -1:
         #if False:    
             
             selection = autodetected
+            
             #portName = ports[int(selection) - 1].device
-            portName = sortedports[0]
-            arduinoPort = sortedports[1]
+            
+            portName = sortedports[jumperlessIndex]
+            
+            arduinoPort = sortedports[arduinoIndex]
+            
             portSelected = True
             serialconnected = 1
             
@@ -163,8 +175,10 @@ def openSerial():
                         "\n\nChoose the Arduino port   ('x' to skip)\n\n(Choose the higher numbered port)\n\n")
                 
                 if (ArduinoSelection == 'x' or ArduinoSelection == 'X'):
-                    disableArduino
+                    disableArduinoFlashing = 1
+                    
                 if ArduinoSelection.isdigit() == True and int(ArduinoSelection) <= i:
+                    
                     arduinoPort = ports[int(ArduinoSelection) - 1].device
                     aPortSelected = True
                     print(ports[int(ArduinoSelection) - 1].device)
@@ -186,9 +200,78 @@ def openSerial():
 
     ser = serial.Serial(portName, 115200, timeout=None)
     #ser.open()
+    
 
+jumperlessFirmwareNumber = [0,0,0,0,0,0]
 
+def chooseJumperlessPort(sortedports):
+    global jumperlessFirmwareString
+    
+    jumperlessFirmwareString = ' '
+    tryPort = 0
+    
+    while (tryPort < 5 and tryPort < len(sortedports)):
+    
+        tempSer1 = serial.Serial(sortedports[tryPort], 115200, timeout=None)
+        #print (tryPort)
+        tempSer1.write(b'?')
+        
+        time.sleep(0.1)
+        inputBuffer2 = b' '
+        
+        if (tempSer1.in_waiting > 0):
+                        #justChecked = 0
+                        #reading = 1
+                        inputBuffer2 = b' '
 
+                        waiting = tempSer1.in_waiting
+
+                        while (serialconnected >= 0):
+                            inByte = tempSer1.read()
+
+                            inputBuffer2 += inByte
+
+                            if (tempSer1.in_waiting == 0):
+                                time.sleep(0.05)
+
+                                if (tempSer1.in_waiting == 0):
+                                    break
+                                else:
+                                    continue
+                        tempSer1.close()
+                        
+                        inputBuffer2 = str(inputBuffer2)
+                        inputBuffer2 = inputBuffer2.strip('b\'\\n \\r ')
+                        
+                        jumperlessFirmwareString = inputBuffer2.split('\\r\\n')[0]
+                        
+                        #print (inputBuffer2)
+                        #print (jumperlessFirmwareString)
+                        
+                        if (jumperlessFirmwareString.startswith("Jumperless firmware version:") == True):
+                            
+                            #print(jumperlessFirmwareString[29:39])
+                            
+                            
+                            jumperlessFirmwareNumber = jumperlessFirmwareString[29:39].split('.')
+                            
+                            #print (jumperlessFirmwareNumber)
+                            
+                            #print ("found a match!")
+                            #
+                            return tryPort
+                            
+                        else:
+                            
+                            tryPort = tryPort+1
+        else:
+           tryPort = tryPort+1
+    #print ("fuck")
+    return 0
+            
+        
+    
+        
 
 
 justChecked = 0
@@ -199,16 +282,58 @@ latestFirmwareAddress = "https://github.com/Architeuthis-Flux/Jumperless/release
 
 url_link = 0
 
+def checkIfFWisOld ():
+    
+    response = requests.get("https://github.com/Architeuthis-Flux/Jumperless/releases/latest")
+    version = response.url.split("/").pop()
+    
+    
+    latestVersion = version.split('.')
+    latestString = latestVersion[0] + '.' + latestVersion[1] + '.' + latestVersion[2]
+    
+    splitIndex = jumperlessFirmwareString.rfind(':')
+    currentString = jumperlessFirmwareString[splitIndex+2:]
+    
+    
+    
 
-def updateJumperlessFirmware():
+    
+    
+    latestList = latestString.split('.')
+    currentList = currentString.split('.')
+    try:
+        latestInt = int("".join(latestList))
+        currentInt = int("".join(currentList))
+    except:
+        return True
+    #print (latestInt)
+    #print (currentInt)
+    
+    
+    if (latestInt > currentInt):
+        
+    
+        print("\n\n\rThe latest firmware is: " + latestString)
+        print(      "You're running version: " + currentString)
+        return True
+    else:
+        return False
+
+    
+
+def updateJumperlessFirmware(force):
     global ser
     global menuEntered
     
     #newFirmware = r
     
+    if (force == False):
+        if (checkIfFWisOld() == False):
+            print ("\n\rYour firmware is up to date (enter 'update' to force update)")
+            return
     
-    print("\n\n\rWould you like to update your Jumperless with the latest firmware? Y/n\n\r")
-    if (input ("\n\r").lower() == "y"):
+    print("\n\rWould you like to update your Jumperless with the latest firmware? Y/n\n\r")
+    if (force == True or input ("\n\r").lower() == "y"):
         
         print ("\n\rDownloading latest firmware...")
         
@@ -317,6 +442,9 @@ def openProject():
 
         if (linkInput.startswith("http") == True):
             entryType = 2
+        elif (linkInput == 'force' or linkInput == 'update' or linkInput == 'force update'):
+            jumperlessFirmwareString = ' '
+            updateJumperlessFirmware(True)
         elif (linkInput.isdigit() == True) and (int(linkInput) <= len(lines)):
             otherIndex = 0
             for idx in lines:
@@ -428,7 +556,7 @@ def openProject():
     
     
 openSerial()    
-updateJumperlessFirmware()
+updateJumperlessFirmware(False)
 openProject()
 
 
