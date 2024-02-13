@@ -12,6 +12,12 @@ import sys
 import codecs
 import os
 import pyduinocli
+
+import psutil
+import shutil
+from urllib.request import urlretrieve
+
+
 #import platform
 
 #from watchedserial import WatchedReaderThread
@@ -74,6 +80,7 @@ else:
 def openSerial():
     global portName
     global ser
+    global serTickle
     global arduinoPort
     serialconnected = 0
 
@@ -128,7 +135,7 @@ def openSerial():
             
             print ("Autodetected USB-Serial at ", end="")
             print (arduinoPort)
-
+            
 
             
 
@@ -178,69 +185,95 @@ def openSerial():
 #portName =  '/dev/cu.usbmodem11301'
 
     ser = serial.Serial(portName, 115200, timeout=None)
+    #ser.open()
 
 
-openSerial()
+
 
 
 justChecked = 0
 reading = 0
 
 
-def check_presence(correct_port, interval=.15):
+latestFirmwareAddress = "https://github.com/Architeuthis-Flux/Jumperless/releases/latest/download/firmware.uf2"
+
+url_link = 0
+
+
+def updateJumperlessFirmware():
     global ser
-    global justreconnected
-    global serialconnected
-    global justChecked
-    global reading
-
-    portFound = 0
-    while True:
+    global menuEntered
+    
+    #newFirmware = r
+    
+    
+    print("\n\n\rWould you like to update your Jumperless with the latest firmware? Y/n\n\r")
+    if (input ("\n\r").lower() == "y"):
         
-       
-        if (reading == 0):
+        print ("\n\rDownloading latest firmware...")
+        
+        serialconnected = 0
+        menuEntered = 1
+        
+        urlretrieve(latestFirmwareAddress, "firmware.uf2")
+        
+        ser.close()
+        time.sleep(0.50)
+        
+        print("Putting Jumperless in BOOTSEL...")
+        
+        serTickle = serial.Serial(portName, 1200, timeout=None)
+        
+        
+        serTickle.close()
+        time.sleep(0.55)
+        
+#         serTickle.open()
+#         time.sleep(0.95)
+#         serTickle.close()
+              
+        print ("Waiting for mounted drive...")
+        
+        foundVolume = "none"
+        
+        while (foundVolume == "none"):
+            time.sleep(0.5)
+            partitions = psutil.disk_partitions()
             
-            portFound = 0
-
-            for port in serial.tools.list_ports.comports():
-
-                if portName in port.device:
-                    
-                    portFound = 1
-
-            #print (portFound)
-
-            if portFound == 1:
-                try:
-                    #print (portName)
-                    #ser = serial.Serial(portName, 115200)
-                    #print (portName)
-                    #ser.open(portName)
-                    justChecked = 1
-                    serialconnected = 1
-                    time.sleep(0.1)
-                    justChecked = 0
-                    
-                    
-                except:
-                    
-                    continue
-
-            else:
-                justreconnected = 1
-                justChecked = 0
-                serialconnected = 0
-
-                ser.close()
-
-            time.sleep(interval)
+            for p in partitions:
+                #print(p.mountpoint)
+                if (p.mountpoint.endswith("RPI-RP2") == True):
+                    foundVolume = p.mountpoint
+                    print("Found Jumperless at " + foundVolume + "...")
+                    break
+                
+            
+        fullPathRP = os.path.join(foundVolume, "firmware.uf2")
+        #print(fullPathRP)
+        time.sleep(0.2)
+        print ("Copying firmware.uf2 to Jumperless...\n\r")
+        try:
+            shutil.copy("firmware.uf2", fullPathRP)
+            
+            
+        except:
+            pass
+        
+        time.sleep(0.75) 
+        print("Jumperless updated to latest firmware!")
+        
+        
+        #ser.open()
+        time.sleep(0.75)
+        
+        #openSerial()
+        ser = serial.Serial(portName, 115200, timeout=None)
+        ser.flush()
+        menuEntered = 0
+        serialConnected = 1
 
 
-import threading
-port_controller = threading.Thread(
-    target=check_presence, args=(portName, .15,), daemon=True)
-# port_controller.daemon(True)
-port_controller.start()
+
 
 
 # 555 project
@@ -250,8 +283,6 @@ port_controller.start()
 
 # the website URL
 #url_link = "https://wokwi.com/projects/369024970682423297"
-
-url_link = 0
 
 
 def openProject():
@@ -301,7 +332,6 @@ def openProject():
                         linkInput = idxLink.rstrip('\n')
 
                         break
-
         else:
             for name in lines:
                 if name != '\n':
@@ -393,7 +423,20 @@ def openProject():
 
     f.close()
     
+    
+    
+    
+    
+openSerial()    
+updateJumperlessFirmware()
 openProject()
+
+
+
+
+
+
+
 
 print("\n\nSave your Wokwi project to update the Jumperless\n\nEnter 'menu' for Bridge App menu\n\n")
 
@@ -402,6 +445,7 @@ print("\n\nSave your Wokwi project to update the Jumperless\n\nEnter 'menu' for 
 def bridgeMenu():
     global menuEntered
     global ser
+    #global serTickle
 
     while(menuEntered == 1):
 
@@ -415,12 +459,16 @@ def bridgeMenu():
 
         menuSelection = input("\n\n")
         
+        
+        
         if(menuSelection == 'f'):
             disableArduinoFlashing = 1
             break
 
         if (menuSelection == 's'):
             ser.close()
+            
+                       
             openSerial()
             #time.sleep(1)
             menuEntered = 0
@@ -523,7 +571,62 @@ def bridgeMenu():
                             
 portNotFound = 1
                             
+def check_presence(correct_port, interval=.15):
+    global ser
+    global justreconnected
+    global serialconnected
+    global justChecked
+    global reading
+
+    portFound = 0
+    while True:
+        
+       
+        if (reading == 0):
             
+            portFound = 0
+
+            for port in serial.tools.list_ports.comports():
+
+                if portName in port.device:
+                    
+                    portFound = 1
+
+            #print (portFound)
+
+            if portFound == 1:
+                try:
+                    #print (portName)
+                    #ser = serial.Serial(portName, 115200)
+                    #print (portName)
+                    #ser.open(portName)
+                    justChecked = 1
+                    serialconnected = 1
+                    time.sleep(0.1)
+                    justChecked = 0
+                    
+                    
+                except:
+                    
+                    continue
+
+            else:
+                justreconnected = 1
+                justChecked = 0
+                serialconnected = 0
+
+                ser.close()
+
+            time.sleep(interval)
+
+
+import threading
+port_controller = threading.Thread(
+    target=check_presence, args=(portName, .15,), daemon=True)
+# port_controller.daemon(True)
+port_controller.start()
+
+#ser.in_waiting            
 
 
 
@@ -534,6 +637,7 @@ def serialTermIn():
     global reading
     global menuEntered
     global portNotFound
+    
     while True:
         readLength = 0
         

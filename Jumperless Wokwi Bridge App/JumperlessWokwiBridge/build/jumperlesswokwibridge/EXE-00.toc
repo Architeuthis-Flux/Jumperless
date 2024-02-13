@@ -11,7 +11,7 @@
  True,
  True,
  False,
- 'universal2',
+ 'x86_64',
  None,
  None,
  '/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless Wokwi Bridge '
@@ -61,7 +61,7 @@
  [],
  False,
  False,
- 1706663074,
+ 1707614607,
  [('runw',
    '/Users/kevinsanto/Library/Python/3.11/lib/python/site-packages/PyInstaller/bootloader/Darwin-64bit/runw',
    'EXECUTABLE')])

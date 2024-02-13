@@ -105,6 +105,8 @@ void setup()
   clearAllNTCC();
 
   lastNetConfirm(0);
+
+  
 }
 
 void setup1()
@@ -146,6 +148,7 @@ menu:
   // // connecttimer = millis();
 
   // //   }
+  //Serial.print("Updated!\n\r");
 
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
