@@ -510,11 +510,16 @@ int scanRows(int pin, bool clearLastFound)
 
   if (gp18read == probe)
   {
-    return -18;
+    delayMicroseconds(1000);
+    if (readFloatingOrState(18, -1) == probe)
+    {
+      return -18;
+    }
+    
   }
 
   pinMode(19, INPUT);
-  delayMicroseconds(400);
+  delayMicroseconds(900);
   int probeRead = readFloatingOrState(19, -1);
 
   if (probeRead == high && ((lastFound[0] != SUPPLY_3V3 )))
@@ -561,12 +566,12 @@ int scanRows(int pin, bool clearLastFound)
 
   if (justCleared && found != -1)
   {
-Serial.print("\n\rjustCleared: ");
-Serial.println(justCleared);
-Serial.print("nextIsSupply: ");
-Serial.println(nextIsSupply);
-Serial.print("nextIsGnd: ");
-Serial.println(nextIsGnd);
+// Serial.print("\n\rjustCleared: ");
+// Serial.println(justCleared);
+// Serial.print("nextIsSupply: ");
+// Serial.println(nextIsSupply);
+// Serial.print("nextIsGnd: ");
+// Serial.println(nextIsGnd);
 
     justCleared = 0;
   }

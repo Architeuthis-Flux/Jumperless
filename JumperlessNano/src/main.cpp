@@ -132,7 +132,7 @@ int baudRate = 115200;
 unsigned long probingTimer = 0;
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.0"; //// remember to update this
+const char firmwareVersion[] = "1.3.1"; //// remember to update this
 
 void loop()
 {
@@ -183,15 +183,19 @@ dontshowmenu:
     //   //clearNodeFile();
     //   goto skipinput;
     // }
-    if (millis() % 100 == 0)
+    if (millis() % 300 == 0)
     {
       startProbe();
       if (readFloatingOrState(18) == 3)
       {
+        delayMicroseconds(1000);
+        if (readFloatingOrState(18) == 3)
+        {
         input = 'p';
         probingTimer = millis();
         // delay(500);
         goto skipinput;
+        }
       }
       pinMode(19, INPUT);
     }
@@ -277,14 +281,15 @@ skipinput:
     int row = 0;
     while (Serial.available() == 0)
     {
-      delayMicroseconds(9700);
+      delayMicroseconds(1700);
       row = scanRows(0);
 
       if (row != -1)
       {
-        if (row == -18 && millis() - probingTimer > 800)
+        if (row == -18 && millis() - probingTimer > 500)
         {
           Serial.print("\n\rCommitting paths!\n\r");
+          probingTimer = millis();
           break;
         }
         else if (row == -18)
@@ -392,7 +397,7 @@ skipinput:
     // Serial.print("bridgesToPaths\n\r");
     delay(18);
     // showNets();
-    rawOtherColors[1] = 0x550008;
+    rawOtherColors[1] = 0x350004;
     sendAllPathsCore2 = 1;
     delay(25);
     pinMode(19, INPUT);
