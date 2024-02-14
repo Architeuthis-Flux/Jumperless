@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-
 #include <Arduino.h>
 
 #define USE_TINYUSB 1
@@ -53,7 +52,6 @@ int supplySwitchPosition = 0;
 void machineMode(void);
 void lastNetConfirm(int forceLastNet = 0);
 
-
 unsigned long lastNetConfirmTimer = 0;
 // int machineMode = 0;
 
@@ -76,7 +74,6 @@ void setup()
   USBDevice.addStringDescriptor("Architeuthis Flux");
 
   USBSer1.setStringDescriptor("Jumperless USB Serial");
-  
 
   USBSer1.begin(115200);
 
@@ -104,9 +101,7 @@ void setup()
 
   clearAllNTCC();
 
-  lastNetConfirm(0);
-
-  
+  // lastNetConfirm(0);
 }
 
 void setup1()
@@ -134,8 +129,10 @@ char input;
 int serSource = 0;
 int readInNodesArduino = 0;
 int baudRate = 115200;
+unsigned long probingTimer = 0;
+int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.2.0";   //// remember to update this
+const char firmwareVersion[] = "1.3.0"; //// remember to update this
 
 void loop()
 {
@@ -150,7 +147,7 @@ menu:
   // // connecttimer = millis();
 
   // //   }
-  //Serial.print("Updated!\n\r");
+  // Serial.print("Updated!\n\r");
 
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
@@ -173,12 +170,30 @@ dontshowmenu:
     if (showReadings >= 1)
     {
       showMeasurements();
-      //Serial.print("\n\n\r");
-      //showLEDsCore2 = 1;
+      // Serial.print("\n\n\r");
+      // showLEDsCore2 = 1;
     }
     if (BOOTSEL)
     {
       lastNetConfirm(1);
+    }
+    // if (tud_connected() == 0 && millis() > 1000)
+    // {
+    //   input = 'p';
+    //   //clearNodeFile();
+    //   goto skipinput;
+    // }
+    if (millis() % 100 == 0)
+    {
+      startProbe();
+      if (readFloatingOrState(18) == 3)
+      {
+        input = 'p';
+        probingTimer = millis();
+        // delay(500);
+        goto skipinput;
+      }
+      pinMode(19, INPUT);
     }
   }
 
@@ -235,43 +250,154 @@ skipinput:
     }
   case 'p':
   {
-  //clearLEDs();
-  int lastRow[10];
-  int pokedNumber = 0;
-  Serial.print("Press any key to exit\n\n\r");
-  while(Serial.available() == 0){
-     int row = scanRows(0);
+    // clearLEDs();
+    int lastRow[10];
+    int pokedNumber = 0;
+    Serial.print("Press any key to exit and commit paths (or touch probe to gpio 18)\n\n\r");
+    rawOtherColors[1] = 0x3500A8;
+    // Serial.print(numberOfNets);
 
-     if (row != -1 )
-     {
-      
-       delay(10);
-       lastRow[pokedNumber] = row;
-       pokedNumber++;
+    if (numberOfNets == 0)
+    {
+      clearNodeFile();
+    }
+    clearAllNTCC();
+    openNodeFile();
+    getNodesToConnect();
 
-      printNodeOrName(row);
-      Serial.print("\r\t");
-       if (pokedNumber >= 2)
+    bridgesToPaths();
+    // clearLEDs();
+    assignNetColors();
+    delay(18);
+    showLEDsCore2 = 1;
+    delay(28);
+    int probedNodes[40][2];
+    int probedNodesIndex = 0;
+
+    int row = 0;
+    while (Serial.available() == 0)
+    {
+      delayMicroseconds(9700);
+      row = scanRows(0);
+
+      if (row != -1)
+      {
+        if (row == -18 && millis() - probingTimer > 800)
         {
-        Serial.print("\r            \r");
-        printNodeOrName(lastRow[0]);
-        Serial.print(" - ");
-        printNodeOrName(lastRow[1]);
-        Serial.print("\n\r");
-        scanRows(0, true);
-        delay(18);
-
-        pokedNumber = 0;
+          Serial.print("\n\rCommitting paths!\n\r");
+          break;
         }
-     }
-     delayMicroseconds(1000);
-     
-  }
-  pinMode(19, INPUT);
+        else if (row == -18)
+        {
+          continue;
+        }
+        delay(10);
+        lastRow[pokedNumber] = row;
+        probedNodes[probedNodesIndex][pokedNumber] = row;
 
+        pokedNumber++;
+
+        printNodeOrName(row);
+        Serial.print("\r\t");
+
+        if (pokedNumber >= 2)
+        {
+          Serial.print("\r            \r");
+          printNodeOrName(probedNodes[probedNodesIndex][0]);
+          Serial.print(" - ");
+          printNodeOrName(probedNodes[probedNodesIndex][1]);
+          Serial.print("\n\r");
+
+          Serial.print("\n\r");
+
+          for (int i = 0; i < probedNodesIndex; i++)
+          {
+
+            /// Serial.print("\n\r");
+
+            if ((probedNodes[i][0] == probedNodes[probedNodesIndex][0] && probedNodes[i][1] == probedNodes[probedNodesIndex][1]) || (probedNodes[i][0] == probedNodes[probedNodesIndex][1] && probedNodes[i][1] == probedNodes[probedNodesIndex][0]))
+            {
+              probedNodes[probedNodesIndex][0] = 0;
+              probedNodes[probedNodesIndex][1] = 0;
+
+              leds.setPixelColor(nodesToPixelMap[probedNodes[i][0]], 0);
+              leds.setPixelColor(nodesToPixelMap[probedNodes[i][1]], 0);
+
+              for (int j = i; j < probedNodesIndex; j++)
+              {
+                probedNodes[j][0] = probedNodes[j + 1][0];
+                probedNodes[j][1] = probedNodes[j + 1][1];
+              }
+              // probedNodes[i][0] = -1;
+              // probedNodes[i][1] = -1;
+              pokedNumber = 0;
+
+              showLEDsCore2 = 1;
+              probedNodesIndex--;
+              probedNodesIndex--;
+              break;
+            }
+          }
+          // Serial.print("\n\n\n\r");
+
+          // Serial.print("\r            \r");
+          // printNodeOrName(probedNodes[probedNodesIndex][0]);
+          // Serial.print(" - ");
+          // printNodeOrName(probedNodes[probedNodesIndex][1]);
+          // Serial.print("\n\r");
+
+          for (int i = probedNodesIndex; i >= 0; i--)
+          {
+            // Serial.print ("    ");
+            // Serial.print (i);
+            Serial.print("\t");
+            printNodeOrName(probedNodes[i][0]);
+            Serial.print(" - ");
+            printNodeOrName(probedNodes[i][1]);
+            Serial.print("\n\r");
+          }
+          Serial.print("\n\n\r");
+
+          // delay(18);
+          pokedNumber = 0;
+          probedNodesIndex++;
+
+          // clearLEDs();
+          // openNodeFile();
+          // getNodesToConnect();
+
+          // bridgesToPaths();
+
+          /// assignNetColors();
+          delay(8);
+          // showLEDsCore2 = 1;
+          // delay(18);
+          scanRows(0, true);
+        }
+      }
+    }
+
+    for (int i = 0; i < probedNodesIndex; i++)
+    {
+      addBridgeToNodeFile(probedNodes[i][0], probedNodes[i][1]);
+    }
+
+    clearAllNTCC();
+    openNodeFile();
+    getNodesToConnect();
+
+    bridgesToPaths();
+    // clearLEDs();
+    assignNetColors();
+    // Serial.print("bridgesToPaths\n\r");
+    delay(18);
+    // showNets();
+    rawOtherColors[1] = 0x550008;
+    sendAllPathsCore2 = 1;
+    delay(25);
+    pinMode(19, INPUT);
+    delay(300);
     break;
-
-
   }
 
   case 'n':
@@ -373,47 +499,6 @@ skipinput:
   case '\n':
     goto menu;
     break;
-
-//   case 'p':
-
-//     // case '{':  //I had this so you could paste a wokwi diagram from the main menu but it kinda makes a mess of other things
-
-//     digitalWrite(RESETPIN, HIGH);
-//     delay(1);
-// #ifdef FSSTUFF
-//     clearNodeFile();
-// #endif
-//     digitalWrite(RESETPIN, LOW);
-//     clearAllNTCC();
-//     clearLEDs();
-
-//     timer = millis();
-
-// #ifdef FSSTUFF
-
-//     parseWokwiFileToNodeFile();
-
-//     openNodeFile();
-//     getNodesToConnect();
-// #endif
-//     Serial.println("\n\n\rnetlist\n\n\r");
-
-//     bridgesToPaths();
-//     assignNetColors();
-
-// #ifdef PIOSTUFF
-
-//     sendAllPaths();
-// #endif
-
-//     if (debugNMtime)
-//     {
-//       Serial.print("\n\n\r");
-//       Serial.print("took ");
-//       Serial.print(millis() - timer);
-//       Serial.print("ms");
-//     }
-//     break;
 
   case 't':
 #ifdef FSSTUFF
@@ -561,21 +646,20 @@ skipinput:
 
 // #include <string> // Include the necessary header file
 
-
 void lastNetConfirm(int forceLastNet)
 {
-  while (tud_connected() == 0 && millis() < 500)
-    ;
+  // while (tud_connected() == 0 && millis() < 500)
+  //   ;
 
-  if (millis() - lastNetConfirmTimer < 3000 && tud_connected() == 1)
-  {
-    //Serial.println(lastNetConfirmTimer);
+  // if (millis() - lastNetConfirmTimer < 3000 && tud_connected() == 1)
+  // {
+  //   // Serial.println(lastNetConfirmTimer);
 
-    //lastNetConfirmTimer = millis();
-    return;
-  }
+  //   // lastNetConfirmTimer = millis();
+  //   return;
+  // }
 
-  if (tud_connected() == 0 || forceLastNet == 1)
+  if (forceLastNet == 1)
   {
 
     int bootselPressed = 0;
@@ -595,7 +679,7 @@ void lastNetConfirm(int forceLastNet)
       bootselPressed = 1;
     }
 
-    while (tud_connected() == 0 || forceLastNet == 1)
+    while (forceLastNet == 1)
     {
       if (BOOTSEL)
         bootselPressed = 1;
@@ -607,7 +691,7 @@ void lastNetConfirm(int forceLastNet)
       sendAllPathsCore2 = 1;
       if (BOOTSEL)
         bootselPressed = 1;
-      //delay(250);
+      // delay(250);
 
       if (bootselPressed == 1)
       {
@@ -615,7 +699,6 @@ void lastNetConfirm(int forceLastNet)
         int fade = 8;
         while (BOOTSEL)
         {
-
 
           sendAllPathsCore2 = 1;
           delay(250);
@@ -627,18 +710,20 @@ void lastNetConfirm(int forceLastNet)
             clearAllNTCC();
             clearLEDs();
             startupColors();
+            clearNodeFile();
             sendAllPathsCore2 = 1;
             lastNetConfirmTimer = millis();
-            //delay(1000);
+            restoredNodeFile = 0;
+            // delay(1000);
             return;
           }
 
-          
           delay(fade * 10);
           fade--;
         }
 
         digitalWrite(RESETPIN, LOW);
+        restoredNodeFile = 1;
         sendAllPathsCore2 = 1;
         return;
       }
@@ -653,23 +738,18 @@ void machineMode(void) // read in commands in machine readable format
 {
   int sequenceNumber = -1;
 
-lastTimeCommandRecieved = millis();
+  lastTimeCommandRecieved = millis();
 
-if (millis() - lastTimeCommandRecieved > 100)
-{
-  machineModeRespond(sequenceNumber, true);
-  return;
-}
+  if (millis() - lastTimeCommandRecieved > 100)
+  {
+    machineModeRespond(sequenceNumber, true);
+    return;
+  }
   enum machineModeInstruction receivedInstruction = parseMachineInstructions(&sequenceNumber);
 
-
-
-
-// Serial.print("receivedInstruction: ");
-// Serial.print(receivedInstruction);
-// Serial.print("\n\r");
-
-
+  // Serial.print("receivedInstruction: ");
+  // Serial.print(receivedInstruction);
+  // Serial.print("\n\r");
 
   switch (receivedInstruction)
   {
@@ -690,15 +770,17 @@ if (millis() - lastTimeCommandRecieved > 100)
     break;
 
   case getnetlist:
-  if (millis() - lastTimeNetlistLoaded > 300)
-  {
-    
-    listNetsMachine();
-  } else {
-    machineModeRespond(0, true);
-    //Serial.print ("too soon bro\n\r");
-    return;
-  }
+    if (millis() - lastTimeNetlistLoaded > 300)
+    {
+
+      listNetsMachine();
+    }
+    else
+    {
+      machineModeRespond(0, true);
+      // Serial.print ("too soon bro\n\r");
+      return;
+    }
     break;
 
   case bridgelist:
@@ -742,24 +824,24 @@ if (millis() - lastTimeCommandRecieved > 100)
   case setsupplyswitch:
 
     supplySwitchPosition = setSupplySwitch();
-    //printSupplySwitch(supplySwitchPosition);
+    // printSupplySwitch(supplySwitchPosition);
     machineModeRespond(sequenceNumber, true);
 
     showLEDsCore2 = 1;
     break;
 
   case getsupplyswitch:
-    //if (millis() - lastTimeNetlistLoaded > 100)
-  //{
-    
-    printSupplySwitch(supplySwitchPosition);
-    //machineModeRespond(sequenceNumber, true);
+    // if (millis() - lastTimeNetlistLoaded > 100)
+    //{
 
- // }else {
-    //Serial.print ("\n\rtoo soon bro\n\r");
-   // machineModeRespond(0, true);
-   // return;
- // }
+    printSupplySwitch(supplySwitchPosition);
+    // machineModeRespond(sequenceNumber, true);
+
+    // }else {
+    // Serial.print ("\n\rtoo soon bro\n\r");
+    // machineModeRespond(0, true);
+    // return;
+    // }
     break;
 
   case getchipstatus:
@@ -876,8 +958,8 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
       {
         input = 'f';
 
-        //connectFromArduino = 'f';
-        // Serial.print("!!!!");
+        // connectFromArduino = 'f';
+        //  Serial.print("!!!!");
       }
       else
       {

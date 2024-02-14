@@ -22,7 +22,7 @@ extern bool debugMM;
 void parseWokwiFileToNodeFile();
 void changeWokwiDefinesToJumperless ();
 void writeToNodeFile(void);
-
+void addBridgeToNodeFile(int node1, int node2);
 void savePreformattedNodeFile (int source = 0);
 
 void openNodeFile();

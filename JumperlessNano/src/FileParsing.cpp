@@ -402,8 +402,79 @@ void changeWokwiDefinesToJumperless(void)
 void clearNodeFile(void)
 {
     LittleFS.remove("nodeFile.txt");
+    nodeFile = LittleFS.open("nodeFile.txt", "w+");
+    nodeFile.print("!");
+    nodeFile.close();
 }
 
+
+void addBridgeToNodeFile(int node1, int node2)
+{
+    nodeFile = LittleFS.open("nodeFile.txt", "r+");
+    if (!nodeFile)
+    {
+        if (debugFP)
+            Serial.println("Failed to open nodeFile");
+        return;
+    }
+    else
+    {
+        if (debugFP)
+            Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
+    }
+
+int nodeFileBraceIndex = 0;
+
+while (nodeFile.available())
+{
+    char c = nodeFile.read();
+   // Serial.print(c);
+ 
+    if (c == '}')
+    {
+        break;
+    } else {
+       nodeFileBraceIndex++;
+    }
+
+    if (c == '!')
+    {
+        nodeFile.seek(0);
+        nodeFile.print("{\n\r");
+        nodeFile.print(node1);
+        nodeFile.print("-");
+        nodeFile.print(node2);
+        nodeFile.print(",\n\r}\n\r{\n\r}\n\r");
+        nodeFile.close();
+        return;
+    }
+}
+//Serial.println(nodeFileBraceIndex);
+nodeFile.seek(nodeFileBraceIndex);
+
+    nodeFile.print(node1);
+    nodeFile.print("-");
+    nodeFile.print(node2);
+    nodeFile.print(",\n\r}\n\r{\n\r}\n\r");
+
+    if (debugFP)
+    {
+        Serial.println("wrote to nodeFile.txt");
+
+        Serial.println("nodeFile.txt contents:\n\r");
+        nodeFile.seek(0);
+
+        while (nodeFile.available())
+        {
+            Serial.write(nodeFile.read());
+        }
+        Serial.println("\n\r");
+    }
+    nodeFile.close();
+
+
+
+}
 void writeToNodeFile(void)
 {
 

@@ -249,6 +249,8 @@ void sendXYraw(int chip, int x, int y, int setOrClear)
   delayMicroseconds(40);
 }
 
+int probeHalfPeriodus = 10;
+
 int readFloatingOrState(int pin, int rowBeingScanned)
 {
 
@@ -263,21 +265,21 @@ int readFloatingOrState(int pin, int rowBeingScanned)
 
   pinMode(pin, INPUT_PULLUP);
 
-  delayMicroseconds(200);
+  delayMicroseconds(100);
 
   readingPullup = digitalRead(pin);
-  delayMicroseconds(10);
+  delayMicroseconds(probeHalfPeriodus);
   readingPullup2 = digitalRead(pin);
-  delayMicroseconds(5);
+  delayMicroseconds(probeHalfPeriodus / 2);
   readingPullup3 = digitalRead(pin);
 
   pinMode(pin, INPUT_PULLDOWN);
-  delayMicroseconds(200);
+  delayMicroseconds(100);
 
   readingPulldown = digitalRead(pin);
-  delayMicroseconds(10);
+  delayMicroseconds(probeHalfPeriodus);
   readingPulldown2 = digitalRead(pin);
-  delayMicroseconds(5);
+  delayMicroseconds(probeHalfPeriodus / 2);
   readingPulldown3 = digitalRead(pin);
 
   if (readingPullup != readingPullup2 || readingPullup2 != readingPullup3 && rowBeingScanned != -1)
@@ -286,9 +288,10 @@ int readFloatingOrState(int pin, int rowBeingScanned)
     {
       state = probe;
 
-      leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 45, 0, 45);
+      // leds.setPixelColor(nodesToPixelMap[rowBeingScanned], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
+
       // Serial.print("probe");
-      leds.show();
+      //
     }
   }
   else
@@ -305,13 +308,13 @@ int readFloatingOrState(int pin, int rowBeingScanned)
     else if (readingPullup == 1 && readingPulldown == 1)
     {
       // Serial.print("HIGH");
-      //leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 45, 0, 0);
+      // leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 45, 0, 0);
       state = high;
     }
     else if (readingPullup == 0 && readingPulldown == 0)
     {
       // Serial.print("LOW");
-      //leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 0, 45, 0);
+      // leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 0, 45, 0);
       state = low;
     }
     else if (readingPullup == 0 && readingPulldown == 1)
@@ -321,31 +324,65 @@ int readFloatingOrState(int pin, int rowBeingScanned)
   }
   // Serial.print("\n");
   leds.show();
-  //delayMicroseconds(100);
+  // delayMicroseconds(100);
 
   return state;
 }
 
-void startProbe(void)
+void startProbe(int probeSpeed)
 {
+  probeHalfPeriodus = 1000000 / probeSpeed / 2;
   pinMode(19, OUTPUT);
-  analogWriteFreq(50000);
+  analogWriteFreq(probeSpeed);
   analogWrite(19, 128);
-  delayMicroseconds(100);
+  // delayMicroseconds(10);
+  pinMode(18, INPUT);
 }
 
-
+int rainbowList[12][3] = {
+    {45, 35, 8},
+    {10, 45, 30},
+    {30, 15, 45},
+    {8, 27, 45},
+    {45, 18, 19},
+    {35, 42, 5},
+    {02, 45, 35},
+    {18, 25, 45},
+    {40, 12, 45},
+    {10, 32, 45},
+    {18, 5, 43},
+    {45, 28, 13}};
+int rainbowIndex = 0;
+int lastFound[5] = {-1, -1, -1, -1, -1};
+int nextIsSupply = 0;
+int nextIsGnd = 0;
+int justCleared = 1;
 
 int scanRows(int pin, bool clearLastFound)
 {
-  static int lastFound = -1;
+
   int found = -1;
 
   if (clearLastFound)
   {
-    lastFound = -1;
+    // for (int i = 0; i < 5; i++)
+    // {
+    //   lastFound[i] = -1;
+    // }
+
+
+    rainbowIndex++;
+    if (rainbowIndex > 11)
+    {
+      rainbowIndex = 0;
+    }
+
+    justCleared = 1;
+    nextIsGnd = 0;
+    nextIsSupply = 0;
     return -1;
   }
+
   digitalWrite(RESETPIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(RESETPIN, LOW);
@@ -390,30 +427,41 @@ int scanRows(int pin, bool clearLastFound)
       // analogRead(ADC0_PIN);
 
       rowBeingScanned = ch[chipScan].yMap[yToScan];
-      if (readFloatingOrState(pin, rowBeingScanned) == probe && rowBeingScanned != lastFound)
+      if (readFloatingOrState(pin, rowBeingScanned) == probe && rowBeingScanned != lastFound[0])
       {
         found = rowBeingScanned;
-        lastFound = found;
-        
+        if (nextIsSupply)
+        {
+          leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 65, 10, 10);
+        }
+        else if (nextIsGnd)
+        {
+          leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 10, 65, 10);
+        }
+        else
+        {
+          leds.setPixelColor(nodesToPixelMap[rowBeingScanned], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
+        }
+
+        leds.show();
+        for (int i = 4; i > 0; i--)
+        {
+          lastFound[i] = lastFound[i - 1];
+        }
+        lastFound[0] = found;
       }
 
       sendXYraw(chipScan, 0, 0, 0);
       sendXYraw(chipScan, 0, yToScan, 0);
 
-      // if (found != -1)
-      // {
-      //   break;
-      // }
+      if (found != -1)
+      {
+        break;
+      }
     }
     sendXYraw(CHIP_L, 2, chipScan, 0);
 
 
-
-
-    if (found != -1)
-    {
-      return found;
-    }
   }
 
   int corners[4] = {1, 30, 31, 60};
@@ -426,39 +474,106 @@ int scanRows(int pin, bool clearLastFound)
     // analogRead(ADC0_PIN);
 
     rowBeingScanned = corners[cornerScan];
-    if (readFloatingOrState(pin, rowBeingScanned) == probe && rowBeingScanned != lastFound)
+    if (readFloatingOrState(pin, rowBeingScanned) == probe && rowBeingScanned != lastFound[0])
     {
       found = rowBeingScanned;
-      lastFound = found;
+      if (nextIsSupply)
+      {
+        leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 65, 10, 10);
+      }
+      else if (nextIsGnd)
+      {
+        leds.setPixelColor(nodesToPixelMap[rowBeingScanned], 10, 65, 10);
+      }
+      else
+      {
+      leds.setPixelColor(nodesToPixelMap[rowBeingScanned], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
+      }
+      leds.show();
+      for (int i = 4; i > 0; i--)
+      {
+        lastFound[i] = lastFound[i - 1];
+      }
+      lastFound[0] = found;
     }
 
     sendXYraw(CHIP_L, cornerScan + 8, 0, 0);
 
-    // if (found != -1)
-    // {
-    //   break;
-    // }
+    if (found != -1)
+    {
+      break;
+    }
   }
   sendXYraw(CHIP_L, xMapRead, 0, 0);
-  
+
+  int gp18read = readFloatingOrState(18, -1);
+
+  if (gp18read == probe)
+  {
+    return -18;
+  }
 
   pinMode(19, INPUT);
-delayMicroseconds(400);
-    int probeRead = readFloatingOrState(19, -1);
+  delayMicroseconds(400);
+  int probeRead = readFloatingOrState(19, -1);
 
-if (probeRead == high && lastFound != SUPPLY_3V3)
-{
-  found = SUPPLY_3V3;
-  lastFound = found;
-}
-else if (probeRead == low && lastFound != GND)
-{
-  found = GND;
-  lastFound = found;
-}
+  if (probeRead == high && ((lastFound[0] != SUPPLY_3V3 )))
+  {
+    found = SUPPLY_3V3;
+    if (justCleared)
+    {
+      nextIsSupply = 1;
+      //justCleared = 0;
+    }
+    else
+    {
+      leds.setPixelColor(nodesToPixelMap[lastFound[0]], 65, 10, 10);
+      nextIsSupply = 0;
+    }
+
+    for (int i = 4; i > 0; i--)
+    {
+      lastFound[i] = lastFound[i - 1];
+    }
+    lastFound[0] = found;
+  }
+  else if (probeRead == low && ((lastFound[0] != GND )))
+  {
+    found = GND;
+    if (justCleared)
+    {
+      // leds.setPixelColor(nodesToPixelMap[lastFound[0]], 0, 0, 0);
+      nextIsGnd = 1;
+      //justCleared = 0;
+    }
+    else
+    {
+      leds.setPixelColor(nodesToPixelMap[lastFound[0]], 10, 65, 10);
+      nextIsGnd = 0;
+    }
+
+    for (int i = 4; i > 0; i--)
+    {
+      lastFound[i] = lastFound[i - 1];
+    }
+    lastFound[0] = found;
+  }
+
+  if (justCleared && found != -1)
+  {
+Serial.print("\n\rjustCleared: ");
+Serial.println(justCleared);
+Serial.print("nextIsSupply: ");
+Serial.println(nextIsSupply);
+Serial.print("nextIsGnd: ");
+Serial.println(nextIsGnd);
+
+    justCleared = 0;
+  }
+
   return found;
 
-  //return 0;
+  // return 0;
 }
 
 void sendPath(int i, int setOrClear)

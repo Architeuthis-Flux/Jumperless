@@ -22,7 +22,7 @@ enum measuredState
 void initCH446Q(void);
 void sendXYraw(int chip, int x, int y, int setorclear);
 int readFloatingOrState (int pin = 0, int row = 0);
-void startProbe (void);
+void startProbe (int probeSpeed = 50000);
 int scanRows(int pin = 0, bool clearLastFound = false);
 void sendAllPaths(void); // should we sort them by chip? for now, no
 void resetArduino (void);
