@@ -127,7 +127,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.1"; //// remember to update this
+const char firmwareVersion[] = "1.3.2"; //// remember to update this
 
 void loop()
 {
@@ -702,7 +702,7 @@ void machineMode(void) // read in commands in machine readable format
   case getunconnectedpaths:
     getUnconnectedPaths();
     break;
-    
+
   case unknown:
     machineModeRespond(sequenceNumber, false);
     return;
