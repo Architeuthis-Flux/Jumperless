@@ -30,20 +30,15 @@
 #include "MachineCommands.h"
 // #include <EEPROM.h>
 
-#ifdef EEPROMSTUFF
 #include <EEPROM.h>
-#endif
 
-#ifdef PIOSTUFF
 #include "CH446Q.h"
-#endif
 
 #include "FileParsing.h"
 
-#ifdef FSSTUFF
 #include "LittleFS.h"
 
-#endif
+#include "Probing.h"
 
 Adafruit_USBD_CDC USBSer1;
 
@@ -129,7 +124,7 @@ char input;
 int serSource = 0;
 int readInNodesArduino = 0;
 int baudRate = 115200;
-unsigned long probingTimer = 0;
+
 int restoredNodeFile = 0;
 
 const char firmwareVersion[] = "1.3.1"; //// remember to update this
@@ -183,21 +178,16 @@ dontshowmenu:
     //   //clearNodeFile();
     //   goto skipinput;
     // }
-    if (millis() % 300 == 0)
+    if (millis() % 100 == 0)
     {
-      startProbe();
-      if (readFloatingOrState(18) == 3)
+      if (checkProbeButton() == 1)
       {
-        delayMicroseconds(1000);
-        if (readFloatingOrState(18) == 3)
-        {
         input = 'p';
         probingTimer = millis();
-        // delay(500);
         goto skipinput;
-        }
       }
-      pinMode(19, INPUT);
+
+      // pinMode(19, INPUT);
     }
   }
 
@@ -254,165 +244,19 @@ skipinput:
     }
   case 'p':
   {
-    // clearLEDs();
-    int lastRow[10];
-    int pokedNumber = 0;
-    Serial.print("Press any key to exit and commit paths (or touch probe to gpio 18)\n\n\r");
-    rawOtherColors[1] = 0x3500A8;
-    // Serial.print(numberOfNets);
-
-    if (numberOfNets == 0)
-    {
-      clearNodeFile();
-    }
-    clearAllNTCC();
-    openNodeFile();
-    getNodesToConnect();
-
-    bridgesToPaths();
-    // clearLEDs();
-    assignNetColors();
-    delay(18);
-    showLEDsCore2 = 1;
-    delay(28);
-    int probedNodes[40][2];
-    int probedNodesIndex = 0;
-
-    int row = 0;
-    while (Serial.available() == 0)
-    {
-      delayMicroseconds(1700);
-      row = scanRows(0);
-
-      if (row != -1)
-      {
-        if (row == -18 && millis() - probingTimer > 500)
-        {
-          Serial.print("\n\rCommitting paths!\n\r");
-          probingTimer = millis();
-          break;
-        }
-        else if (row == -18)
-        {
-          continue;
-        }
-        delay(10);
-        lastRow[pokedNumber] = row;
-        probedNodes[probedNodesIndex][pokedNumber] = row;
-
-        pokedNumber++;
-
-        printNodeOrName(row);
-        Serial.print("\r\t");
-
-        if (pokedNumber >= 2)
-        {
-          Serial.print("\r            \r");
-          printNodeOrName(probedNodes[probedNodesIndex][0]);
-          Serial.print(" - ");
-          printNodeOrName(probedNodes[probedNodesIndex][1]);
-          Serial.print("\n\r");
-
-          Serial.print("\n\r");
-
-          for (int i = 0; i < probedNodesIndex; i++)
-          {
-
-            /// Serial.print("\n\r");
-
-            if ((probedNodes[i][0] == probedNodes[probedNodesIndex][0] && probedNodes[i][1] == probedNodes[probedNodesIndex][1]) || (probedNodes[i][0] == probedNodes[probedNodesIndex][1] && probedNodes[i][1] == probedNodes[probedNodesIndex][0]))
-            {
-              probedNodes[probedNodesIndex][0] = 0;
-              probedNodes[probedNodesIndex][1] = 0;
-
-              leds.setPixelColor(nodesToPixelMap[probedNodes[i][0]], 0);
-              leds.setPixelColor(nodesToPixelMap[probedNodes[i][1]], 0);
-
-              for (int j = i; j < probedNodesIndex; j++)
-              {
-                probedNodes[j][0] = probedNodes[j + 1][0];
-                probedNodes[j][1] = probedNodes[j + 1][1];
-              }
-              // probedNodes[i][0] = -1;
-              // probedNodes[i][1] = -1;
-              pokedNumber = 0;
-
-              showLEDsCore2 = 1;
-              probedNodesIndex--;
-              probedNodesIndex--;
-              break;
-            }
-          }
-          // Serial.print("\n\n\n\r");
-
-          // Serial.print("\r            \r");
-          // printNodeOrName(probedNodes[probedNodesIndex][0]);
-          // Serial.print(" - ");
-          // printNodeOrName(probedNodes[probedNodesIndex][1]);
-          // Serial.print("\n\r");
-
-          for (int i = probedNodesIndex; i >= 0; i--)
-          {
-            // Serial.print ("    ");
-            // Serial.print (i);
-            Serial.print("\t");
-            printNodeOrName(probedNodes[i][0]);
-            Serial.print(" - ");
-            printNodeOrName(probedNodes[i][1]);
-            Serial.print("\n\r");
-          }
-          Serial.print("\n\n\r");
-
-          // delay(18);
-          pokedNumber = 0;
-          probedNodesIndex++;
-
-          // clearLEDs();
-          // openNodeFile();
-          // getNodesToConnect();
-
-          // bridgesToPaths();
-
-          /// assignNetColors();
-          delay(8);
-          // showLEDsCore2 = 1;
-          // delay(18);
-          scanRows(0, true);
-        }
-      }
-    }
-
-    for (int i = 0; i < probedNodesIndex; i++)
-    {
-      addBridgeToNodeFile(probedNodes[i][0], probedNodes[i][1]);
-    }
-
-    clearAllNTCC();
-    openNodeFile();
-    getNodesToConnect();
-
-    bridgesToPaths();
-    // clearLEDs();
-    assignNetColors();
-    // Serial.print("bridgesToPaths\n\r");
-    delay(18);
-    // showNets();
-    rawOtherColors[1] = 0x350004;
-    sendAllPathsCore2 = 1;
-    delay(25);
-    pinMode(19, INPUT);
-    delay(300);
+    probeMode();
     break;
   }
 
   case 'n':
-
+    couldntFindPath(1);
     Serial.print("\n\n\rnetlist\n\n\r");
     listSpecialNets();
     listNets();
 
     break;
   case 'b':
+    couldntFindPath(1);
     Serial.print("\n\n\rBridge Array\n\r");
     printBridgeArray();
     Serial.print("\n\n\n\rPaths\n\r");
@@ -855,7 +699,10 @@ void machineMode(void) // read in commands in machine readable format
 
     // case gpio:
     //   break;
-
+  case getunconnectedpaths:
+    getUnconnectedPaths();
+    break;
+    
   case unknown:
     machineModeRespond(sequenceNumber, false);
     return;

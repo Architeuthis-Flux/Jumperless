@@ -22,7 +22,7 @@ ArduinoJson::DynamicJsonDocument machineModeJson(8000);
 
 enum machineModeInstruction lastReceivedInstruction = unknown;
 
-char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch", "getchipstatus"};
+char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch", "getchipstatus", "getunconnectedpaths"};
 
 enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 {
@@ -130,6 +130,31 @@ void machineModeRespond(int sequenceNumber, bool ok)
     Serial.println("");
 }
 
+void getUnconnectedPaths(void)
+{
+    if (numberOfUnconnectablePaths == 0)
+    {
+        Serial.println("::unconnectedpaths-begin");
+        Serial.println("::unconnectedpaths-end");
+        return;
+    }
+    Serial.println("::unconnectedpaths-begin");
+    Serial.print("::unconnectedpaths[");
+    for (int i = 0; i < numberOfUnconnectablePaths; i++)
+    {
+        if (i > 0)
+        {
+            Serial.print(",");
+        }
+
+        printNodeOrName(unconnectablePaths[i][0]);
+        Serial.print("-");
+        printNodeOrName(unconnectablePaths[i][1]);
+    }
+    Serial.println("]");
+    Serial.println("::unconnectedpaths-end");
+}
+
 void machineNetlistToNetstruct(void)
 {
     char names[MAX_NETS][32] = {0};
@@ -154,16 +179,16 @@ void machineNetlistToNetstruct(void)
 
     for (int i = 0; i < MAX_NETS; i++)
     {
-        
+
         int nodesIndex = 0;
 
         if (machineModeJson[i].isNull() == true)
         {
             continue;
-            //break;
+            // break;
         }
-netIndex ++;
-        //netIndex = machineModeJson[i]["index"];
+        netIndex++;
+        // netIndex = machineModeJson[i]["index"];
 
         strcpy(names[i], machineModeJson[i]["name"]);
 
@@ -297,7 +322,7 @@ void populateBridgesFromNodes(void)
             if (net[i].nodes[j] == -1 || net[i].nodes[j] == 0)
             {
                 continue;
-                //break;
+                // break;
             }
 
             if (net[i].nodes[j] == net[i].nodes[0])
@@ -730,8 +755,8 @@ void listNetsMachine(void)
         if (n->number == 0 || n->nodes[0] == -1)
         {
             // net not allocated yet
-            continue; //this allows us to delete nets and have jumperlab work
-            //break;
+            continue; // this allows us to delete nets and have jumperlab work
+            // break;
         }
 
         Serial.print("::net[");
@@ -762,8 +787,6 @@ void listNetsMachine(void)
         Serial.print(n->specialFunction ? "true," : "false,");
 
         // COLOR
-
-
 
         rgbColor color = unpackRgb(scaleUpBrightness(n->rawColor));
         char buf[8];
@@ -810,31 +833,36 @@ void listBridgesMachine(void)
             {
                 started = true;
             }
-            printNodeOrName(n->bridges[j][0],1);
+            printNodeOrName(n->bridges[j][0], 1);
             Serial.print("-");
-            printNodeOrName(n->bridges[j][1],1);
+            printNodeOrName(n->bridges[j][1], 1);
         }
     }
     Serial.println("]");
 }
 
-void printChipStatusMachine() {
-  Serial.println("::chipstatus-begin");
-  for (int i = 0; i < 12; i++) {
-    Serial.print("::chipstatus[");
-    Serial.print(chipNumToChar(i));
-    Serial.print(",");
-    for (int j = 0; j < 16; j++) {
-      Serial.print(ch[i].xStatus[j]);
-      Serial.print(",");
-    }
-    for (int j = 0; j < 8; j++) {
-      Serial.print(ch[i].yStatus[j]);
-      if (j != 7) {
+void printChipStatusMachine()
+{
+    Serial.println("::chipstatus-begin");
+    for (int i = 0; i < 12; i++)
+    {
+        Serial.print("::chipstatus[");
+        Serial.print(chipNumToChar(i));
         Serial.print(",");
-      }
+        for (int j = 0; j < 16; j++)
+        {
+            Serial.print(ch[i].xStatus[j]);
+            Serial.print(",");
+        }
+        for (int j = 0; j < 8; j++)
+        {
+            Serial.print(ch[i].yStatus[j]);
+            if (j != 7)
+            {
+                Serial.print(",");
+            }
+        }
+        Serial.println("]");
     }
-    Serial.println("]");
-  }
-  Serial.println("::chipstatus-end");
+    Serial.println("::chipstatus-end");
 }

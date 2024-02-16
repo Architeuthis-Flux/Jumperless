@@ -13,12 +13,17 @@ extern int numberOfPaths;
 extern bool debugNTCC;
 extern bool debugNTCC2;
 
+extern int numberOfUnconnectablePaths;
+extern int unconnectablePaths[10][2];
+
 void clearAllNTCC(void);
 
 void sortPathsByNet(void);  
 void bridgesToPaths(void);
 
 void findStartAndEndChips(int node1, int node2, int net);
+
+void couldntFindPath(int forcePrint = 0);
 
 void resolveChipCandidates();
 

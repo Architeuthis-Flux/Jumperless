@@ -3,6 +3,12 @@
 #ifndef JUMPERLESSDEFINESRP2040_H
 #define JUMPERLESSDEFINESRP2040_H
 
+
+
+extern volatile int sendAllPathsCore2;
+
+
+
 #define INPUTBUFFERLENGTH 8000
 
 #define PIOSTUFF 1 //comment these out to remove them

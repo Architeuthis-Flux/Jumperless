@@ -2,7 +2,7 @@
 #ifndef MACHINECOMMANDS_H
 #define MACHINECOMMANDS_H
 
-#define NUMBEROFINSTRUCTIONS 17
+#define NUMBEROFINSTRUCTIONS 18
 
 enum machineModeInstruction
 {
@@ -21,7 +21,8 @@ enum machineModeInstruction
     setnodecolor,
     setsupplyswitch,
     getsupplyswitch,
-    getchipstatus
+    getchipstatus,
+    getunconnectedpaths
 };
 
 extern char inputBuffer[INPUTBUFFERLENGTH];
@@ -29,6 +30,7 @@ extern char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20];
 
 enum machineModeInstruction parseMachineInstructions(int *sequenceNumber);
 void machineModeRespond(int sequenceNumber, bool ok);
+void getUnconnectedPaths(void);
 void machineNetlistToNetstruct(void);
 void populateBridgesFromNodes(void);
 int nodeTokenToInt(char *);
