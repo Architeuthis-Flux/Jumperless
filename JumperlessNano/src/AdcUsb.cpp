@@ -77,6 +77,8 @@ JumperlessUsbInterface jlUsbInterface;
 void setupAdcUsbStuff() {
   TinyUSBDevice.addInterface(jlUsbInterface);
 
+  analogReadResolution(12);
+
   adc.setBuffers(4, 32);
   adc.onReceive(adcCallback);
   // the sample rate passed here is already adjusted for the number of pins.

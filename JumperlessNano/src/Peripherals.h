@@ -22,7 +22,6 @@ extern int showADCreadings[4];
 extern int revisionNumber;
 
 void initINA219(void);
-void initADC(void);
 
 void initDAC(void);
 
