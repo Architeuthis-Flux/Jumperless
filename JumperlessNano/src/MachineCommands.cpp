@@ -134,11 +134,10 @@ void getUnconnectedPaths(void)
 {
     if (numberOfUnconnectablePaths == 0)
     {
-        Serial.println("::unconnectedpaths-begin");
-        Serial.println("::unconnectedpaths-end");
+
         return;
     }
-    Serial.println("::unconnectedpaths-begin");
+    
     Serial.print("::unconnectedpaths[");
     for (int i = 0; i < numberOfUnconnectablePaths; i++)
     {
@@ -152,7 +151,7 @@ void getUnconnectedPaths(void)
         printNodeOrName(unconnectablePaths[i][1]);
     }
     Serial.println("]");
-    Serial.println("::unconnectedpaths-end");
+    
 }
 
 void machineNetlistToNetstruct(void)
