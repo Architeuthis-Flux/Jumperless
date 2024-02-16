@@ -40,6 +40,8 @@
 
 #include "Probing.h"
 
+#include "AdcUsb.h"
+
 Adafruit_USBD_CDC USBSer1;
 
 int supplySwitchPosition = 0;
@@ -72,13 +74,15 @@ void setup()
 
   USBSer1.begin(115200);
 
+  setupAdcUsbStuff();
+
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
   debugFlagInit();
 
 #endif
 
-  initADC();
+  //initADC();
   delay(1);
   initDAC(); // also sets revisionNumber
   delay(1);

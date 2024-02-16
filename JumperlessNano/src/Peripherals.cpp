@@ -14,11 +14,11 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
-#include "ADCInput.h"
 #include "pico/cyw43_arch.h"
 
 #include "mcp4725.hpp"
 #include "MCP_DAC.h"
+#include "AdcUsb.h"
 
 #include <SPI.h>
 
@@ -71,24 +71,6 @@ uint32_t lastTime = 0;
 uint16_t sine0[360];
 uint16_t sine1[360];
 
-// ADCInput adc(A3);
-
-void initADC(void)
-{
-
-  pinMode(ADC0_PIN, INPUT);
-  pinMode(ADC1_PIN, INPUT);
-  pinMode(ADC2_PIN, INPUT);
-  pinMode(ADC3_PIN, INPUT);
-
-  gpio_set_function(ADC3_PIN, GPIO_FUNC_NULL);
-  adc_gpio_init(ADC3_PIN);
-  adc_select_input(3);
-
-  adc_fifo_setup(true, false, 0, false, false);
-  adc_run(true);
-  analogReadResolution(12);
-}
 
 void initDAC(void)
 {
@@ -537,11 +519,9 @@ int readAdc(int channel, int samples)
 {
   int adcReadingAverage = 0;
 
-  uint8_t adcChannel = channel + ADC0_PIN;
-
   for (int i = 0; i < samples; i++)
   {
-    adcReadingAverage += analogRead(adcChannel);
+    adcReadingAverage += adcReadings[channel];
     delay(1);
   }
 

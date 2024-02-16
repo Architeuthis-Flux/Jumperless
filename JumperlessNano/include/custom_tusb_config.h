@@ -65,14 +65,18 @@ extern "C" {
 // Device Configuration
 //--------------------------------------------------------------------
 
-#define CFG_TUD_ENDOINT0_SIZE 64
+#define CFG_TUD_ENDOINT0_SIZE 256
 
 #define CFG_TUD_CDC 2
 
-#define CFG_TUD_MSC 1
-#define CFG_TUD_HID 1
-#define CFG_TUD_MIDI 1
-#define CFG_TUD_VENDOR 1
+#define CFG_TUD_MSC 0
+#define CFG_TUD_HID 0
+#define CFG_TUD_MIDI 0
+#define CFG_TUD_VENDOR 0
+#define CFG_TUD_JUMPERLESS 1
+
+// max is 64
+#define CFG_TUD_JUMPERLESS_EP_BUFSIZE 8
 
 // CDC FIFO size of TX and RX
 #define CFG_TUD_CDC_RX_BUFSIZE 256
