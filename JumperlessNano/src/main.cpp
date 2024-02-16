@@ -45,7 +45,7 @@
 
 #endif
 
-#include "AdcHid.h"
+#include "AdcUsb.h"
 
 Adafruit_USBD_CDC USBSer1;
 
@@ -79,7 +79,7 @@ void setup()
 
   USBSer1.begin(115200);
 
-  setupAdcHidStuff();
+  setupAdcUsbStuff();
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
