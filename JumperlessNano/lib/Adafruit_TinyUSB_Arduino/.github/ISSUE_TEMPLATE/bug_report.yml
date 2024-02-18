@@ -1,0 +1,102 @@
+name: Bug Report
+description: Report a problem with TinyUSB Library
+labels: 'Bug'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        It's okay to leave some blank if it doesn't apply to your problem.
+
+  - type: dropdown
+    attributes:
+      label: Operating System
+      options:
+              - Linux
+              - MacOS
+              - RaspberryPi OS
+              - Windows 7
+              - Windows 10
+              - Windows 11
+              - Others
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Arduino IDE version
+      placeholder: e.g Arduino 1.8.15
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Board
+      placeholder: e.g Feather nRF52840 Express
+    validations:
+      required: true
+      
+  - type: input
+    attributes:
+      label: ArduinoCore version
+      description: Can be found under "Board Manager" menu
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: TinyUSB Library version
+      placeholder: "Release version or github latest"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Sketch as ATTACHED TXT
+      placeholder: |
+        e.g examples/MassStorage/msc_ramdisk.
+        If it is custom sketch, please provide it as **ATTACHED** files or link to it.
+        Pasting raw long code that hurts readability can get your issue **closed**
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Compiled Log as ATTACHED TXT
+      placeholder: |
+        Compiled log from Arduino IDE as **ATTACHED** txt.
+        Pasting raw long log that hurts readability can get your issue **closed**
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: What happened ?
+      placeholder: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: How to reproduce ?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. See error      
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Debug Log
+      placeholder: |
+        TinyUSB debug log where the issue occurred as attached txt file, best with comments to explain the actual events.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
