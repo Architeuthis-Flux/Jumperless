@@ -132,6 +132,7 @@ int probeMode(int pin, int setOrClear)
 
         if (row[0] != -1 && row[0] != row[1])
         {
+            row[1] = row[0];
     
 
             if (connectedRowsIndex > 1)
@@ -224,8 +225,10 @@ int probeMode(int pin, int setOrClear)
                     // Serial.print("bridgesToPaths\n\r");
                    // delay(18);
                     // showNets();
-                    showLEDsCore2 = 1;
+                    //showLEDsCore2 = 1;
                     sendAllPathsCore2 = 1;
+
+                    delay(25);
                 }
                 else
                 {
@@ -247,8 +250,10 @@ int probeMode(int pin, int setOrClear)
                     // Serial.print("bridgesToPaths\n\r");
                     //delay(18);
                     // showNets();
-                    showLEDsCore2 = 1;
+                    //showLEDsCore2 = 1;
                     sendAllPathsCore2 = 1;
+                    //logoFlash = 1;
+                    delay(25);
                 }
                 node1or2 = 0;
                 nodesToConnect[0] = -1;
@@ -269,15 +274,15 @@ int probeMode(int pin, int setOrClear)
 
         probeTimeout = millis();
     }
+    digitalWrite(RESETPIN, LOW);
+    clearAllNTCC();
+    openNodeFile();
+    getNodesToConnect();
 
-    // clearAllNTCC();
-    // openNodeFile();
-    // getNodesToConnect();
-
-    // bridgesToPaths();
-    // // clearLEDs();
-    // leds.clear();
-    // assignNetColors();
+    bridgesToPaths();
+    // clearLEDs();
+    //leds.clear();
+    assignNetColors();
     // // Serial.print("bridgesToPaths\n\r");
     // delay(18);
     // // showNets();
@@ -285,10 +290,10 @@ int probeMode(int pin, int setOrClear)
      rawOtherColors[1] = 0x550004;
 showLEDsCore2 = 1;
 
-    // sendAllPathsCore2 = 1;
+    sendAllPathsCore2 = 1;
     // delay(25);
     // pinMode(19, INPUT);
-    // delay(300);
+     delay(300);
 
     return 1;
 }
@@ -616,7 +621,7 @@ int scanRows(int pin)
         found = SUPPLY_5V;
         connectedRows[connectedRowsIndex] = found;
         connectedRowsIndex++;
-        return connectedRows[connectedRowsIndex];
+        //return connectedRows[connectedRowsIndex];
     }
 
     else if (probeRead == low)
@@ -626,7 +631,7 @@ int scanRows(int pin)
         connectedRowsIndex++;
         // Serial.print(connectedRows[connectedRowsIndex]);
 
-        return connectedRows[connectedRowsIndex];
+        //return connectedRows[connectedRowsIndex];
     }
 
     startProbe();

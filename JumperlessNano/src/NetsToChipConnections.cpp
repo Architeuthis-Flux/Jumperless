@@ -2226,7 +2226,7 @@ void couldntFindPath(int forcePrint)
             unconnectablePaths[numberOfUnconnectablePaths][0] = path[i].node1;
             unconnectablePaths[numberOfUnconnectablePaths][1] = path[i].node2;
             numberOfUnconnectablePaths++;
-            path[i].skip = true;
+            //path[i].skip = true;
         }
     }
     if (debugNTCC2 || forcePrint)
