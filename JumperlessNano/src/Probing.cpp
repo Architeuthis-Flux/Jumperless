@@ -149,12 +149,13 @@ restartProbing:
 
         row[0] = scanRows(ADC0_PIN);
 
-        if (row[0] == -18 && (millis() - probingTimer > 500) && checkProbeButton() == 1 && millis() - probeButtonTimer > 1500)
+        if (row[0] == -18 && (millis() - probingTimer > 500) && checkProbeButton() == 1 && millis() - probeButtonTimer > 1000)
         {
-            if (longShortPress(1000) == 1)
+            if (longShortPress(750) == 1)
             {
                 setOrClear = !setOrClear;
                 probingTimer = millis();
+                probeButtonTimer = millis();
                 goto restartProbing;
                 break;
             }
@@ -218,7 +219,8 @@ restartProbing:
 
                 node1or2++;
                 probingTimer = millis();
-                // showLEDsCore2 = 1;
+                probeButtonTimer = millis();
+                 showLEDsCore2 = 2;
                 delay(30);
             }
             else if (connectedRowsIndex == 1)
