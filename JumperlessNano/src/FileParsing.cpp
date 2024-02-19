@@ -10,12 +10,7 @@
 #include "LEDs.h"
 #include <EEPROM.h>
 #include "MachineCommands.h"
-
-
-
-
-
-
+#include "Probing.h"
 
 bool debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 bool debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
@@ -29,7 +24,6 @@ char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
 ArduinoJson::StaticJsonDocument<8000> wokwiJson;
 
-
 String connectionsW[MAX_BRIDGES][5];
 
 File nodeFile;
@@ -37,8 +31,6 @@ File nodeFile;
 File wokwiFile;
 
 unsigned long timeToFP = 0;
-
-
 
 void savePreformattedNodeFile(int source)
 {
@@ -82,6 +74,11 @@ void savePreformattedNodeFile(int source)
             delay(1);
         }
     }
+    // nodeFile.write("\n\r");
+
+    //     nodeFile.seek(0);
+    //     nodeFileString.read(nodeFile);
+    //    Serial.println(nodeFileString);
 
     nodeFile.close();
 }
@@ -91,26 +88,63 @@ void printNodeFile(void)
     nodeFile = LittleFS.open("nodeFile.txt", "r");
     if (!nodeFile)
     {
-        if (debugFP)
-            Serial.println("Failed to open nodeFile");
+        // if (debugFP)
+        // Serial.println("Failed to open nodeFile");
         return;
     }
     else
     {
-        if (debugFP)
-            Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
+        // if (debugFP)
+        // Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
     }
     nodeFileString.clear();
 
     nodeFileString.read(nodeFile);
-
     nodeFile.close();
+    // Serial.print(nodeFileString);
 
-    Serial.println(nodeFileString);
+    //     int newLines = 0;
+    // Serial.println(nodeFileString.indexOf(","));
+    // Serial.println(nodeFileString.charAt(nodeFileString.indexOf(",")+1));
+    // Serial.println(nodeFileString.indexOf(","));
 
+    if (nodeFileString.charAt(nodeFileString.indexOf(",") + 1) != '\n')
+    {
+        nodeFileString.replace(",", ",\n\r");
+        nodeFileString.replace("{", "{\n\r");
+    }
+
+    // int nodeFileStringLength = nodeFileString.indexOf("}");
+    // if (nodeFileStringLength != -1)
+    // {
+    // //nodeFileString.remove(nodeFileStringLength + 1, -1);
+    // }
+
+    // if (nodeFileString.indexOf(",\n\r") == -1)
+    // {
+    //     nodeFileString.replace(",", ",\n\r");
+    //     nodeFileString.replace("{", "{\n\r");
+    // }
+
+    // nodeFile.close();
+
+    int nodeFileStringLength = nodeFileString.indexOf("}");
+    if (nodeFileStringLength != -1)
+    {
+        if (nodeFileString.charAt(nodeFileStringLength + 1) != '\n')
+        {
+            nodeFileString.replace("}", "}\n\r");
+        }
+        nodeFileString.remove(nodeFileStringLength + 2, -1);
+    }
+
+    // nodeFileString.readUntilToken(nodeFileString, "{");
+    // nodeFileString.removeLast(9);
+
+    Serial.print(nodeFileString);
+    // Serial.print('*');
     nodeFileString.clear();
 }
-
 
 void parseWokwiFileToNodeFile(void)
 {
@@ -410,7 +444,6 @@ void clearNodeFile(void)
 void removeBridgeFromNodeFile(int node1, int node2)
 {
 
-    
     nodeFile = LittleFS.open("nodeFile.txt", "r+");
     if (!nodeFile)
     {
@@ -423,38 +456,136 @@ void removeBridgeFromNodeFile(int node1, int node2)
         if (debugFP)
             Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
     }
-    char nodeAsChar[20];
+
+    nodeFileString.clear();
+
     nodeFileString.read(nodeFile);
     nodeFile.close();
 
+    char nodeAsChar[20];
     itoa(node1, nodeAsChar, 10);
+    char paddedChar[21];
 
-    if (node2 != -1)
+    paddedChar[0] = ' ';
+    for (int i = 1; i < 20; i++)
     {
-        nodeFileString.replace(nodeAsChar, "x");
-        itoa(node2, nodeAsChar, 10);
-        nodeFileString.replace(nodeAsChar, "x");
+        if (nodeAsChar[i - 1] == '\0')
+        {
+            paddedChar[i] = ' ';
+            paddedChar[i + 1] = '\0';
+            break;
+        }
+        paddedChar[i] = nodeAsChar[i - 1];
     }
-    else
+
+    int numberOfLines = 0;
+    // Serial.print(paddedChar);
+    // Serial.println("*");
+
+    char lines[100][20];
+
+    int lineIndex = 0;
+    int charIndex = 0;
+
+    for (int i = 0; i < 100; i++)
     {
-        nodeFileString.replace(nodeAsChar, "x");
+
+        if (nodeFileString[charIndex] == '\0')
+        {
+            numberOfLines = i;
+            break;
+        }
+        lines[i][0] = ' ';
+        for (int j = 1; j < 20; j++)
+        {
+            if (nodeFileString[charIndex] == ',')
+            {
+                lines[i][j] = ' ';
+                lines[i][j + 1] = ',';
+                // lines[i][j + 2] = '\n';
+                // lines[i][j + 3] = '\r';
+                lines[i][j + 2] = '\0';
+
+                charIndex++;
+                break;
+            }
+            else if (nodeFileString[charIndex] == '-')
+            {
+                lines[i][j] = ' ';
+                lines[i][j + 1] = '-';
+                lines[i][j + 2] = ' ';
+                j += 2;
+                charIndex++;
+                // break;
+            }
+            else if (nodeFileString[charIndex] == '\n' || nodeFileString[charIndex] == '\r' || nodeFileString[charIndex] == '{' || nodeFileString[charIndex] == '}')
+            {
+                lines[i][j] = ' ';
+                charIndex++;
+            }
+            else
+            {
+                lines[i][j] = nodeFileString[charIndex];
+                charIndex++;
+            }
+        }
     }
 
-    nodeFileString.replace("x-x,", "");
+    // Serial.println("\n\r********");
 
+    for (int i = 0; i < numberOfLines; i++)
+    {
+        if (lines[i][0] == '\0')
+        {
+            // break;
+        }
+        if (strstr(lines[i], paddedChar) != NULL)
+        {
+           // Serial.println(lines[i]);
+            // delay(1);
 
-    //Serial.println(nodeAsChar);
+            for (int j = 0; j < 18; j++)
+            {
+                lines[i][j] = ' ';
+            }
+            // lines[i][18] = '\n';
+            // lines[i][19] = '\r';
+            lines[i][0] = '\0';
+        }
+    }
 
-
-//Serial.println(nodeFileString);
-    
-        nodeFile = LittleFS.open("nodeFile.txt", "w+");
-nodeFile.write(nodeFileString.c_str());
+    nodeFileString.clear();
+    nodeFileString.concat("{");
+    for (int i = 0; i < numberOfLines; i++)
+    {
+        if (lines[i][0] == '\0')
+        {
+            continue;
+        }
+        // Serial.println(i);
+        // delay(1);
+        for (int j = 0; j < 20; j++)
+        {
+            if (lines[i][j] == '\0')
+            {
+                break;
+            }
+            if (lines[i][j] == ' ')
+            {
+                continue;
+            }
+            nodeFileString.concat(lines[i][j]);
+            // Serial.print(lines[i][j]);
+            // delay(1);
+        }
+    }
+    nodeFileString.concat("}\n\r");
 
     nodeFile.close();
+    nodeFile = LittleFS.open("nodeFile.txt", "w+");
+    nodeFile.write(nodeFileString.c_str());
 
-
-
+    nodeFile.close();
 }
 
 void addBridgeToNodeFile(int node1, int node2)
@@ -472,39 +603,56 @@ void addBridgeToNodeFile(int node1, int node2)
             Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
     }
 
-int nodeFileBraceIndex = 0;
+    int nodeFileBraceIndex = 0;
 
-while (nodeFile.available())
-{
-    char c = nodeFile.read();
-   // Serial.print(c);
- 
-    if (c == '}')
+    while (nodeFile.available())
     {
-        break;
-    } else {
-       nodeFileBraceIndex++;
-    }
+        char c = nodeFile.read();
+        // Serial.print(c);
 
-    if (c == '!')
-    {
-        nodeFile.seek(0);
-        nodeFile.print("{\n\r");
-        nodeFile.print(node1);
-        nodeFile.print("-");
-        nodeFile.print(node2);
-        nodeFile.print(",\n\r}\n\r{\n\r}\n\r");
-        nodeFile.close();
-        return;
+        if (c == '}')
+        {
+            break;
+        }
+        else
+        {
+            nodeFileBraceIndex++;
+        }
+
+        if (c == '!')
+        {
+            nodeFile.seek(0);
+            nodeFile.print("{\n\r");
+            nodeFile.print(node1);
+            nodeFile.print("-");
+            nodeFile.print(node2);
+            nodeFile.print(",\n\r}\n\r");
+
+            // if (1)
+            // {
+            //     Serial.println("wrote to nodeFile.txt");
+
+            //     Serial.println("nodeFile.txt contents:\n\r");
+            //     nodeFile.seek(0);
+
+            //     while (nodeFile.available())
+            //     {
+            //         Serial.write(nodeFile.read());
+            //     }
+            //     Serial.println("\n\r");
+            // }
+            // Serial.print (nodeFile);
+            nodeFile.close();
+            return;
+        }
     }
-}
-//Serial.println(nodeFileBraceIndex);
-nodeFile.seek(nodeFileBraceIndex);
+    // Serial.println(nodeFileBraceIndex);
+    nodeFile.seek(nodeFileBraceIndex);
 
     nodeFile.print(node1);
     nodeFile.print("-");
     nodeFile.print(node2);
-    nodeFile.print(",\n\r}\n\r{\n\r}\n\r");
+    nodeFile.print(",}\n\r");
 
     if (debugFP)
     {
@@ -520,10 +668,8 @@ nodeFile.seek(nodeFileBraceIndex);
         Serial.println("\n\r");
     }
     nodeFile.close();
-
-
-
 }
+
 void writeToNodeFile(void)
 {
 
@@ -546,17 +692,17 @@ void writeToNodeFile(void)
     {
         if (connectionsW[i][0] == "-1" && connectionsW[i][1] != "-1")
         {
-            //lightUpNode(connectionsW[i][0].toInt());
+            // lightUpNode(connectionsW[i][0].toInt());
             continue;
         }
         if (connectionsW[i][1] == "-1" && connectionsW[i][0] != "-1")
         {
-            //lightUpNode(connectionsW[i][1].toInt());
+            // lightUpNode(connectionsW[i][1].toInt());
             continue;
         }
         if (connectionsW[i][0] == connectionsW[i][1])
         {
-            //lightUpNode(connectionsW[i][0].toInt());
+            // lightUpNode(connectionsW[i][0].toInt());
             continue;
         }
 
@@ -565,7 +711,7 @@ void writeToNodeFile(void)
         nodeFile.print(connectionsW[i][1]);
         nodeFile.print(",\n\r");
     }
-    nodeFile.print("}\n\r");
+    nodeFile.print("\n\r}\n\r");
 
     if (debugFP)
     {
@@ -600,6 +746,7 @@ void openNodeFile()
             Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
     }
 
+    nodeFileString.clear();
     nodeFileString.read(nodeFile);
 
     nodeFile.close();
@@ -658,7 +805,7 @@ void splitStringToFields()
     }
     else
     {
-        nodeFileString.substring(specialFunctionsString, 0, nodeFileString.length());
+        nodeFileString.substring(specialFunctionsString, 0, -1); // nodeFileString.length());
     }
     specialFunctionsString.trim();
 
@@ -692,8 +839,7 @@ void replaceSFNamesWithDefinedInts(void)
         Serial.println("replacing special function names with defined ints\n\r");
         Serial.println(specialFunctionsString);
     }
-    
-    
+
     specialFunctionsString.replace("GND", "100");
     specialFunctionsString.replace("GROUND", "100");
     specialFunctionsString.replace("SUPPLY_5V", "105");
@@ -851,17 +997,16 @@ void parseStringToBridges(void)
 
         stringIndex = specialFunctionsString.stoken(buffer, stringIndex, delimiters);
 
-        //Serial.print("buffer = ");
-        //Serial.println(buffer);
+        // Serial.print("buffer = ");
+        // Serial.println(buffer);
 
-       // Serial.print("stringIndex = ");
-        //Serial.println(stringIndex);
-
+        // Serial.print("stringIndex = ");
+        // Serial.println(stringIndex);
 
         buffer.toInt(path[newBridgeIndex].node1);
 
-        //Serial.print("path[newBridgeIndex].node1 = ");
-       // Serial.println(path[newBridgeIndex].node1);
+        // Serial.print("path[newBridgeIndex].node1 = ");
+        // Serial.println(path[newBridgeIndex].node1);
 
         if (debugFP)
         {
@@ -978,6 +1123,8 @@ void debugFlagInit(void)
         EEPROM.write(LEDBRIGHTNESSADDRESS, DEFAULTBRIGHTNESS);
         EEPROM.write(RAILBRIGHTNESSADDRESS, DEFAULTRAILBRIGHTNESS);
         EEPROM.write(SPECIALBRIGHTNESSADDRESS, DEFAULTSPECIALNETBRIGHTNESS);
+        EEPROM.write(PROBESWAPADDRESS, 0);
+
 
         EEPROM.commit();
         delay(5);
@@ -998,6 +1145,8 @@ void debugFlagInit(void)
     LEDbrightnessSpecial = EEPROM.read(SPECIALBRIGHTNESSADDRESS);
 
     debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
+
+    probeSwap = EEPROM.read(PROBESWAPADDRESS);
 
 #else
 
@@ -1079,26 +1228,8 @@ void debugFlagSet(int flag)
 
         break;
     }
+
     case 2:
-    {
-        flagStatus = EEPROM.read(TIME_FILEPARSINGADDRESS);
-
-        if (flagStatus == 0)
-        {
-            EEPROM.write(TIME_FILEPARSINGADDRESS, 1);
-
-            debugFPtime = true;
-        }
-        else
-        {
-            EEPROM.write(TIME_FILEPARSINGADDRESS, 0);
-
-            debugFPtime = false;
-        }
-
-        break;
-    }
-    case 3:
     {
         flagStatus = EEPROM.read(DEBUG_NETMANAGERADDRESS);
 
@@ -1116,25 +1247,8 @@ void debugFlagSet(int flag)
         }
         break;
     }
-    case 4:
-    {
-        flagStatus = EEPROM.read(TIME_NETMANAGERADDRESS);
 
-        if (flagStatus == 0)
-        {
-            EEPROM.write(TIME_NETMANAGERADDRESS, 1);
-
-            debugNMtime = true;
-        }
-        else
-        {
-            EEPROM.write(TIME_NETMANAGERADDRESS, 0);
-
-            debugNMtime = false;
-        }
-        break;
-    }
-    case 5:
+    case 3:
     {
         flagStatus = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSADDRESS);
 
@@ -1153,7 +1267,7 @@ void debugFlagSet(int flag)
 
         break;
     }
-    case 6:
+    case 4:
     {
         flagStatus = EEPROM.read(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS);
 
@@ -1172,7 +1286,7 @@ void debugFlagSet(int flag)
         break;
     }
 
-    case 7:
+    case 5:
     {
         flagStatus = EEPROM.read(DEBUG_LEDSADDRESS);
 
@@ -1191,6 +1305,25 @@ void debugFlagSet(int flag)
         break;
     }
 
+    case 6:
+    {
+        flagStatus = EEPROM.read(PROBESWAPADDRESS);
+
+        if (flagStatus == 0)
+        {
+            EEPROM.write(PROBESWAPADDRESS, 1);
+
+            probeSwap = true;
+        }
+        else
+        {
+            EEPROM.write(PROBESWAPADDRESS, 0);
+
+            probeSwap = false;
+        }
+        break;
+    }
+
     case 0:
     {
         EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
@@ -1200,6 +1333,7 @@ void debugFlagSet(int flag)
         EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSADDRESS, 0);
         EEPROM.write(DEBUG_NETTOCHIPCONNECTIONSALTADDRESS, 0);
         EEPROM.write(DEBUG_LEDSADDRESS, 0);
+        
         debugFP = false;
         debugFPtime = false;
         debugNM = false;
@@ -1207,6 +1341,7 @@ void debugFlagSet(int flag)
         debugNTCC = false;
         debugNTCC2 = false;
         debugLEDs = false;
+        
         break;
     }
 

@@ -117,7 +117,7 @@ void clearLEDs(void);
 void randomColors(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
-void assignNetColors (void);
+void assignNetColors ();
 void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS, int supplySwitchPosition= 1);
 
 void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)

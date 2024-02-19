@@ -131,7 +131,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.4"; //// remember to update this
+const char firmwareVersion[] = "1.3.5"; //// remember to update this
 
 void loop()
 {
@@ -151,14 +151,16 @@ menu:
   Serial.print("\n\n\r\t\t\tMenu\n\n\r");
   Serial.print("\tn = show netlist\n\r");
   Serial.print("\tb = show bridge array\n\r");
+  Serial.print("\ts = show node file\n\r");
+  Serial.print("\tf = load formatted node file\n\r");
   Serial.print("\tw = waveGen\n\r");
   Serial.print("\tv = toggle show current/voltage\n\r");
-  Serial.print("\tf = load formatted nodeFile\n\r");
   Serial.print("\tu = set baud rate for USB-Serial\n\r");
   Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
   Serial.print("\tr = reset Arduino\n\r");
   Serial.print("\tp = probe connections\n\r");
+  Serial.print("\tc = clear nodes with probe\n\r");
   Serial.print("\n\n\r");
 
 dontshowmenu:
@@ -182,7 +184,7 @@ dontshowmenu:
     {
       if (checkProbeButton() == 1)
       {
-        int longShort = longShortPress(1500);
+        int longShort = longShortPress(1000);
       if (longShort == 1)
       {
         input = 'c';
@@ -222,6 +224,17 @@ skipinput:
     Serial.println(firmwareVersion);
     break;
   }
+
+  case 's':
+    Serial.print("\n\n\r");
+    Serial.print("\tNode File\n\r");
+    Serial.print("\n\ryou can paste this into the menu to reload this circuit");
+    Serial.print("\n\r(make sure you grab an extra blank line at the end)\n\r");
+    Serial.print("\n\n\rf ");
+    printNodeFile();
+    Serial.print("\n\n\r");
+    break;
+
   case 'v':
 
     if (showReadings >= 3 || (inaConnected == 0 && showReadings >= 1))
@@ -326,6 +339,7 @@ skipinput:
     savePreformattedNodeFile(serSource);
 
     // Serial.print("savePFNF\n\r");
+    //debugFP = 1;
     openNodeFile();
     getNodesToConnect();
     // Serial.print("openNF\n\r");
@@ -440,22 +454,26 @@ skipinput:
 
     Serial.print("\n\r1. file parsing           =    ");
     Serial.print(debugFP);
-    Serial.print("\n\r2. file parsing time      =    ");
-    Serial.print(debugFPtime);
-
-    Serial.print("\n\r3. net manager            =    ");
+    Serial.print("\n\r2. net manager            =    ");
     Serial.print(debugNM);
-    Serial.print("\n\r4. net manager time       =    ");
-    Serial.print(debugNMtime);
-
-    Serial.print("\n\r5. chip connections       =    ");
+    Serial.print("\n\r3. chip connections       =    ");
     Serial.print(debugNTCC);
-    Serial.print("\n\r6. chip conns alt paths   =    ");
+    Serial.print("\n\r4. chip conns alt paths   =    ");
     Serial.print(debugNTCC2);
-    Serial.print("\n\r7. LEDs                   =    ");
+    Serial.print("\n\r5. LEDs                   =    ");
     Serial.print(debugLEDs);
+    Serial.print("\n\n\r6. swap probe pin         =    ");
+    if (probeSwap == 0)
+    {
+      Serial.print("19");
+    }
+    else
+    {
+      Serial.print("18");
+    }
+    
 
-    Serial.print("\n\n\r");
+    Serial.print("\n\n\n\r");
 
     while (Serial.available() == 0)
       ;
@@ -742,11 +760,23 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
   {
     int rails = showLEDsCore2;
 
-    // showNets();
+
+     
     if (rails == 1)
     {
       lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
     }
+
+
+    if (rails == 2)
+    {
+      
+    } else {
+      showNets();
+    }
+
+
+
     if (rails > 3)
     {
       Serial.print("\n\r");
@@ -844,7 +874,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     logoFlash = 1;
   }
 
-  if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 250)
+  if (logoFlash == 1 && logoFlashTimer != 0 && millis() - logoFlashTimer > 150)
   {
     logoFlash = 0;
     logoFlashTimer = 0;

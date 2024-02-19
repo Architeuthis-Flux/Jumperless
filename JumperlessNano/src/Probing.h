@@ -6,6 +6,10 @@
 
 extern unsigned long probingTimer;
 extern long probeFrequency;
+extern int probePin;
+extern int buttonPin;
+
+extern int probeSwap;
 
 enum measuredState
 {
