@@ -554,7 +554,8 @@ void lastNetConfirm(int forceLastNet)
     assignNetColors();
 
     sendAllPathsCore2 = 1;
-
+Serial.print("\n\r   short press BOOTSEL to restore last netlist\n\r");
+Serial.print("   long press to cancel\n\r");
     delay(250);
     if (BOOTSEL)
     {
@@ -565,12 +566,23 @@ void lastNetConfirm(int forceLastNet)
     {
       if (BOOTSEL)
         bootselPressed = 1;
-      clearLEDs();
-      showLEDsCore2 = 1;
+
+      //clearLEDs();
+      //leds.show();
+      leds.clear();
+      lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
+      leds.show();
+      //showLEDsCore2 = 1;
+      
+
       if (BOOTSEL)
         bootselPressed = 1;
+
       delay(250);
+
+      //showLEDsCore2 = 2;
       sendAllPathsCore2 = 1;
+      //Serial.print("p\n\r");
       if (BOOTSEL)
         bootselPressed = 1;
       // delay(250);
@@ -583,20 +595,23 @@ void lastNetConfirm(int forceLastNet)
         {
 
           sendAllPathsCore2 = 1;
+          showLEDsCore2 = 2;
           delay(250);
-          clearLEDs();
-          showLEDsCore2 = 1;
+         clearLEDs();
+          //leds.clear();
+          showLEDsCore2 = 2;
 
           if (fade <= 0)
           {
             clearAllNTCC();
             clearLEDs();
             startupColors();
-            clearNodeFile();
+            //clearNodeFile();
             sendAllPathsCore2 = 1;
             lastNetConfirmTimer = millis();
             restoredNodeFile = 0;
             // delay(1000);
+            Serial.print("\n\r   cancelled\n\r");
             return;
           }
 
@@ -607,6 +622,8 @@ void lastNetConfirm(int forceLastNet)
         digitalWrite(RESETPIN, LOW);
         restoredNodeFile = 1;
         sendAllPathsCore2 = 1;
+        Serial.print("\n\r   restoring last netlist\n\r");
+        printNodeFile();
         return;
       }
       delay(250);
@@ -762,7 +779,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
 
      
-    if (rails == 1)
+    if (rails == 1  || rails == 2)
     {
       lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
     }

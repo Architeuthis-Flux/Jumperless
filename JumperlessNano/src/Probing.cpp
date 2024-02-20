@@ -44,8 +44,8 @@ int buttonPin = 18;
 
 
 int rainbowList[13][3] = {
-    {55, 55, 55},
-    {10, 45, 30},
+    {40, 50, 80},
+    {88, 33, 70},
     {30, 15, 45},
     {8, 27, 45},
     {45, 18, 19},
@@ -435,7 +435,7 @@ int selectFromLastFound(void)
             {
                 if (i == selected)
                 {
-                    leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[0][0], rainbowList[0][1], rainbowList[0][2]);
+                    leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[1][0], rainbowList[1][1], rainbowList[1][2]);
                 }
                 else
                 {
@@ -450,7 +450,7 @@ int selectFromLastFound(void)
                     else
                     {
 
-                        leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[0][0] / 8, rainbowList[0][1] / 8, rainbowList[0][2] / 8);
+                        leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[1][0] / 8, rainbowList[1][1] / 8, rainbowList[1][2] / 8);
                     }
                 }
             }
