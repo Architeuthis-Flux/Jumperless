@@ -74,15 +74,15 @@ void setup()
 
   USBSer1.begin(115200);
 
-  //setupAdcUsbStuff(); // I took this out because it was causing a crash on
+  // setupAdcUsbStuff(); // I took this out because it was causing a crash on
 
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
   debugFlagInit();
 
 #endif
-//delay(1);
-  //initADC();
+  // delay(1);
+  // initADC();
   delay(1);
   initDAC(); // also sets revisionNumber
   delay(1);
@@ -131,7 +131,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.5"; //// remember to update this
+const char firmwareVersion[] = "1.3.7"; //// remember to update this
 
 void loop()
 {
@@ -179,24 +179,23 @@ dontshowmenu:
       lastNetConfirm(1);
     }
 
-
     if ((millis() % 200) < 5)
     {
       if (checkProbeButton() == 1)
       {
         int longShort = longShortPress(1000);
-      if (longShort == 1)
-      {
-        input = 'c';
-        probingTimer = millis();
-        goto skipinput;
-      } else if ( longShort == 0)
-      {
-        input = 'p';
-         probingTimer = millis();
-        goto skipinput;
-      }
-   
+        if (longShort == 1)
+        {
+          input = 'c';
+          probingTimer = millis();
+          goto skipinput;
+        }
+        else if (longShort == 0)
+        {
+          input = 'p';
+          probingTimer = millis();
+          goto skipinput;
+        }
       }
 
       // pinMode(19, INPUT);
@@ -272,7 +271,7 @@ skipinput:
   }
   case 'c':
   {
-    //removeBridgeFromNodeFile(19, 1);
+    // removeBridgeFromNodeFile(19, 1);
     probeMode(19, 0);
     break;
   }
@@ -339,7 +338,7 @@ skipinput:
     savePreformattedNodeFile(serSource);
 
     // Serial.print("savePFNF\n\r");
-    //debugFP = 1;
+    // debugFP = 1;
     openNodeFile();
     getNodesToConnect();
     // Serial.print("openNF\n\r");
@@ -471,7 +470,6 @@ skipinput:
     {
       Serial.print("18");
     }
-    
 
     Serial.print("\n\n\n\r");
 
@@ -554,8 +552,8 @@ void lastNetConfirm(int forceLastNet)
     assignNetColors();
 
     sendAllPathsCore2 = 1;
-Serial.print("\n\r   short press BOOTSEL to restore last netlist\n\r");
-Serial.print("   long press to cancel\n\r");
+    Serial.print("\n\r   short press BOOTSEL to restore last netlist\n\r");
+    Serial.print("   long press to cancel\n\r");
     delay(250);
     if (BOOTSEL)
     {
@@ -567,22 +565,21 @@ Serial.print("   long press to cancel\n\r");
       if (BOOTSEL)
         bootselPressed = 1;
 
-      //clearLEDs();
-      //leds.show();
+      // clearLEDs();
+      // leds.show();
       leds.clear();
       lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
       leds.show();
-      //showLEDsCore2 = 1;
-      
+      // showLEDsCore2 = 1;
 
       if (BOOTSEL)
         bootselPressed = 1;
 
       delay(250);
 
-      //showLEDsCore2 = 2;
+      // showLEDsCore2 = 2;
       sendAllPathsCore2 = 1;
-      //Serial.print("p\n\r");
+      // Serial.print("p\n\r");
       if (BOOTSEL)
         bootselPressed = 1;
       // delay(250);
@@ -597,8 +594,8 @@ Serial.print("   long press to cancel\n\r");
           sendAllPathsCore2 = 1;
           showLEDsCore2 = 2;
           delay(250);
-         clearLEDs();
-          //leds.clear();
+          clearLEDs();
+          // leds.clear();
           showLEDsCore2 = 2;
 
           if (fade <= 0)
@@ -606,7 +603,7 @@ Serial.print("   long press to cancel\n\r");
             clearAllNTCC();
             clearLEDs();
             startupColors();
-            //clearNodeFile();
+            // clearNodeFile();
             sendAllPathsCore2 = 1;
             lastNetConfirmTimer = millis();
             restoredNodeFile = 0;
@@ -656,14 +653,14 @@ void machineMode(void) // read in commands in machine readable format
     lastTimeNetlistLoaded = millis();
     clearAllNTCC();
 
-    //writeNodeFileFromInputBuffer();
+    // writeNodeFileFromInputBuffer();
 
     digitalWrite(RESETPIN, HIGH);
 
     machineNetlistToNetstruct();
     populateBridgesFromNodes();
     bridgesToPaths();
-    
+
     clearLEDs();
     assignNetColors();
     // showNets();
@@ -777,22 +774,15 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
   {
     int rails = showLEDsCore2;
 
-
-     
-    if (rails == 1  || rails == 2)
+    if (rails == 1 || rails == 2)
     {
       lightUpRail(-1, -1, 1, 28, supplySwitchPosition);
     }
 
-
-    if (rails == 2)
+    if (rails != 2)
     {
-      
-    } else {
       showNets();
     }
-
-
 
     if (rails > 3)
     {

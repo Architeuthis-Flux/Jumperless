@@ -22,7 +22,7 @@ enum measuredState
 };
 
 
-
+int voltageSelect(void);
 int longShortPress(int pressLength = 500); 
 int doubleSingleClick(void);
 int selectFromLastFound(void);

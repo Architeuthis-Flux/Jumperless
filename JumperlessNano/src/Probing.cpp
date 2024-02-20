@@ -15,7 +15,6 @@
 #include "hardware/pwm.h"
 #include <EEPROM.h>
 
-
 int probeSwap = 0;
 int probeHalfPeriodus = 20;
 
@@ -39,9 +38,14 @@ int nodesToConnect[2] = {-1, -1};
 int node1or2 = 0;
 
 int probePin = 19;
-int buttonPin = 18; 
+int buttonPin = 18;
 
+unsigned long probeButtonTimer = 0;
 
+int justSelectedConnectedNodes = 0;
+
+int voltageSelection = SUPPLY_3V3;
+int voltageChosen = 0;
 
 int rainbowList[13][3] = {
     {40, 50, 80},
@@ -66,19 +70,18 @@ int justCleared = 1;
 int probeMode(int pin, int setOrClear)
 {
 
-probeSwap = EEPROM.read(PROBESWAPADDRESS);
+    probeSwap = EEPROM.read(PROBESWAPADDRESS);
 
-
-if (probeSwap == 0)
-{
-    probePin = 19;
-    buttonPin = 18;
-    
-} else
-{
-    probePin = 18;
-    buttonPin = 19;
-}
+    if (probeSwap == 0)
+    {
+        probePin = 19;
+        buttonPin = 18;
+    }
+    else
+    {
+        probePin = 18;
+        buttonPin = 19;
+    }
 restartProbing:
     int lastRow[10];
 
@@ -129,8 +132,6 @@ restartProbing:
         rainbowIndex = 12;
     }
 
-    unsigned long probeButtonTimer = 0;
-
     if (setOrClear == 0)
     {
         probeButtonTimer = millis();
@@ -149,7 +150,7 @@ restartProbing:
 
         row[0] = scanRows(ADC0_PIN);
 
-        if (row[0] == -18 && (millis() - probingTimer > 500) && checkProbeButton() == 1 && millis() - probeButtonTimer > 1000)
+        if (row[0] == -18 && (millis() - probingTimer > 500) && checkProbeButton() == 1 && (millis() - probeButtonTimer) > 1000)
         {
             if (longShortPress(750) == 1)
             {
@@ -166,14 +167,11 @@ restartProbing:
 
             connectedRowsIndex = 0;
 
-            
             node1or2 = 0;
             nodesToConnect[0] = -1;
             nodesToConnect[1] = -1;
-            
-            //showLEDsCore2 = 1;
-           
 
+            // showLEDsCore2 = 1;
 
             break;
         }
@@ -189,18 +187,25 @@ restartProbing:
             if (connectedRowsIndex > 1)
             {
 
-                for (int k = 0; k < 4; k++)
+                for (int k = 0; k < 3; k++) // check a few more times to make sure we got all of them
                 {
+                    connectedRows2Index[k] = 0;
                     for (int i = 0; i < connectedRowsIndex; i++)
                     {
-                        connectedRows2[k][i] = connectedRows[i];
+                        if (connectedRows[i] != SUPPLY_5V && connectedRows[i] != GND && connectedRows[i] != SUPPLY_3V3)
+                        {
+
+                            connectedRows2[k][connectedRows2Index[k]] = connectedRows[i];
+                            connectedRows2Index[k]++;
+                        }
                     }
-                    connectedRows2Index[k] = connectedRowsIndex;
+                    // connectedRows2Index[k] = connectedRowsIndex;
                     connectedRowsIndex = 0;
                     scanRows(ADC0_PIN);
+                    delayMicroseconds(10);
                 }
                 int maxIndex = 0;
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     if (connectedRows2Index[i] > connectedRows2Index[maxIndex])
                     {
@@ -209,25 +214,46 @@ restartProbing:
                 }
                 for (int i = 0; i < connectedRows2Index[maxIndex]; i++)
                 {
-                    connectedRows[i] = connectedRows2[maxIndex][i];
+                    if (connectedRows2[maxIndex][i] != SUPPLY_5V && connectedRows2[maxIndex][i] != GND && connectedRows2[maxIndex][i] != SUPPLY_3V3)
+                    {
+                        connectedRows[i] = connectedRows2[maxIndex][i];
+                    }
                 }
                 connectedRowsIndex = connectedRows2Index[maxIndex];
+            }
 
+            if (connectedRowsIndex > 1) // if GND or 5V, we're not including them in the multiple nodes found
+            {
                 std::sort(connectedRows, connectedRows + connectedRowsIndex);
 
                 nodesToConnect[node1or2] = selectFromLastFound();
 
+                // leds.setPixelColor(nodesToPixelMap[nodesToConnect[node1or2]], rainbowList[0][0], rainbowList[0][1], rainbowList[0][2]);
+
+                connectedRows[0] = nodesToConnect[node1or2];
+
                 node1or2++;
                 probingTimer = millis();
-                probeButtonTimer = millis();
-                 showLEDsCore2 = 2;
-                delay(30);
+                // probeButtonTimer = millis();
+                doubleSelectTimeout = millis();
+                doubleSelectCountdown = 1000;
+                showLEDsCore2 = 2;
+                delay(10);
             }
             else if (connectedRowsIndex == 1)
             {
                 nodesToConnect[node1or2] = connectedRows[0];
                 printNodeOrName(nodesToConnect[0]);
                 Serial.print("\r\t");
+
+                if (nodesToConnect[node1or2] == SUPPLY_3V3 || nodesToConnect[node1or2] == SUPPLY_5V && voltageChosen == 0)
+                {
+                    voltageSelection = voltageSelect();
+                    nodesToConnect[node1or2] = voltageSelection;
+                    voltageChosen = 1;
+                    showLEDsCore2 = 2;
+                }
+
                 if (node1or2 == 1 && setOrClear == 1 && nodesToConnect[0] == GND)
                 {
                     leds.setPixelColor(nodesToPixelMap[nodesToConnect[1]], 0, 45, 5);
@@ -247,13 +273,15 @@ restartProbing:
                 else
                 {
                     // Serial.print("!!!!!");
-                    leds.setPixelColor(nodesToPixelMap[connectedRows[0]], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
+                    leds.setPixelColor(nodesToPixelMap[nodesToConnect[node1or2]], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
                     // leds.show();
                 }
 
                 node1or2++;
                 probingTimer = millis();
                 showLEDsCore2 = 2;
+                doubleSelectTimeout = millis();
+                doubleSelectCountdown = 1500;
                 delay(10);
 
                 // delay(3);
@@ -264,8 +292,13 @@ restartProbing:
 
             if (node1or2 >= 2 || (setOrClear == 0 && node1or2 >= 1))
             {
+                // Serial.print("\n\n\n\r!!!!!!!!!\n\n\n\r");
+                // if (nodesToConnect[0] != nodesToConnect[1])
+                // {
 
-                if (setOrClear == 1)
+                // }
+
+                if (setOrClear == 1 && (nodesToConnect[0] != nodesToConnect[1]) && nodesToConnect[0] != -1 && nodesToConnect[1] != -1)
                 {
                     Serial.print("\r           \r");
                     printNodeOrName(nodesToConnect[0]);
@@ -298,7 +331,7 @@ restartProbing:
 
                     //  sendAllPathsCore2 = 1;
                     // digitalWrite(RESETPIN, LOW);
-                    delay(25);
+                    delay(35);
 
                     // row[1] = -1;
 
@@ -307,7 +340,7 @@ restartProbing:
                     doubleSelectTimeout = millis();
                     doubleSelectCountdown = 2000;
                 }
-                else
+                else if (setOrClear == 0)
                 {
                     Serial.print("\r           \r");
                     printNodeOrName(nodesToConnect[0]);
@@ -315,9 +348,9 @@ restartProbing:
                     removeBridgeFromNodeFile(nodesToConnect[0]);
                     leds.setPixelColor(nodesToPixelMap[nodesToConnect[0]], 0, 0, 0);
 
-                    //leds.setPixelColor(nodesToPixelMap[nodesToConnect[1]], 0, 0, 0);
+                    // leds.setPixelColor(nodesToPixelMap[nodesToConnect[1]], 0, 0, 0);
                     rainbowIndex = 12;
-                    //printNodeFile();
+                    // printNodeFile();
                     clearAllNTCC();
                     openNodeFile();
                     getNodesToConnect();
@@ -345,11 +378,57 @@ restartProbing:
 
             row[1] = row[0];
         }
+        // Serial.print("\n\r");
+        // Serial.print(" ");
+        // Serial.print(row[0]);
 
-        if (node1or2 == 0 && doubleSelectCountdown <= 0)
+        if (justSelectedConnectedNodes == 1)
+        {
+            justSelectedConnectedNodes = 0;
+        }
+
+        if (setOrClear == 1) // makes the LED brighter when you have one node selected
         {
 
+            if (node1or2 == 0)
+            {
+
+                rawOtherColors[1] = 0x4500e8;
+            }
+            else
+            {
+                if (nodesToConnect[0] == GND)
+                {
+                    rawOtherColors[1] = 0x00ff00;
+                }
+                else if (nodesToConnect[0] == SUPPLY_5V)
+                {
+                    rawOtherColors[1] = 0xff0000;
+                }
+                else if (nodesToConnect[1] == SUPPLY_3V3)
+                {
+                    rawOtherColors[1] = 0xff0066;
+                }
+                else
+                {
+                    rawOtherColors[1] = 0x8510f8;
+                }
+                // rawOtherColors[1] = 0x8510f8;
+            }
+            showLEDsCore2 = 2;
+        }
+        else
+        {
+            rawOtherColors[1] = 0x6644A8;
+            showLEDsCore2 = 2;
+        }
+
+        if ((node1or2 == 0 && doubleSelectCountdown <= 0))
+        {
+            // Serial.println("doubleSelectCountdown");
             row[1] = -2;
+            doubleSelectTimeout = millis();
+            doubleSelectCountdown = 1000;
         }
 
         // Serial.println(doubleSelectCountdown);
@@ -375,7 +454,7 @@ restartProbing:
 
     bridgesToPaths();
     // clearLEDs();
-     leds.clear();
+    leds.clear();
     assignNetColors();
     // // Serial.print("bridgesToPaths\n\r");
     // delay(18);
@@ -395,12 +474,101 @@ restartProbing:
 
 unsigned long blinkTimer = 0;
 
+int voltageSelect(void)
+{
+    int selected = SUPPLY_3V3;
+    int selectionConfirmed = 0;
+    int selected2 = 0;
+    int lastSelected = 0;
+    connectedRows[0] = -1;
+    Serial.print("\r                                \r");
+    Serial.print("\n\r");
+    Serial.print("      select voltage\n\n\r");
+    Serial.print("  short press = cycle through voltages\n\r");
+    Serial.print("  long press  = select\n\r");
+
+    Serial.print("\n\r ");
+
+    while (selectionConfirmed == 0)
+    {
+
+        if (lastSelected != selected)
+        {
+            if (selected == SUPPLY_3V3)
+            {
+                Serial.print("\r3.3V   ");
+                clearLEDsExceptRails();
+                leds.setPixelColor(nodesToPixelMap[1], 55, 0, 12);
+                leds.setPixelColor(nodesToPixelMap[2], 55, 0, 12);
+                leds.setPixelColor(nodesToPixelMap[3], 55, 0, 12);
+
+                leds.setPixelColor(nodesToPixelMap[31], 15, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[32], 15, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[33], 15, 0, 0);
+
+                leds.setPixelColor(nodesToPixelMap[34], 15, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[35], 15, 0, 0);
+            }
+            else if (selected == SUPPLY_5V)
+            {
+                Serial.print("\r5V    ");
+                clearLEDsExceptRails();
+                leds.setPixelColor(nodesToPixelMap[1], 15, 0, 6);
+                leds.setPixelColor(nodesToPixelMap[2], 15, 0, 6);
+                leds.setPixelColor(nodesToPixelMap[3], 15, 0, 6);
+
+                leds.setPixelColor(nodesToPixelMap[31], 55, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[32], 55, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[33], 55, 0, 0);
+
+                leds.setPixelColor(nodesToPixelMap[34], 55, 0, 0);
+                leds.setPixelColor(nodesToPixelMap[35], 55, 0, 0);
+            }
+            // showLEDsCore2 = 1;
+
+            leds.show();
+            lastSelected = selected;
+        }
+
+        delay(30);
+
+        int longShort = longShortPress();
+        if (longShort == 1)
+        {
+            selectionConfirmed = 1;
+            voltageSelection = selected;
+            // break;
+        }
+        else if (longShort == 0)
+        {
+            if (selected == SUPPLY_3V3)
+            {
+                selected = SUPPLY_5V;
+            }
+            else
+            {
+                selected = SUPPLY_3V3;
+            }
+        }
+    }
+
+    // Serial.print("\n\r");
+    leds.clear();
+    showNets();
+    showLEDsCore2 = 2;
+
+    return voltageSelection;
+}
+
 int selectFromLastFound(void)
 {
+
+    rawOtherColors[1] = 0x0010ff;
+
     blinkTimer = 0;
     int selected = 0;
     int selectionConfirmed = 0;
-
+    int selected2 = connectedRows[selected];
     Serial.print("\n\r");
     Serial.print("      multiple nodes found\n\n\r");
     Serial.print("  short press = cycle through nodes\n\r");
@@ -416,7 +584,8 @@ int selectFromLastFound(void)
             Serial.print(", ");
         }
     }
-    Serial.print("\n\n\r ");
+    Serial.print("\n\n\r");
+    delay(10);
 
     uint32_t previousColor[connectedRowsIndex];
 
@@ -424,13 +593,15 @@ int selectFromLastFound(void)
     {
         previousColor[i] = leds.getPixelColor(nodesToPixelMap[connectedRows[i]]);
     }
+    int lastSelected = -1;
 
     while (selectionConfirmed == 0)
     {
         probeTimeout = millis();
         // if (millis() - blinkTimer > 100)
         // {
-
+        if (lastSelected != selected && selectionConfirmed == 0)
+        {
             for (int i = 0; i < connectedRowsIndex; i++)
             {
                 if (i == selected)
@@ -445,7 +616,7 @@ int selectFromLastFound(void)
                         int r = (previousColor[i] >> 16) & 0xFF;
                         int g = (previousColor[i] >> 8) & 0xFF;
                         int b = (previousColor[i] >> 0) & 0xFF;
-                        leds.setPixelColor(nodesToPixelMap[connectedRows[i]], (r / 3) + 3, (g / 3) + 3, (b / 3) + 3);
+                        leds.setPixelColor(nodesToPixelMap[connectedRows[i]], (r / 4) + 5, (g / 4) + 5, (b / 4) + 5);
                     }
                     else
                     {
@@ -454,40 +625,43 @@ int selectFromLastFound(void)
                     }
                 }
             }
-            Serial.print("\r");
-            Serial.print("");
+            lastSelected = selected;
+
+            Serial.print(" \r");
+            // Serial.print("");
             printNodeOrName(connectedRows[selected]);
             Serial.print("  ");
-            //leds.show();
-             showLEDsCore2 = 2;
-            blinkTimer = millis();
-      //  }
+        }
+        // leds.show();
+        showLEDsCore2 = 2;
+        blinkTimer = millis();
+        //  }
         delay(30);
         int longShort = longShortPress();
         delay(5);
         if (longShort == 1)
         {
             selectionConfirmed = 1;
-            for (int i = 0; i < connectedRowsIndex; i++)
-            {
-                if (i == selected)
-                // if (0)
-                {
-                    leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
-                }
-                else
-                {
-                    leds.setPixelColor(nodesToPixelMap[connectedRows[i]], 0, 0, 0);
-                }
-            }
-            showLEDsCore2 = 1;
+            // for (int i = 0; i < connectedRowsIndex; i++)
+            // {
+            //     if (i == selected)
+            //     // if (0)
+            //     {
+            //         leds.setPixelColor(nodesToPixelMap[connectedRows[i]], rainbowList[rainbowIndex][0], rainbowList[rainbowIndex][1], rainbowList[rainbowIndex][2]);
+            //     }
+            //     else
+            //     {
+            //         leds.setPixelColor(nodesToPixelMap[connectedRows[i]], 0, 0, 0);
+            //     }
+            // }
+            // showLEDsCore2 = 1;
             // selected = lastFound[node1or2][selected];
             //  clearLastFound();
 
             // delay(500);
-            int selected2 = connectedRows[selected];
-            return selected2;
-            // break;
+            selected2 = connectedRows[selected];
+            // return selected2;
+            break;
         }
         else if (longShort == 0)
         {
@@ -495,26 +669,12 @@ int selectFromLastFound(void)
             selected++;
             blinkTimer = 0;
 
-            // break;
-            //}
-            // delay(5);
-
-            // Serial.print("\n\r");
-            // Serial.print("node1or2: ");
-            // Serial.println(node1or2);
-            // Serial.print("selected: ");
-            // Serial.println(selected);
-            // Serial.print("lastFoundIndex[");
-            // Serial.print(node1or2);
-            // Serial.print("]: ");
-            // Serial.println(connectedRowsIndex);
-            // delay(5);
             if (selected >= connectedRowsIndex)
             {
 
                 selected = 0;
             }
-            //delay(100);
+            // delay(100);
         }
         delay(15);
         //  }
@@ -522,7 +682,35 @@ int selectFromLastFound(void)
 
         // showLEDsCore2 = 1;
     }
-int selected2 = connectedRows[selected];
+    selected2 = connectedRows[selected];
+
+    for (int i = 0; i < connectedRowsIndex; i++)
+    {
+        if (i == selected)
+        {
+            leds.setPixelColor(nodesToPixelMap[connectedRows[selected]], rainbowList[0][0], rainbowList[0][1], rainbowList[0][2]);
+        }
+        else if (previousColor[i] != 0)
+        {
+
+            int r = (previousColor[i] >> 16) & 0xFF;
+            int g = (previousColor[i] >> 8) & 0xFF;
+            int b = (previousColor[i] >> 0) & 0xFF;
+            leds.setPixelColor(nodesToPixelMap[connectedRows[i]], r, g, b);
+        }
+        else
+        {
+
+            leds.setPixelColor(nodesToPixelMap[connectedRows[i]], 0, 0, 0);
+        }
+    }
+
+    // leds.setPixelColor(nodesToPixelMap[selected2], rainbowList[0][0], rainbowList[0][1], rainbowList[0][2]);
+    // leds.show();
+    // showLEDsCore2 = 1;
+    probeButtonTimer = millis();
+    // connectedRowsIndex = 0;
+    justSelectedConnectedNodes = 1;
     return selected2;
 }
 
@@ -658,7 +846,6 @@ int readFloatingOrState(int pin, int rowBeingScanned)
     else
     {
 
-
         if (readingPullup2 == 1 && readingPulldown2 == 0)
         {
 
@@ -666,27 +853,27 @@ int readFloatingOrState(int pin, int rowBeingScanned)
         }
         else if (readingPullup2 == 1 && readingPulldown2 == 1)
         {
-        //              Serial.print(readingPullup);
-        // // Serial.print(readingPullup2);
-        // // Serial.print(readingPullup3);
-        // // //Serial.print(" ");
-        //  Serial.print(readingPulldown);
-        // // Serial.print(readingPulldown2);
-        // // Serial.print(readingPulldown3);
-        //  Serial.print("\n\r");
+            //              Serial.print(readingPullup);
+            // // Serial.print(readingPullup2);
+            // // Serial.print(readingPullup3);
+            // // //Serial.print(" ");
+            //  Serial.print(readingPulldown);
+            // // Serial.print(readingPulldown2);
+            // // Serial.print(readingPulldown3);
+            //  Serial.print("\n\r");
 
             state = high;
         }
         else if (readingPullup2 == 0 && readingPulldown2 == 0)
         {
-        //  Serial.print(readingPullup);
-        // // Serial.print(readingPullup2);
-        // // Serial.print(readingPullup3);
-        // // //Serial.print(" ");
-        //  Serial.print(readingPulldown);
-        // // Serial.print(readingPulldown2);
-        // // Serial.print(readingPulldown3);
-        //  Serial.print("\n\r");
+            //  Serial.print(readingPullup);
+            // // Serial.print(readingPullup2);
+            // // Serial.print(readingPullup3);
+            // // //Serial.print(" ");
+            //  Serial.print(readingPulldown);
+            // // Serial.print(readingPulldown2);
+            // // Serial.print(readingPulldown3);
+            //  Serial.print("\n\r");
             state = low;
         }
         else if (readingPullup == 0 && readingPulldown == 1)
@@ -737,6 +924,7 @@ int scanRows(int pin)
 {
 
     int found = -1;
+    connectedRows[0] = -1;
 
     if (checkProbeButton() == 1)
     {
@@ -751,17 +939,18 @@ int scanRows(int pin)
     // delayMicroseconds(20);
 
     pinMode(probePin, INPUT);
-     delayMicroseconds(400);
+    delayMicroseconds(400);
     int probeRead = readFloatingOrState(probePin, -1);
 
     if (probeRead == high)
     {
-        found = SUPPLY_5V;
+        found = voltageSelection;
         connectedRows[connectedRowsIndex] = found;
         connectedRowsIndex++;
+        found = -1;
         // return connectedRows[connectedRowsIndex];
-        //Serial.print("high");
-        return found;
+        // Serial.print("high");
+        // return found;
     }
 
     else if (probeRead == low)
@@ -769,7 +958,8 @@ int scanRows(int pin)
         found = GND;
         connectedRows[connectedRowsIndex] = found;
         connectedRowsIndex++;
-        return found;
+        // return found;
+        found = -1;
         // return connectedRows[connectedRowsIndex];
         // Serial.print(connectedRows[connectedRowsIndex]);
 

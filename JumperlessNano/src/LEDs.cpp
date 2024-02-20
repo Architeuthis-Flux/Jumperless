@@ -33,7 +33,7 @@ bool debugLEDs = EEPROM.read(DEBUG_LEDSADDRESS);
 bool debugLEDs = 1;
 #endif
 
-uint32_t rawSpecialNetColors[8] = //dim
+uint32_t rawSpecialNetColors[8] = // dim
     {0x000000,
      0x001C04,
      0x1C0702,
@@ -43,14 +43,14 @@ uint32_t rawSpecialNetColors[8] = //dim
      0x232323,
      0x232323};
 
- uint32_t rawOtherColors[8] =
-    {0x020008, // headerglow
-     0x550008, // logo / status
-     0x0055AA, // logoflash / statusflash
-     0x301A02, // +8V
-     0x120932, // -8V
-     0x443434, // UART TX
-     0x324244,  // UART RX  
+uint32_t rawOtherColors[8] =
+    {0x020008,  // headerglow
+     0x550008,  // logo / status
+     0x0055AA,  // logoflash / statusflash
+     0x301A02,  // +8V
+     0x120932,  // -8V
+     0x443434,  // UART TX
+     0x324244,  // UART RX
      0x232323}; // unassigned
 
 rgbColor specialNetColors[8] =
@@ -561,7 +561,7 @@ void assignNetColors(void)
         // if(net[i].nodes[0] == -1){
         //     continue;
         // }
-        
+
         if (net[i].machine == true)
         {
             // Serial.println("number of nets: ");
@@ -573,9 +573,8 @@ void assignNetColors(void)
 
             // netColors[i] = specialNetRgb;
             // continue;
-            //leds.setPixelColor(nodesToPixelMap[i], net[i].rawColor);
+            // leds.setPixelColor(nodesToPixelMap[i], net[i].rawColor);
             netColors[i] = unpackRgb(net[i].rawColor);
-
         }
         else
         {
@@ -701,13 +700,10 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
             if (net[netNumber].nodes[j] <= 0)
             {
                 break;
-            
             }
 
             if (net[netNumber].machine == true)
             {
-
-
 
                 if (net[netNumber].nodes[j] == node || node == -1)
                 {
@@ -716,21 +712,20 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                         if (nodesToPixelMap[net[netNumber].nodes[j]] > 0)
                         {
                             leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], scaleDownBrightness(net[netNumber].rawColor));
-                        
 
-                        if (debugLEDs)
-                        {
-                            Serial.print("net: ");
-                            Serial.print(netNumber);
-                            Serial.print(" node: ");
-                            Serial.print(net[netNumber].nodes[j]);
-                            Serial.print(" mapped to LED:");
-                            Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
+                            if (debugLEDs)
+                            {
+                                Serial.print("net: ");
+                                Serial.print(netNumber);
+                                Serial.print(" node: ");
+                                Serial.print(net[netNumber].nodes[j]);
+                                Serial.print(" mapped to LED:");
+                                Serial.println(nodesToPixelMap[net[netNumber].nodes[j]]);
 
-                            Serial.print("rawColor: ");
-                            Serial.println(net[netNumber].rawColor, HEX);
+                                Serial.print("rawColor: ");
+                                Serial.println(net[netNumber].rawColor, HEX);
+                            }
                         }
-}
                         // leds.setPixelColor(nodesToPixelMap[net[netNumber].nodes[j]], net[netNumber].color.r, net[netNumber].color.g, net[netNumber].color.b);
                     }
                     else
@@ -914,7 +909,6 @@ uint32_t scaleDownBrightness(uint32_t hexColor, int scaleFactor, int maxBrightne
     }
 
     return scaledBrightness;
-
 }
 
 uint32_t scaleUpBrightness(uint32_t hexColor, int scaleFactor, int minBrightness)
@@ -954,9 +948,7 @@ uint32_t scaleUpBrightness(uint32_t hexColor, int scaleFactor, int minBrightness
         scaledBrightness = scaledBrightness | b;
     }
 
-
     return scaledBrightness;
-
 }
 
 struct rgbColor pcbColorCorrect(rgbColor colorToShift)
@@ -1194,10 +1186,8 @@ struct rgbColor shiftHue(struct rgbColor colorToShift, int hueShift, int brightn
 void lightUpNode(int node, uint32_t color)
 {
 
-
-    leds.setPixelColor(nodesToPixelMap[node],color);
+    leds.setPixelColor(nodesToPixelMap[node], color);
     showLEDsCore2 = 1;
-
 }
 
 void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosition)
@@ -1224,13 +1214,11 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
         if (leds.getPixelColor(i) == 0 && leds.getPixelColor(i) != rawOtherColors[0])
         {
             leds.setPixelColor(i, rawOtherColors[0]);
-
         }
-        
     }
 
-    leds.setPixelColor(83, scaleDownBrightness( rawSpecialNetColors[1]));
-    leds.setPixelColor(108,scaleDownBrightness( rawSpecialNetColors[1]));
+    leds.setPixelColor(83, scaleDownBrightness(rawSpecialNetColors[1]));
+    leds.setPixelColor(108, scaleDownBrightness(rawSpecialNetColors[1]));
     leds.setPixelColor(109, scaleDownBrightness(rawSpecialNetColors[2]));
     leds.setPixelColor(96, scaleDownBrightness(rawSpecialNetColors[3]));
     leds.setPixelColor(106, scaleDownBrightness(rawSpecialNetColors[2]));
@@ -1247,7 +1235,7 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
             // rgbColor rgbRail = railColors[j];
             // hsvColor hsvRail = RgbToHsv(rgbRail);
             // hsvRail.v = brightness2;
-             //Serial.println (rawOtherColors[0], HEX);
+            // Serial.println (rawOtherColors[0], HEX);
             // rgbRail = HsvToRgb(hsvRail);
             // Serial.println (hsvRail.h);
             // Serial.println (hsvRail.s);
@@ -1282,7 +1270,7 @@ void showNets(void)
 
     for (int i = 0; i <= numberOfNets; i++)
     {
-        //Serial.print(i);
+        // Serial.print(i);
 
         lightUpNet(i);
     }
@@ -1646,4 +1634,22 @@ void clearLEDs(void)
     //  }
 
     // showLEDsCore2 = 1;
+}
+
+void clearLEDsExceptRails(void)
+{
+    for (int i = 0; i <= 109; i++)
+    {
+        if (i >= 60 && i <= 80)
+        {
+            continue;
+        }
+
+        if (i == 108 || i == 109 || i == 83 || i == 96 || i == 106)
+        {
+            continue;
+        }
+
+        leds.setPixelColor(i, 0);
+    }
 }
