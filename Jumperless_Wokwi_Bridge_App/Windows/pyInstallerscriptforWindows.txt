@@ -1,0 +1,1 @@
+python3 -m PyInstaller --icon="icon.ico" -F -y --console --add-binary ""C:\Users\arabi\OneDrive\Desktop\JumperlessWokwiBridge2\windows\arduino-cli.exe";." JumperlessWokwiBridge.py 

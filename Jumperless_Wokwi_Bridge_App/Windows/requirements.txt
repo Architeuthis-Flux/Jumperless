@@ -1,0 +1,8 @@
+pywin32
+psutil
+urllib3==2.1.0
+beautifulsoup4==4.12.2
+pyserial==3.5
+Requests==2.31.0
+websocket_client==1.6.2
+pyduinocli
