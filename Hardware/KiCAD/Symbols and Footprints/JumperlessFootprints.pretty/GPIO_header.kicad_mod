@@ -1,0 +1,16 @@
+(footprint "GPIO_header" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr through_hole)
+  (fp_text reference "REF**" (at 0 -2.54 unlocked) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp f293f9f6-6ff6-4e77-83d4-90a2d160899c)
+  )
+  (fp_text value "GPIO_header" (at 0 3.81 unlocked) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 4f92000d-c0e8-444c-9ed6-dda9fa2e1a49)
+  )
+  (pad "1" thru_hole roundrect (at -3.81 0) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.35) (tstamp 800ad8c0-2bcc-46da-adf5-952aaf9be63a))
+  (pad "2" thru_hole roundrect (at -1.27 0) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.35) (tstamp 2f5d1968-2cd0-4c56-872a-68d9b75a4870))
+  (pad "3" thru_hole roundrect (at 1.27 0) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.35) (tstamp 8c2a3161-25d6-4592-b98f-1ec362083cc3))
+  (pad "4" thru_hole roundrect (at 3.81 0) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.35) (tstamp 8942bbd7-9459-4a94-b17a-4c3cffbff72e))
+)

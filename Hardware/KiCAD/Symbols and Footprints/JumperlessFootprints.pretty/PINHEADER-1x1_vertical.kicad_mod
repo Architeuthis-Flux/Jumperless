@@ -1,0 +1,13 @@
+(footprint "PINHEADER-1x1_vertical" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr through_hole)
+  (fp_text reference "REF**" (at 0 -3.81 unlocked) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 987fc594-a1c8-43bd-b652-5581b33d2e5e)
+  )
+  (fp_text value "PINHEADER-1x1_vertical" (at 0 3.81 unlocked) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 30a8f6e5-2100-49a5-8936-7a92707b08dd)
+  )
+  (pad "1" thru_hole roundrect (at 0 0) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.35) (tstamp 67cca4c1-9ff8-488e-958c-0a50fac9d47e))
+)

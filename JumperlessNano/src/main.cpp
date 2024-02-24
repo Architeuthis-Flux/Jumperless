@@ -74,8 +74,9 @@ void setup()
 
   USBSer1.begin(115200);
 
-  // setupAdcUsbStuff(); // I took this out because it was causing a crash on
-
+//delay(10);
+  ///// setupAdcUsbStuff(); // I took this out because it was causing a crash on
+//delay(10);
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
   debugFlagInit();
