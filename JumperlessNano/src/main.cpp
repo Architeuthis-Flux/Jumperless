@@ -74,9 +74,7 @@ void setup()
 
   USBSer1.begin(115200);
 
-//delay(10);
-  ///// setupAdcUsbStuff(); // I took this out because it was causing a crash on
-//delay(10);
+
 #ifdef EEPROMSTUFF
   EEPROM.begin(256);
   debugFlagInit();
@@ -101,17 +99,21 @@ void setup()
 
   clearAllNTCC();
 
+    delay(20);
+   setupAdcUsbStuff(); // I took this out because it was causing a crash on
+delay(10);
+
   // lastNetConfirm(0);
 }
 
 void setup1()
 {
+delay(4);
 
-#ifdef PIOSTUFF
   initCH446Q();
-#endif
 
-  // delay (4);
+
+   delay (4);
   initLEDs();
   delay(4);
   startupColors();
@@ -120,6 +122,10 @@ void setup1()
 
   delay(4);
   showLEDsCore2 = 1;
+
+
+
+
 }
 
 char connectFromArduino = '\0';
@@ -132,7 +138,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.7"; //// remember to update this
+const char firmwareVersion[] = "1.3.8"; //// remember to update this
 
 void loop()
 {
@@ -347,6 +353,7 @@ skipinput:
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
+    delay(1);
     // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();

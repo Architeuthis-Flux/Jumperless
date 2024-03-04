@@ -28,81 +28,81 @@ void isrFromPio(void)
   {
   case CHIP_A:
   {
-    digitalWriteFast(CS_A, HIGH);
+    digitalWrite(CS_A, HIGH);
     break;
   }
   case CHIP_B:
   {
-    digitalWriteFast(CS_B, HIGH);
+    digitalWrite(CS_B, HIGH);
     break;
   }
   case CHIP_C:
   {
-    digitalWriteFast(CS_C, HIGH);
+    digitalWrite(CS_C, HIGH);
     break;
   }
   case CHIP_D:
   {
-    digitalWriteFast(CS_D, HIGH);
+    digitalWrite(CS_D, HIGH);
     break;
   }
   case CHIP_E:
   {
-    digitalWriteFast(CS_E, HIGH);
+    digitalWrite(CS_E, HIGH);
     break;
   }
   case CHIP_F:
   {
-    digitalWriteFast(CS_F, HIGH);
+    digitalWrite(CS_F, HIGH);
     break;
   }
   case CHIP_G:
   {
-    digitalWriteFast(CS_G, HIGH);
+    digitalWrite(CS_G, HIGH);
     break;
   }
   case CHIP_H:
   {
-    digitalWriteFast(CS_H, HIGH);
+    digitalWrite(CS_H, HIGH);
     break;
   }
   case CHIP_I:
   {
-    digitalWriteFast(CS_I, HIGH);
+    digitalWrite(CS_I, HIGH);
     break;
   }
   case CHIP_J:
   {
-    digitalWriteFast(CS_J, HIGH);
+    digitalWrite(CS_J, HIGH);
     break;
   }
   case CHIP_K:
   {
-    digitalWriteFast(CS_K, HIGH);
+    digitalWrite(CS_K, HIGH);
     break;
   }
   case CHIP_L:
   {
-    digitalWriteFast(CS_L, HIGH);
+    digitalWrite(CS_L, HIGH);
     break;
   }
   }
 
-  delayMicroseconds(2);
-  digitalWriteFast(CS_A, LOW);
-  digitalWriteFast(CS_B, LOW);
-  digitalWriteFast(CS_C, LOW);
-  digitalWriteFast(CS_D, LOW);
-  digitalWriteFast(CS_E, LOW);
-  digitalWriteFast(CS_F, LOW);
-  digitalWriteFast(CS_G, LOW);
+  delayMicroseconds(6);
+  digitalWrite(CS_A, LOW);
+  digitalWrite(CS_B, LOW);
+  digitalWrite(CS_C, LOW);
+  digitalWrite(CS_D, LOW);
+  digitalWrite(CS_E, LOW);
+  digitalWrite(CS_F, LOW);
+  digitalWrite(CS_G, LOW);
 
-  digitalWriteFast(CS_H, LOW);
-  digitalWriteFast(CS_I, LOW);
-  digitalWriteFast(CS_J, LOW);
-  digitalWriteFast(CS_K, LOW);
-  digitalWriteFast(CS_L, LOW);
-  delayMicroseconds(1);
+  digitalWrite(CS_H, LOW);
+  digitalWrite(CS_I, LOW);
+  digitalWrite(CS_J, LOW);
+  digitalWrite(CS_K, LOW);
+  digitalWrite(CS_L, LOW);
+  delayMicroseconds(4);
   irq_flags = pio0_hw->irq;
   pio_interrupt_clear(pio, PIO0_IRQ_0);
   hw_clear_bits(&pio0_hw->irq, irq_flags);
@@ -128,26 +128,26 @@ void initCH446Q(void)
   uint offset = pio_add_program(pio, &spi_ch446_multi_cs_program);
   // uint offsetCS = pio_add_program(pio, &spi_ch446_cs_handler_program);
 
-  Serial.print("offset: ");
-  Serial.println(offset);
+  // Serial.print("offset: ");
+  // Serial.println(offset);
 
   pio_spi_ch446_multi_cs_init(pio, sm, offset, 8, 16, 0, 1, clk, dat);
   // pio_spi_ch446_cs_handler_init(pio, smCS, offsetCS, 256, 1, 8, 20, 6);
   // pinMode(CS_A, OUTPUT);
   // digitalWrite(CS_A, HIGH);
 
-  pinMode(CS_A, OUTPUT);
-  pinMode(CS_B, OUTPUT);
-  pinMode(CS_C, OUTPUT);
-  pinMode(CS_D, OUTPUT);
-  pinMode(CS_E, OUTPUT);
-  pinMode(CS_F, OUTPUT);
-  pinMode(CS_G, OUTPUT);
-  pinMode(CS_H, OUTPUT);
-  pinMode(CS_I, OUTPUT);
-  pinMode(CS_J, OUTPUT);
-  pinMode(CS_K, OUTPUT);
-  pinMode(CS_L, OUTPUT);
+  pinMode(CS_A, OUTPUT_8MA);
+  pinMode(CS_B, OUTPUT_8MA);
+  pinMode(CS_C, OUTPUT_8MA);
+  pinMode(CS_D, OUTPUT_8MA);
+  pinMode(CS_E, OUTPUT_8MA);
+  pinMode(CS_F, OUTPUT_8MA);
+  pinMode(CS_G, OUTPUT_8MA);
+  pinMode(CS_H, OUTPUT_8MA);
+  pinMode(CS_I, OUTPUT_8MA);
+  pinMode(CS_J, OUTPUT_8MA);
+  pinMode(CS_K, OUTPUT_8MA);
+  pinMode(CS_L, OUTPUT_8MA);
 
   digitalWrite(CS_A, LOW);
   digitalWrite(CS_B, LOW);
@@ -162,10 +162,10 @@ void initCH446Q(void)
   digitalWrite(CS_K, LOW);
   digitalWrite(CS_L, LOW);
 
-  pinMode(RESETPIN, OUTPUT);
+  pinMode(RESETPIN, OUTPUT_12MA);
 
   digitalWrite(RESETPIN, HIGH);
-  delay(2);
+  delay(3);
   digitalWrite(RESETPIN, LOW);
 }
 
@@ -302,11 +302,11 @@ void sendXYraw(int chip, int x, int y, int setOrClear)
 
   chAddress = chAddress << 24;
 
-  delayMicroseconds(20);
+  delayMicroseconds(50);
 
   pio_sm_put(pio, sm, chAddress);
 
-  delayMicroseconds(40);
+  delayMicroseconds(80);
 }
 
 void createXYarray(void)
