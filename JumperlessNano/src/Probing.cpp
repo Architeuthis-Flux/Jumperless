@@ -745,6 +745,7 @@ int checkProbeButton(void)
 {
     int buttonState = 0;
 
+pinMode(buttonPin, INPUT);
     startProbe();
 
     if (readFloatingOrState(buttonPin, 0) == probe)
@@ -756,6 +757,8 @@ int checkProbeButton(void)
         buttonState = 0;
     }
     stopProbe();
+    pinMode(buttonPin, OUTPUT );
+    digitalWrite(buttonPin, LOW);
 
     return buttonState;
 }

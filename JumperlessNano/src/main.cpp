@@ -99,8 +99,8 @@ void setup()
 
   clearAllNTCC();
 
-    delay(20);
-   setupAdcUsbStuff(); // I took this out because it was causing a crash on
+    //delay(20);
+   //setupAdcUsbStuff(); // I took this out because it was causing a crash on
 delay(10);
 
   // lastNetConfirm(0);
@@ -138,7 +138,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.8"; //// remember to update this
+const char firmwareVersion[] = "1.3.9"; //// remember to update this
 
 void loop()
 {

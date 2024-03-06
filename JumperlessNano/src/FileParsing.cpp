@@ -857,7 +857,7 @@ void replaceSFNamesWithDefinedInts(void)
     specialFunctionsString.replace("CURRENT_SENSE_MINUS", "109");
     specialFunctionsString.replace("CURRENT_SENSE_PLUS", "108");
     specialFunctionsString.replace("ISENSE_MINUS", "109");
-    specialFunctionsString.replace("IENSE_PLUS", "108");
+    specialFunctionsString.replace("ISENSE_PLUS", "108");
 
     specialFunctionsString.replace("EMPTY_NET", "127");
 
