@@ -36,7 +36,8 @@ https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/e701d5c8-2349-49
 Use it to probe the pins on an unknown IC (which is what I'm doing in the video above), or for some automated fuzzing, or to help guide you through converting a schematic to a real circuit, or do whatever the hell you want with it. 
 
 
-![IMG_4228](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/4a243d6c-3955-4523-b7f4-9b39831ca136)
+![TxRx00097-Edit](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/439021f0-c350-41a1-9d0f-64dc4f8d6bb0)
+
 
 
 
