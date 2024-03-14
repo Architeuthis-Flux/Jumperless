@@ -15,6 +15,19 @@
 #include "hardware/pwm.h"
 #include <EEPROM.h>
 
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+
+
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+
 int probeSwap = 0;
 int probeHalfPeriodus = 20;
 
@@ -67,8 +80,66 @@ int nextIsSupply = 0;
 int nextIsGnd = 0;
 int justCleared = 1;
 
+char oledBuffer[32] = "                               ";
+
+void drawchar(void) {
+  display.clearDisplay();
+if (isSpace(oledBuffer[7]) == true )
+{
+  display.setTextSize(3);      // Normal 1:1 pixel scale
+    display.setCursor(0, 5);     // Start at top-left corner
+}   
+else if (isSpace(oledBuffer[10]) == true && isSpace(oledBuffer[11]) == true)
+{
+    display.setTextSize(2);      // Normal 1:1 pixel scale
+    display.setCursor(0, 9);     // Start at top-left corner
+}
+else
+{
+    display.setTextSize(1);      // Normal 1:1 pixel scale
+    display.setCursor(0, 0);     // Start at top-left corner
+}
+
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+
+  display.cp437(true);         // Use full 256 char 'Code Page 437' font
+
+  // Not all the characters will fit on the display. This is normal.
+  // Library will draw what it can and the rest will be clipped.
+display.write(oledBuffer);
+
+  display.display();
+
+  for (int i = 0; i < 32; i++)
+  {
+    oledBuffer[i] = ' ';
+  }
+  ///delay(2000);
+}
+
+
+
+
 int probeMode(int pin, int setOrClear)
 {
+
+  display.display();
+  display.clearDisplay();
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+  if (setOrClear == 1)
+  {
+    sprintf(oledBuffer, "connect  ");
+  }
+  else
+  {
+    sprintf(oledBuffer, "clear");
+  }
+
+  drawchar();
+
 
     probeSwap = EEPROM.read(PROBESWAPADDRESS);
 
@@ -121,12 +192,16 @@ restartProbing:
 
     if (setOrClear == 1)
     {
+        sprintf(oledBuffer, "connect  ");
+        drawchar();
         Serial.print("\n\r\t  connect nodes\n\n\n\r");
         rawOtherColors[1] = 0x4500e8;
         rainbowIndex = 0;
     }
     else
     {
+        sprintf(oledBuffer, "clear");
+        drawchar();
         Serial.print("\n\r\t  clear nodes\n\n\n\r");
         rawOtherColors[1] = 0x6644A8;
         rainbowIndex = 12;
@@ -244,6 +319,16 @@ restartProbing:
             {
                 nodesToConnect[node1or2] = connectedRows[0];
                 printNodeOrName(nodesToConnect[0]);
+
+                // for (int o = 0; 0<30; o++)
+                // {
+
+                //     oledBuffer[o] = ' ';
+
+                // }
+
+                //itoa(nodesToConnect[0], oledBuffer, 10);
+                //drawchar();
                 Serial.print("\r\t");
 
                 if (nodesToConnect[node1or2] == SUPPLY_3V3 || nodesToConnect[node1or2] == SUPPLY_5V && voltageChosen == 0)
@@ -288,6 +373,11 @@ restartProbing:
             }
             if (node1or2 == 1)
             {
+                sprintf(oledBuffer, "%s", definesToChar(nodesToConnect[0]));
+                drawchar();
+
+
+
             }
 
             if (node1or2 >= 2 || (setOrClear == 0 && node1or2 >= 1))
@@ -300,12 +390,34 @@ restartProbing:
 
                 if (setOrClear == 1 && (nodesToConnect[0] != nodesToConnect[1]) && nodesToConnect[0] != -1 && nodesToConnect[1] != -1)
                 {
+                   // char oledBuffer2[32];
+                    //int charsPrinted = 0;
                     Serial.print("\r           \r");
+                   // itoa(nodesToConnect[0], oledBuffer, 10);
                     printNodeOrName(nodesToConnect[0]);
                     Serial.print(" - ");
                     printNodeOrName(nodesToConnect[1]);
+                    printNodeOrName(nodesToConnect[1]);
+                    printNodeOrName(nodesToConnect[1]);
                     Serial.print("  \t ");
                     Serial.print("connected\n\r");
+
+                    char node1Name[12];
+                    
+                    //node1Name =  (char)definesToChar(nodesToConnect[0]);
+
+                    strcpy(node1Name, definesToChar(nodesToConnect[0]));
+
+                    char node2Name[12];
+
+                    //node2Name =  (char)definesToChar(nodesToConnect[1]);
+
+                    strcpy(node2Name, definesToChar(nodesToConnect[1]));
+
+                    sprintf(oledBuffer, "%s - %s           ", node1Name, node2Name);
+
+                    drawchar();
+
                     addBridgeToNodeFile(nodesToConnect[0], nodesToConnect[1]);
                     // rainbowIndex++;
                     if (rainbowIndex > 1)
@@ -468,6 +580,9 @@ restartProbing:
     // pinMode(probePin, INPUT);
     delay(300);
     row[1] = -2;
+
+    //sprintf(oledBuffer, "        ");
+    drawchar();
 
     return 1;
 }
@@ -746,7 +861,7 @@ int checkProbeButton(void)
     int buttonState = 0;
 
 pinMode(buttonPin, INPUT);
-    startProbe();
+    startProbe(10000);
 
     if (readFloatingOrState(buttonPin, 0) == probe)
     {

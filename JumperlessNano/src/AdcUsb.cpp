@@ -30,9 +30,9 @@ static void adcCallback() {
   buf[2] = adcReadings[2] = adc.read();
   buf[3] = adcReadings[3] = adc.read();
 
-  if (tud_jumperless_ready()) {
-    tud_jumperless_send_measurements(buf, sizeof(buf));
-  }
+  // if (tud_jumperless_ready()) {
+  //   tud_jumperless_send_measurements(buf, sizeof(buf));
+  // }
 }
 
 
@@ -48,7 +48,7 @@ public:
 };
 
 JumperlessUsbInterface::JumperlessUsbInterface() {
-  this->setStringDescriptor("Jumperless Analog");
+  // this->setStringDescriptor("Jumperless Analog");
 }
 
 uint16_t JumperlessUsbInterface::getInterfaceDescriptor(uint8_t itfnum,
