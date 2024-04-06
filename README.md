@@ -17,6 +17,7 @@ Using a bunch of analog crosspoint switches wired together into one bigger switc
 
 
 
+Try this Wokwi project if something isn't working: https://wokwi.com/projects/389569655762010113
 
 Here's an example of me using this thing to connect some I2C pins from an Arduino to an OLED
 
