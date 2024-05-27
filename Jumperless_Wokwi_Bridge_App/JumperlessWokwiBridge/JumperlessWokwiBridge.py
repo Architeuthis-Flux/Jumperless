@@ -49,6 +49,9 @@ portName = ' '
 
 arduinoPort = 0
 
+noArduinocli = True
+
+
 if (noArduinocli == True):
     
     disableArduinoFlashing = 1
@@ -1326,11 +1329,11 @@ while True:
             lastDiagram = diagram
 
             try:
-                #ser.write('f'.encode())
-                print(f)
+                ser.write('f'.encode())
+                #print(f)
                 time.sleep(0.4)
-                print(p)
-                #ser.write(p.encode())
+                #print(p)
+                ser.write(p.encode())
 
             except:
                 continue

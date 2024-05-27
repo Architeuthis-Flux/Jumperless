@@ -11,7 +11,7 @@
 #include <EEPROM.h>
 #include "MachineCommands.h"
 
-bool debugMM = false;
+bool debugMM = true;
 // char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
 File nodeFileMachineMode;

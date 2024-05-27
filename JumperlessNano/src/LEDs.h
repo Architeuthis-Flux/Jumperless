@@ -6,6 +6,7 @@
 #include "JumperlessDefinesRP2040.h"
 #include "Adafruit_NeoPixel.h"
 #include "NetsToChipConnections.h"
+#include "RotaryEncoder.h"
 
 #define LED_PIN 25 //change this to 0 if you want to run this on a Pico to control the lights on a Jumperlux
 #define LED_COUNT 111
@@ -110,17 +111,24 @@ const int railsToPixelMap[4][5] =  {{70,73,74,77,78},//top positive rail
 const int pixelsToRails[20] = {B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B_RAIL_NEG, B_RAIL_POS, B_RAIL_POS, B_RAIL_NEG, B_RAIL_NEG, B_RAIL_POS,
                                T_RAIL_POS, T_RAIL_NEG, T_RAIL_NEG, T_RAIL_POS, T_RAIL_POS, T_RAIL_NEG, T_RAIL_NEG, T_RAIL_POS, T_RAIL_POS, T_RAIL_NEG};
 
+extern uint32_t savedLEDcolors[NUM_SLOTS][LED_COUNT];
+
 
 extern rgbColor netColors[MAX_NETS];
 struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int brightnessShift = 0, int saturationShift = 0,int specialFunction = -1);
 void initLEDs(void);
 char LEDbrightnessMenu(void);
+
+void refreshSavedColors(void);
+void saveRawColors(int slot = -1);
+void showSavedColors(int slot = -1);
+
 void clearLEDs(void);
 void randomColors(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
 void assignNetColors ();
-void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS, int supplySwitchPosition= 1);
+void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS, int supplySwitchPosition= 0);
 
 void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
 void lightUpNode (int node, uint32_t color);

@@ -4,6 +4,8 @@
 #include "NetsToChipConnections.h"
 #include "MatrixStateRP2040.h"
 #include "FileParsing.h"
+#include "NetManager.h"
+#include "NetsToChipConnections.h"
 
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -463,6 +465,142 @@ char LEDbrightnessMenu(void)
     return input;
 }
 
+uint32_t savedLEDcolors[NUM_SLOTS][LED_COUNT];
+int slotLEDpositions[20] = {
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+};
+int rotaryEncoderPositions[6] = {
+    97, // AREF
+    95, // D13 (button)
+    94, // D12 (encoder A)
+    93, // D11 (encoder GND)
+    92, // D10 (encoder B)
+};
+
+uint32_t slotSelectionColors[12] = {
+    0x084080, // preview
+    0x005555, // active
+    0x102000, // inactive
+    0x000000, // off
+    0x881261, // preview+active
+
+    0x253500, // rotary encoder High
+    0x000060, // rotary encoder Low
+
+    0x550011, // button High
+    0x001C05, // button Low
+
+};
+
+void saveRawColors(int slot)
+{
+    if (slot == -1)
+    {
+        slot = netSlot;
+    }
+
+    for (int i = 0; i < LED_COUNT; i++)
+    {
+        if (i >= slotLEDpositions[0] && i <= slotLEDpositions[NUM_SLOTS - 1])
+        {
+            // savedLEDcolors[slot][i] = slotSelectionColors[1];
+            //  Serial.print(i);
+            //  Serial.print("\t");
+
+            continue;
+        }
+        savedLEDcolors[slot][i] = leds.getPixelColor(i);
+        // Serial.print(savedLEDcolors[slot][i], HEX);
+        // Serial.print("\t");
+        // if (i % 30 == 0)
+        // {
+        //     Serial.println("\n\r");
+        // }
+    }
+    // Serial.println(" ");
+}
+
+void refreshSavedColors(void)
+{
+    for (int i = 0; i < NUM_SLOTS; i++)
+    {
+        clearAllNTCC();
+        openNodeFile(i);
+        getNodesToConnect();
+        bridgesToPaths();
+        clearLEDs();
+        assignNetColors();
+        showNets();
+        lightUpRail();
+        saveRawColors(i);
+    }
+}
+
+void showSavedColors(int slot)
+{
+    if (slot == -1)
+    {
+        slot = netSlot;
+    }
+    // Serial.println(savedLEDcolors[slot][0], HEX);
+
+    // if (savedLEDcolors[slot][110] == 0) // checking a nano header LED because it should always dimly lit
+    if (true)
+    {
+        // for (int i = 0; i < LED_COUNT; i++)
+        // {
+        //     Serial.print(i);
+
+        //      Serial.print(" ");
+        //     Serial.println(savedLEDcolors[slot][i], HEX);
+
+        // }
+        // Serial.print("\rNo saved colors for slot ");
+        // Serial.print(slot);
+        clearAllNTCC();
+        openNodeFile(slot);
+        getNodesToConnect();
+        bridgesToPaths();
+        // clearLEDsExceptRails();
+        // leds.clear();
+
+        assignNetColors();
+        showNets();
+        lightUpRail();
+        // delayMicroseconds(100);
+        // saveRawColors(slot);
+    }
+    if (rotaryEncoderMode == 1)
+    {
+        for (int i = 0; i < LED_COUNT; i++)
+        {
+            leds.setPixelColor(i, savedLEDcolors[slot][i]);
+
+            if (i == slotLEDpositions[netSlot])
+            {
+                leds.setPixelColor(i, slotSelectionColors[1]);
+            }
+            if (i == slotLEDpositions[slot])
+            {
+                leds.setPixelColor(i, slotSelectionColors[0]);
+            }
+            if (slot == netSlot && i == slotLEDpositions[netSlot])
+            {
+                leds.setPixelColor(i, slotSelectionColors[4]);
+            }
+        }
+    }
+    showLEDsCore2 = 1;
+    // leds.show();
+}
+
 void assignNetColors(void)
 {
     // numberOfNets = 60;
@@ -852,7 +990,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
                 }
             }
         }
-        turnOffSkippedNodes();
+        // turnOffSkippedNodes();
         /*                                                            Serial.print("color: ");
                                                             Serial.print(color,HEX);
                                                             Serial.print(" r: ");
@@ -873,7 +1011,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
 
 void turnOffSkippedNodes(void)
 {
-
+    return;
     for (int i = 0; i < numberOfPaths; i++)
     {
 
@@ -1200,22 +1338,100 @@ void lightUpRail(int logo, int rail, int onOff, int brightness2, int switchPosit
     Serial.print("\n\rled brightness: ");
     Serial.print(LEDbrightness);
 */
+    // uint32_t rawOtherColors[8] =
+    //     {0x020008,  // headerglow
+    //      0x550008,  // logo / status
+    //      0x0055AA,  // logoflash / statusflash
+    //      0x301A02,  // +8V
+    //      0x120932,  // -8V
+    //      0x443434,  // UART TX
+    //      0x324244,  // UART RX
+    //      0x232323}; // unassigned
 
     brightness2 = LEDbrightnessRail;
 
-    if (logo == -1 && logoFlash == 0)
+    // if (rotaryEncoderMode == 1 )
+    // {
+
+    //     rawOtherColors[1] = 0x550018;
+    //     rawOtherColors[2] = 0x0045BA;
+    // } else
+    // {
+    //     rawOtherColors[1] = 0x550008;
+    //     rawOtherColors[2] = 0x0055AA;
+    // }
+    if (logo == -1 && logoFlash == 0 || rotaryEncoderMode == 1)
     {
         leds.setPixelColor(110, rawOtherColors[1]);
         // Serial.println(RgbToHsv(unpackRgb(0x550008)).v);
     }
+    else
+    {
+        leds.setPixelColor(110, rawOtherColors[2]);
+    }
 
     for (int i = 80; i <= 109; i++)
     {
-        if (leds.getPixelColor(i) == 0 && leds.getPixelColor(i) != rawOtherColors[0])
+
+        if (leds.getPixelColor(i) == 0)// || (rotaryEncoderMode == 0 && leds.getPixelColor(i) == slotSelectionColors[8]) )
         {
             leds.setPixelColor(i, rawOtherColors[0]);
         }
+        
+
+        if (rotaryEncoderMode == 1)
+        {
+            if (i == slotLEDpositions[netSlot])
+            {
+                // continue;
+                leds.setPixelColor(i, slotSelectionColors[4]);
+            }
+            if (i == rotaryEncoderPositions[0])
+            {
+                leds.setPixelColor(i, slotSelectionColors[8]);
+            }
+            if (i == rotaryEncoderPositions[1])
+            {
+                leds.setPixelColor(i, slotSelectionColors[7 + encoderIsPressed]);
+            }
+            if (i == rotaryEncoderPositions[2])
+            {
+                leds.setPixelColor(i, slotSelectionColors[6 - rotState]);
+            }
+            if (i == rotaryEncoderPositions[3])
+            {
+                leds.setPixelColor(i, slotSelectionColors[8]);
+            }
+            if (i == rotaryEncoderPositions[4])
+            {
+                leds.setPixelColor(i, slotSelectionColors[5 + rotState]);
+            }
+        }
+        
+
     }
+    //     int rotaryEncoderPositions[6]= {
+    //     97, //AREF
+    //     95, //D13 (button)
+    //     94, //D12 (encoder A)
+    //     93, //D11 (encoder GND)
+    //     92, //D10 (encoder B)
+    // }
+
+    // uint32_t slotSelectionColors[10] = {
+    //     0x084080, //preview
+    //     0x005555, //active
+    //     0x102000, //inactive
+    //     0x000000, //off
+    //     0x881261, //preview+active
+
+    //     0x334400, //rotary encoder High
+    //     0x000066, //rotary encoder Low
+
+    //     0x770011, //button High
+    //     0x004423, //button Low
+
+    //   };
 
     leds.setPixelColor(83, scaleDownBrightness(rawSpecialNetColors[1]));
     leds.setPixelColor(108, scaleDownBrightness(rawSpecialNetColors[1]));
@@ -1274,7 +1490,8 @@ void showNets(void)
 
         lightUpNet(i);
     }
-    showLEDsCore2 = 1;
+    // saveRawColors();
+    // showLEDsCore2 = 1;
 }
 
 rgbColor HsvToRgb(hsvColor hsv)
@@ -1382,10 +1599,10 @@ void randomColors(uint32_t color, int wait)
     {
 
         count = random(0, 8);
-        if (i > 80)
-        {
-            count = random(0, 22);
-        }
+        // if (i > 80)
+        // {
+        //     count = random(0, 22);
+        // }
 
         byte colorValR = random(60, 0x3f);
         byte colorValG = random(60, 0x30);
@@ -1419,7 +1636,7 @@ void randomColors(uint32_t color, int wait)
         // color = color | (color >> 1);
 
         leds.setPixelColor(i, color); //  Set pixel's color (in RAM)
-        lightUpRail(-1, -1, 1, LEDbrightnessRail);
+        // lightUpRail(-1, -1, 1, LEDbrightnessRail);
         showLEDsCore2 = 2; //  Update strip to match
                            //  Pause for a moment
     }
@@ -1570,7 +1787,7 @@ void rainbowBounce(int wait)
             leds.setPixelColor(i, rgbPacked);
         }
 
-        showLEDsCore2 = 2;
+        showLEDsCore2 = 3;
         delayMicroseconds((wait * 1000) * ((j / 20.0)));
     }
     for (long j = 40; j >= 0; j -= 1)
@@ -1594,7 +1811,7 @@ void rainbowBounce(int wait)
             leds.setPixelColor(i, rgbPacked);
         }
 
-        showLEDsCore2 = 2;
+        showLEDsCore2 = 3;
         delayMicroseconds((wait * 1000) * ((j / 20.0)));
     }
 }

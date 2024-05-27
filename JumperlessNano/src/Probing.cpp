@@ -14,19 +14,20 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 #include <EEPROM.h>
-
+#include "RotaryEncoder.h"
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define OLED_CONNECTED 0
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
-
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int probeSwap = 0;
 int probeHalfPeriodus = 20;
@@ -60,6 +61,9 @@ int justSelectedConnectedNodes = 0;
 int voltageSelection = SUPPLY_3V3;
 int voltageChosen = 0;
 
+int wasRotaryMode = 0; 
+
+
 int rainbowList[13][3] = {
     {40, 50, 80},
     {88, 33, 70},
@@ -82,65 +86,80 @@ int justCleared = 1;
 
 char oledBuffer[32] = "                               ";
 
-void drawchar(void) {
-  display.clearDisplay();
-if (isSpace(oledBuffer[7]) == true )
+void drawchar(void)
 {
-  display.setTextSize(3);      // Normal 1:1 pixel scale
-    display.setCursor(0, 5);     // Start at top-left corner
-}   
-else if (isSpace(oledBuffer[10]) == true && isSpace(oledBuffer[11]) == true)
-{
-    display.setTextSize(2);      // Normal 1:1 pixel scale
-    display.setCursor(0, 9);     // Start at top-left corner
+
+    if (OLED_CONNECTED == 0)
+    {
+        return;
+    }
+    display.clearDisplay();
+    if (isSpace(oledBuffer[7]) == true)
+    {
+        display.setTextSize(3);  // Normal 1:1 pixel scale
+        display.setCursor(0, 5); // Start at top-left corner
+    }
+    else if (isSpace(oledBuffer[10]) == true && isSpace(oledBuffer[11]) == true)
+    {
+        display.setTextSize(2);  // Normal 1:1 pixel scale
+        display.setCursor(0, 9); // Start at top-left corner
+    }
+    else
+    {
+        display.setTextSize(1);  // Normal 1:1 pixel scale
+        display.setCursor(0, 0); // Start at top-left corner
+    }
+
+    display.setTextColor(SSD1306_WHITE); // Draw white text
+
+    display.cp437(true); // Use full 256 char 'Code Page 437' font
+
+    // Not all the characters will fit on the display. This is normal.
+    // Library will draw what it can and the rest will be clipped.
+    display.write(oledBuffer);
+
+    display.display();
+
+    for (int i = 0; i < 32; i++)
+    {
+        oledBuffer[i] = ' ';
+    }
+    /// delay(2000);
 }
-else
-{
-    display.setTextSize(1);      // Normal 1:1 pixel scale
-    display.setCursor(0, 0);     // Start at top-left corner
-}
-
-  display.setTextColor(SSD1306_WHITE); // Draw white text
-
-  display.cp437(true);         // Use full 256 char 'Code Page 437' font
-
-  // Not all the characters will fit on the display. This is normal.
-  // Library will draw what it can and the rest will be clipped.
-display.write(oledBuffer);
-
-  display.display();
-
-  for (int i = 0; i < 32; i++)
-  {
-    oledBuffer[i] = ' ';
-  }
-  ///delay(2000);
-}
-
-
-
 
 int probeMode(int pin, int setOrClear)
 {
+    // wasRotaryMode = rotaryEncoderMode;
+    // rotaryEncoderMode = 0;
+    if (OLED_CONNECTED == 1)
+    {
 
-  display.display();
-  display.clearDisplay();
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-  if (setOrClear == 1)
-  {
-    sprintf(oledBuffer, "connect  ");
-  }
-  else
-  {
-    sprintf(oledBuffer, "clear");
-  }
+        Serial.print("\n\r\t  Probing mode\n\n\r");
 
-  drawchar();
+        display.display();
+        display.clearDisplay();
+        if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+        {
+            //  Serial.println("SSD1306 allocation failed");
+            // for(;;); // Don't proceed, loop forever
+        }
+        else
+        {
+            // Serial.println("SSD1306 allocation success");
+        }
+        if (setOrClear == 1)
+        {
+            sprintf(oledBuffer, "connect  ");
+        }
+        else
+        {
+            sprintf(oledBuffer, "clear");
+        }
 
+        drawchar();
+    }
 
+    Serial.print("\n\r\t  Probing mode\n\n\r");
     probeSwap = EEPROM.read(PROBESWAPADDRESS);
 
     if (probeSwap == 0)
@@ -154,6 +173,7 @@ int probeMode(int pin, int setOrClear)
         buttonPin = 19;
     }
 restartProbing:
+probeActive = 1;
     int lastRow[10];
 
     int pokedNumber = 0;
@@ -162,18 +182,19 @@ restartProbing:
 
     if (numberOfNets == 0)
     {
-        clearNodeFile();
+       // clearNodeFile(netSlot);
     }
     clearAllNTCC();
-    openNodeFile();
+    openNodeFile(netSlot);
     getNodesToConnect();
 
     bridgesToPaths();
-    // clearLEDs();
+     clearLEDs();
     assignNetColors();
-    delay(18);
+    showNets();
+    //delay(18);
     showLEDsCore2 = 1;
-    delay(28);
+    //delay(28);
     int probedNodes[40][2];
     int probedNodesIndex = 0;
 
@@ -327,8 +348,8 @@ restartProbing:
 
                 // }
 
-                //itoa(nodesToConnect[0], oledBuffer, 10);
-                //drawchar();
+                // itoa(nodesToConnect[0], oledBuffer, 10);
+                // drawchar();
                 Serial.print("\r\t");
 
                 if (nodesToConnect[node1or2] == SUPPLY_3V3 || nodesToConnect[node1or2] == SUPPLY_5V && voltageChosen == 0)
@@ -375,9 +396,6 @@ restartProbing:
             {
                 sprintf(oledBuffer, "%s", definesToChar(nodesToConnect[0]));
                 drawchar();
-
-
-
             }
 
             if (node1or2 >= 2 || (setOrClear == 0 && node1or2 >= 1))
@@ -390,27 +408,26 @@ restartProbing:
 
                 if (setOrClear == 1 && (nodesToConnect[0] != nodesToConnect[1]) && nodesToConnect[0] != -1 && nodesToConnect[1] != -1)
                 {
-                   // char oledBuffer2[32];
-                    //int charsPrinted = 0;
+                    // char oledBuffer2[32];
+                    // int charsPrinted = 0;
                     Serial.print("\r           \r");
-                   // itoa(nodesToConnect[0], oledBuffer, 10);
+                    // itoa(nodesToConnect[0], oledBuffer, 10);
                     printNodeOrName(nodesToConnect[0]);
                     Serial.print(" - ");
                     printNodeOrName(nodesToConnect[1]);
-                    printNodeOrName(nodesToConnect[1]);
-                    printNodeOrName(nodesToConnect[1]);
-                    Serial.print("  \t ");
+
+                    Serial.print("   \t ");
                     Serial.print("connected\n\r");
 
                     char node1Name[12];
-                    
-                    //node1Name =  (char)definesToChar(nodesToConnect[0]);
+
+                    // node1Name =  (char)definesToChar(nodesToConnect[0]);
 
                     strcpy(node1Name, definesToChar(nodesToConnect[0]));
 
                     char node2Name[12];
 
-                    //node2Name =  (char)definesToChar(nodesToConnect[1]);
+                    // node2Name =  (char)definesToChar(nodesToConnect[1]);
 
                     strcpy(node2Name, definesToChar(nodesToConnect[1]));
 
@@ -418,21 +435,22 @@ restartProbing:
 
                     drawchar();
 
-                    addBridgeToNodeFile(nodesToConnect[0], nodesToConnect[1]);
+                    addBridgeToNodeFile(nodesToConnect[0], nodesToConnect[1], netSlot);
                     // rainbowIndex++;
                     if (rainbowIndex > 1)
                     {
                         rainbowIndex = 0;
                     }
+                    showSavedColors(netSlot);
 
-                    clearAllNTCC();
-                    openNodeFile();
-                    getNodesToConnect();
+                    // clearAllNTCC();
+                    // openNodeFile(netSlot);
+                    // getNodesToConnect();
 
-                    bridgesToPaths();
-                    // clearLEDs();
-                    leds.clear();
-                    assignNetColors();
+                    // bridgesToPaths();
+                    // // clearLEDs();
+                    // leds.clear();
+                    // assignNetColors();
                     // Serial.print("bridgesToPaths\n\r");
                     // delay(18);
                     // showNets();
@@ -457,24 +475,25 @@ restartProbing:
                     Serial.print("\r           \r");
                     printNodeOrName(nodesToConnect[0]);
                     Serial.print("\t cleared\n\r");
-                    removeBridgeFromNodeFile(nodesToConnect[0]);
+                    removeBridgeFromNodeFile(nodesToConnect[0], -1, netSlot);
                     leds.setPixelColor(nodesToPixelMap[nodesToConnect[0]], 0, 0, 0);
 
                     // leds.setPixelColor(nodesToPixelMap[nodesToConnect[1]], 0, 0, 0);
                     rainbowIndex = 12;
                     // printNodeFile();
-                    clearAllNTCC();
-                    openNodeFile();
-                    getNodesToConnect();
+                    showSavedColors(netSlot);
+                    // clearAllNTCC();
+                    // openNodeFile(netSlot);
+                    // getNodesToConnect();
 
-                    bridgesToPaths();
-                    // clearLEDs();
-                    leds.clear();
-                    assignNetColors();
-                    // Serial.print("bridgesToPaths\n\r");
-                    // delay(18);
-                    // showNets();
-                    showLEDsCore2 = 1;
+                    // bridgesToPaths();
+                    // // clearLEDs();
+                    // leds.clear();
+                    // assignNetColors();
+                    // // Serial.print("bridgesToPaths\n\r");
+                    // // delay(18);
+                    // // showNets();
+                    // showLEDsCore2 = 1;
                     // sendAllPathsCore2 = 1;
                     // logoFlash = 1;
                     delay(25);
@@ -561,7 +580,7 @@ restartProbing:
     }
     digitalWrite(RESETPIN, LOW);
     clearAllNTCC();
-    openNodeFile();
+    openNodeFile(netSlot);
     getNodesToConnect();
 
     bridgesToPaths();
@@ -570,8 +589,8 @@ restartProbing:
     assignNetColors();
     // // Serial.print("bridgesToPaths\n\r");
     // delay(18);
-    // // showNets();
-    // showLEDsCore2 = 1;
+     showNets();
+     showLEDsCore2 = 1;
     rawOtherColors[1] = 0x550004;
     showLEDsCore2 = 1;
 
@@ -581,9 +600,10 @@ restartProbing:
     delay(300);
     row[1] = -2;
 
-    //sprintf(oledBuffer, "        ");
+    // sprintf(oledBuffer, "        ");
     drawchar();
 
+   // rotaryEncoderMode = wasRotaryMode;
     return 1;
 }
 
@@ -860,7 +880,7 @@ int checkProbeButton(void)
 {
     int buttonState = 0;
 
-pinMode(buttonPin, INPUT);
+    pinMode(buttonPin, INPUT);
     startProbe(10000);
 
     if (readFloatingOrState(buttonPin, 0) == probe)
@@ -872,7 +892,7 @@ pinMode(buttonPin, INPUT);
         buttonState = 0;
     }
     stopProbe();
-    pinMode(buttonPin, OUTPUT );
+    pinMode(buttonPin, OUTPUT);
     digitalWrite(buttonPin, LOW);
 
     return buttonState;
