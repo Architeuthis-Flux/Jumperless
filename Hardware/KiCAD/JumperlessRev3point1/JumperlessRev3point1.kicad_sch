@@ -4,6 +4,14 @@
 	(generator_version "8.0")
 	(uuid "8ec97ee2-81b7-42dd-ac8f-66899dc25929")
 	(paper "A1")
+	(title_block
+		(title "Jumperless Rev 3.1")
+		(date "2023-11-11")
+		(rev "3.1")
+		(company "Architeuthis Flux")
+		(comment 1 "Kevin Santo Cappuccio")
+		(comment 2 "KevinC@ppucc.io")
+	)
 	(lib_symbols
 		(symbol "+9V_1"
 			(power)

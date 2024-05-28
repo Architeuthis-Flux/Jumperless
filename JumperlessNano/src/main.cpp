@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 
+/*
+Kevin Santo Cappuccio
+Architeuthis Flux
+
+KevinC@ppucc.io
+
+5/28/2024
+
+*/
+
 #include <Arduino.h>
 
 #define USE_TINYUSB 1
