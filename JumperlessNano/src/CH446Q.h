@@ -14,6 +14,7 @@ extern int lightUpNetCore2;
 
 void initCH446Q(void);
 void sendXYraw(int chip, int x, int y, int setorclear);
+int clearAllConnectionsOnChip(int chip, int clearOrRestore);//returns number of connections cleared
 
 void sendAllPaths(void); // should we sort them by chip? for now, no
 void resetArduino (void);

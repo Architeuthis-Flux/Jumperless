@@ -1,0 +1,9 @@
+python -m PyInstaller \
+--icon="/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/jumperlesswokwibridge/icon.icns" \
+-y \
+--console \
+--windowed \
+--target-arch arm64 \
+--path "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/JumperlessWokwiBridge/.venv/lib/python3.12/site-packages" \
+--add-binary "arduino-cli:." \
+JumperlessWokwiBridge.py 

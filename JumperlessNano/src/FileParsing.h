@@ -19,7 +19,7 @@ extern bool debugMM;
 
 //extern File nodeFile;  
 void createSlots(int slot = -1, int addRotaryConnections = 0);
-void inputNodeFileList(void);
+void inputNodeFileList(int addRotaryConnections = 0);
 //this just opens the file, takes out all the bullshit, and then populates the newBridge array
 void parseWokwiFileToNodeFile();
 void changeWokwiDefinesToJumperless ();

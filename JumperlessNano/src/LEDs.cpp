@@ -564,6 +564,7 @@ void showSavedColors(int slot)
         // }
         // Serial.print("\rNo saved colors for slot ");
         // Serial.print(slot);
+        ///pauseCore2 = 1;
         clearAllNTCC();
         openNodeFile(slot);
         getNodesToConnect();
@@ -572,8 +573,9 @@ void showSavedColors(int slot)
         // leds.clear();
 
         assignNetColors();
+        //pauseCore2 = 0;
         showNets();
-        lightUpRail();
+        //lightUpRail();
         // delayMicroseconds(100);
         // saveRawColors(slot);
     }

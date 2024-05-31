@@ -43,6 +43,8 @@
     extern volatile uint8_t LEDbrightness;
     extern volatile uint8_t LEDbrightnessSpecial;
 
+    extern volatile uint8_t pauseCore2;
+
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
 

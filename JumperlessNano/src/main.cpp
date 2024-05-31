@@ -120,9 +120,9 @@ void setup()
   createSlots(-1, rotaryEncoderMode);
   clearAllNTCC();
 
-    // if (rotaryEncoderMode == 1)
+  // if (rotaryEncoderMode == 1)
   // {
-  //rotEncInit = 1;
+  // rotEncInit = 1;
   initRotaryEncoder();
   //}
 
@@ -146,8 +146,6 @@ void setup1()
 
   delay(4);
 
-
-
   showLEDsCore2 = 1;
 }
 
@@ -164,7 +162,9 @@ int restoredNodeFile = 0;
 const char firmwareVersion[] = "1.3.13"; //// remember to update this
 
 int firstLoop = 1;
-volatile int probeActive = 0;
+volatile int probeActive = 1;
+
+int showExtraMenu = 0;
 
 void loop()
 {
@@ -182,20 +182,34 @@ menu:
   // //   }
   // Serial.print("Updated!\n\r");
 
-  Serial.print("\n\n\r\t\t\tMenu\n\n\r");
+  Serial.print("\n\n\r\t\tMenu\n\r");
+  // Serial.print("Slot ");
+  // Serial.print(netSlot);
+  Serial.print("\n\r");
+  Serial.print("\tm = show this menu\n\r");
   Serial.print("\tn = show netlist\n\r");
+  Serial.print("\ts = show node files by slot\n\r");
+  Serial.print("\to = load node files by slot\n\r");
+  Serial.print("\tf = load node file to current slot\n\r");
+  Serial.print("\tr = rotary encoder mode -");
+  rotaryEncoderMode == 1 ? Serial.print(" ON (z/x to cycle)\n\r") : Serial.print(" off\n\r");
+  Serial.print("\t\b\bz/x = cycle slots - current slot ");
+  Serial.print(netSlot);
+  Serial.print("\n\r");
+  Serial.print("\te = show extra menu options\n\r");
+
+    if (showExtraMenu == 1)
+  {
   Serial.print("\tb = show bridge array\n\r");
-  Serial.print("\ts = show node file\n\r");
-  Serial.print("\tf = load formatted node file\n\r");
+  Serial.print("\tp = probe connections\n\r");
   Serial.print("\tw = waveGen\n\r");
   Serial.print("\tv = toggle show current/voltage\n\r");
   Serial.print("\tu = set baud rate for USB-Serial\n\r");
   Serial.print("\tl = LED brightness / test\n\r");
   Serial.print("\td = toggle debug flags\n\r");
-  Serial.print("\tr = rotary encoder mode -");
-  rotaryEncoderMode == 1 ? Serial.print(" ON (z/x to cycle)\n\r") : Serial.print(" off\n\r");
-  Serial.print("\tp = probe connections\n\r");
-  Serial.print("\tc = clear nodes with probe\n\r");
+
+  }
+  //Serial.print("\tc = clear nodes with probe\n\r");
   Serial.print("\n\n\r");
 
   if (firstLoop == 1 && rotaryEncoderMode == 1)
@@ -204,6 +218,7 @@ menu:
     Serial.print("Press the button to select\n\r");
     Serial.print("\n\n\r");
     firstLoop = 0;
+    probeActive = 0;
 
     goto loadfile;
   }
@@ -266,7 +281,12 @@ dontshowmenu:
   else
   {
     input = Serial.read();
-    Serial.print("\n\r");
+   //Serial.print("\n\r");
+    if (input == '}' || input == ' ' || input == '\n' || input == '\r')
+    {
+      goto dontshowmenu;
+    }
+    //Serial.write(input);
   }
 
 // Serial.print(input);
@@ -277,6 +297,52 @@ skipinput:
   {
     Serial.print("Jumperless firmware version: ");
     Serial.println(firmwareVersion);
+    break;
+  }
+  case '$':
+  {
+    //return current slot number
+    Serial.println(netSlot);
+    break;
+  }
+  case '_'://hold arduino in reset
+  {
+    pinMode(16, OUTPUT);
+    pinMode(17, INPUT);
+    clearAllConnectionsOnChip(CHIP_I, 0);
+
+    sendXYraw(CHIP_I,11,0,1);
+    sendXYraw(CHIP_I,15,0,1);
+
+    sendXYraw(CHIP_I,11,1,1);//double up connections
+    sendXYraw(CHIP_I,15,1,1);
+
+goto dontshowmenu;
+  }
+  case '-':
+  {
+    clearAllConnectionsOnChip(CHIP_I, 1);
+
+    sendXYraw(CHIP_I,11,0,0);
+    sendXYraw(CHIP_I,15,0,0);
+
+    sendXYraw(CHIP_I,11,1,0);//double up connections
+    sendXYraw(CHIP_I,15,1,0);
+
+    sendAllPathsCore2 = 1;
+
+    break;
+  }
+  case 'e':
+  {
+    if (showExtraMenu == 0)
+    {
+      showExtraMenu = 1;
+    }
+    else
+    {
+      showExtraMenu = 0;
+    }
     break;
   }
 
@@ -290,12 +356,18 @@ skipinput:
       // break;
     }
     Serial.print("\n\n\r");
-    Serial.print("\tSlot File ");
-    Serial.print(fileNo - '0');
+    if (fileNo == -1)
+    {
+      Serial.print("\tSlot Files");
+    }
+    else
+    {
+      Serial.print("\tSlot File ");
+      Serial.print(fileNo - '0');
+    }
     Serial.print("\n\n\r");
-    Serial.print("\tNode File\n\r");
-    Serial.print("\n\ryou can paste this into the menu to reload this circuit");
-    Serial.print("\n\r(make sure you grab an extra blank line at the end)\n\r");
+    Serial.print("\n\ryou can paste this text reload this circuit (enter 'o' first)");
+    Serial.print("\n\r(or even just a single slot)\n\n\n\r");
     if (fileNo == -1)
     {
       for (int i = 0; i < NUM_SLOTS; i++)
@@ -313,7 +385,7 @@ skipinput:
 
         Serial.print("\n\rf ");
         printNodeFile(i);
-        Serial.print("\n\r");
+        Serial.print("\n\n\n\r");
       }
     }
     else
@@ -418,36 +490,51 @@ skipinput:
     }
   case 'o':
   {
-    inputNodeFileList();
+    probeActive = 1;
+    inputNodeFileList(rotaryEncoderMode);
+    showSavedColors(netSlot);
+    //input = ' ';
+    showLEDsCore2 = 1;
+    probeActive = 0;
+    goto dontshowmenu;
     break;
   }
 
   case 'x':
-    //{
-    netSlot++;
-    if (netSlot >= NUM_SLOTS)
+    {
+    
+    if (netSlot == NUM_SLOTS)
     {
       netSlot = 0;
+    } else {
+      netSlot ++;
     }
+
     Serial.print("\r                                         \r");
-    Serial.print("Slot: ");
+    Serial.print("Slot ");
     Serial.print(netSlot);
+    slotPreview = netSlot;
     goto loadfile;
+    }
   case 'z':
-    //{
-    netSlot--;
-    if (netSlot < 0)
+    {
+    
+    if (netSlot == 0)
     {
       netSlot = NUM_SLOTS - 1;
+    } else{
+      netSlot--;
     }
     Serial.print("\r                                         \r");
-    Serial.print("Slot: ");
+    Serial.print("Slot ");
     Serial.print(netSlot);
+    slotPreview = netSlot;
     goto loadfile;
-
+    }
   case 'y':
   {
   loadfile:
+    probeActive = 1;
     clearAllNTCC();
     openNodeFile(netSlot);
     getNodesToConnect();
@@ -459,17 +546,22 @@ skipinput:
     // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
-    //saveRawColors(netSlot);
+    // saveRawColors(netSlot);
     showSavedColors(netSlot);
     sendAllPathsCore2 = 1;
     slotChanged = 0;
     input = ' ';
     // break;
-
-    goto dontshowmenu;
+    // if (rotaryEncoderMode == 1)
+    // {
+    //   goto dontshowmenu;
+    // }
+    probeActive = 0;
+    break;
   }
   case 'f':
 
+    probeActive = 1;
     readInNodesArduino = 1;
     clearAllNTCC();
 
@@ -486,11 +578,6 @@ skipinput:
     {
       serSource = 0;
     }
-    // if (rotaryEncoderMode == 1)
-    // {
-    //   createSlots(netSlot);
-    // }
-
     savePreformattedNodeFile(serSource, netSlot, rotaryEncoderMode);
 
     // Serial.print("savePFNF\n\r");
@@ -506,8 +593,9 @@ skipinput:
     // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
-    saveRawColors(netSlot);
+    // saveRawColors(netSlot);
     sendAllPathsCore2 = 1;
+    showLEDsCore2 = 1;
 
     if (debugNMtime)
     {
@@ -517,6 +605,8 @@ skipinput:
       Serial.print("ms");
     }
     input = ' ';
+
+    probeActive = 0;
     if (connectFromArduino != '\0')
     {
       connectFromArduino = '\0';
@@ -524,8 +614,10 @@ skipinput:
       //  delay(2000);
       input = ' ';
       readInNodesArduino = 0;
+
       goto dontshowmenu;
     }
+
     connectFromArduino = '\0';
     readInNodesArduino = 0;
     break;
@@ -585,8 +677,13 @@ skipinput:
       // unInitRotaryEncoder();
 
       rotaryEncoderMode = 0;
-      //createSlots(-1, rotaryEncoderMode);
-      // showSavedColors(netSlot);
+      // createSlots(-1, rotaryEncoderMode);
+      //  showSavedColors(netSlot);
+      // assignNetColors();
+
+      // showNets();
+      lightUpRail();
+
       showLEDsCore2 = 1;
       debugFlagSet(10); // encoderModeOff
       goto menu;
@@ -978,11 +1075,19 @@ unsigned long logoFlashTimer = 0;
 
 int arduinoReset = 0;
 unsigned long lastTimeReset = 0;
+volatile uint8_t pauseCore2 = 0;
 
 void loop1() // core 2 handles the LEDs and the CH446Q8
 {
 
   // while (1) rainbowBounce(50); //I uncomment this to test the LEDs on a fresh board
+
+  while(pauseCore2 == 1)
+  {
+   
+  }
+
+
   if (showLEDsCore2 >= 1)
   {
     int rails = showLEDsCore2;
@@ -1025,8 +1130,9 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
 
   if (arduinoReset == 0 && USBSer1.peek() == 0x30) // 0x30 is the first thing AVRDUDE sends
   {
+    //Serial.print("resetting arduino\n\r");
 
-    resetArduino();
+    //resetArduino();
     arduinoReset = 1;
     lastTimeReset = millis();
   }
@@ -1046,12 +1152,14 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     {
 
       char ch = USBSer1.read();
+      //Serial.write(ch);
       Serial1.write(ch);
     }
 
     if (Serial1.available())
     {
       char ch = Serial1.read();
+      //Serial.write(ch);
       USBSer1.write(ch);
     }
 

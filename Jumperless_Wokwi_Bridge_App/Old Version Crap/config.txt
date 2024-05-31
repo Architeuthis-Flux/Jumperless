@@ -1,0 +1,10 @@
+https://wokwi.com/projects/384867917935745025
+1
+False
+1.3.13
+1
+Jumperless firmware version: 1.3.13
+['1', '3', '13']
+Jumperless firmware version: 1.3.13
+['https://wokwi.com/projects/386286708886919169', '!', '!', '!', '!', '!', '!', '!', '!']
+['slot 0\thttps://wokwi.com/projects/386286708886919169\t// c\n', 'slot 1\n', 'slot 2\n', 'slot 3\n', 'slot 4\n', 'slot 5\n', 'slot 6\n', 'slot 7\n']

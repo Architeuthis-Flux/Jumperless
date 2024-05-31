@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 
+import pathlib
 
 import requests
 import json
@@ -17,8 +18,10 @@ import psutil
 import shutil
 from urllib.request import urlretrieve
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
-
+os.system("")
 #import platform
 
 #from watchedserial import WatchedReaderThread
@@ -37,8 +40,9 @@ serialconnected = 0
 
 portSelected = 0
 
-stringified = 0
-lastDiagram = 1
+stringified = ' '
+lastDiagram = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+diagram = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
 
 menuEntered = 0
@@ -49,21 +53,62 @@ portName = ' '
 
 arduinoPort = 0
 
+noWokwiStuff = False
+
+disableArduinoFlashing = 1
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+#Path.mkdir(Path.cwd() / "JumperlessFiles/", exist_ok=True)
+
+
+slotAssignmentsFile = ("JumperlessFiles/slotAssignments.txt")  
+savedProjectsFile = ("JumperlessFiles/savedProjects.txt")
+
+pathlib.Path(slotAssignmentsFile).parent.mkdir(parents=True, exist_ok=True)
+pathlib.Path(savedProjectsFile).parent.mkdir(parents=True, exist_ok=True)
+# Path.home() / "JumperlessFiles" / "savedProjects.txt"
+
+#arduino = pyduinocli.Arduino("arduino-cli")
+
+#### If you're running this in thonny, make sure you download arduino-cli and put it in the same folder as this script
+#### then uncomment this below and comment the one above
+# arduino = pyduinocli.Arduino("./arduino-cli")
 noArduinocli = True
+# try:
+#     arduino = pyduinocli.Arduino(resource_path("arduino-cli"))
+# except:
+#     try:
+#         arduino = pyduinocli.Arduino("arduino-cli")
+#     except:
+#         try:
+#             arduino = pyduinocli.Arduino("./arduino-cli")
+#         except:
+#             print ("Couldn't find arduino-cli")
+#             noArduinocli = True
+#             pass
+    
+
+# print ('\n\n\n\rarduino')    
+# print(arduino)
+
+serialconnected = 0
 
 
 if (noArduinocli == True):
     
     disableArduinoFlashing = 1
-else:
-    disableArduinoFlashing = 0
+
 
 def openSerial():
     global portName
     global ser
     global serTickle
     global arduinoPort
-    serialconnected = 0
+    global disableArduinoFlashing
+    global serialconnected
 
     portSelected = 0
     foundports = []
@@ -99,7 +144,7 @@ def openSerial():
         sortedports = sorted(foundports,key = lambda x:x[-1])
         #print (foundports)
         #print(sortedports)
-        print ("\n\n")
+        print ("\n")
         
         jumperlessIndex = chooseJumperlessPort(sortedports)
         arduinoIndex = (jumperlessIndex + 1) % 2
@@ -109,24 +154,25 @@ def openSerial():
         
         if autodetected != -1:
         #if False:    
-            
-            selection = autodetected
-            
-            #portName = ports[int(selection) - 1].device
-            
-            portName = sortedports[jumperlessIndex]
-            
-            arduinoPort = sortedports[arduinoIndex]
-            
-            portSelected = True
-            serialconnected = 1
-            
-            print("\nAutodetected Jumperless at", end=" ")
-            print(portName)
-            
-            print ("Autodetected USB-Serial at ", end="")
-            print (arduinoPort)
-            
+            try:
+                selection = autodetected
+                
+                #portName = ports[int(selection) - 1].device
+                
+                portName = sortedports[jumperlessIndex]
+                
+                arduinoPort = sortedports[arduinoIndex]
+                
+                portSelected = True
+                serialconnected = 1
+                
+                print("\nAutodetected Jumperless at", end=" ")
+                print(portName)
+                
+                print ("Autodetected USB-Serial at ", end="")
+                print (arduinoPort)
+            except:
+                pass
 
             
 
@@ -185,11 +231,12 @@ jumperlessFirmwareNumber = [0,0,0,0,0,0]
 
 def chooseJumperlessPort(sortedports):
     global jumperlessFirmwareString
+    global jumperlessFirmwareNumber
     
     jumperlessFirmwareString = ' '
     tryPort = 0
     
-    while (tryPort < 5 and tryPort < len(sortedports)):
+    while (tryPort < len(sortedports)):
     
         tempSer1 = serial.Serial(sortedports[tryPort], 115200, timeout=None)
         #print (tryPort)
@@ -261,32 +308,45 @@ latestFirmwareAddress = "https://github.com/Architeuthis-Flux/Jumperless/release
 
 url_link = 0
 
+currentString = 'fuck'
+
 def checkIfFWisOld ():
+    global currentString
+    global jumperlessFirmwareString
     
     response = requests.get("https://github.com/Architeuthis-Flux/Jumperless/releases/latest")
     version = response.url.split("/").pop()
-    
+    #print(version)
     
     latestVersion = version.split('.')
     latestString = latestVersion[0] + '.' + latestVersion[1] + '.' + latestVersion[2]
     
     splitIndex = jumperlessFirmwareString.rfind(':')
+
+    #print(jumperlessFirmwareString)
     currentString = jumperlessFirmwareString[splitIndex+2:]
     
-    
-    
+
 
     
     
     latestList = latestString.split('.')
     currentList = currentString.split('.')
+    # print(currentList)
+    # print(latestList)
+
+
+    #latestInt = (int(latestList[0])* 100) + (int(latestList[2])* 10) + (int(latestList[2]))
+    #currentInt = (int(currentList[0])* 100) + (int(currentList[2])* 10) + (int(currentList[2]))
+    # try:
+    latestInt = int("".join(latestList))
     try:
-        latestInt = int("".join(latestList))
         currentInt = int("".join(currentList))
     except:
-        return True
-    #print (latestInt)
-    #print (currentInt)
+        currentInt = 0
+        #return True
+    # print (latestInt)
+    # print (currentInt)
     
     
     if (latestInt > currentInt):
@@ -303,12 +363,14 @@ def checkIfFWisOld ():
 def updateJumperlessFirmware(force):
     global ser
     global menuEntered
+    global currentString
+    global serialconnected
     
     #newFirmware = r
     
     if (force == False):
         if (checkIfFWisOld() == False):
-            print ("\n\rYour firmware is up to date (enter 'update' to force update)")
+            #print ("\n\n\r'update' to force firmware update - yours is up to date (" + currentString + ")")
             return
     
     print("\n\rWould you like to update your Jumperless with the latest firmware? Y/n\n\r")
@@ -351,6 +413,11 @@ def updateJumperlessFirmware(force):
                     print("Found Jumperless at " + foundVolume + "...")
                     break
                 
+                
+                #if (win32api.GetVolumeInformation(p.mountpoint)[0] == "RPI-RP2"):
+                 #   foundVolume = p.mountpoint
+                  #  print("Found Jumperless at " + foundVolume + "...")
+                   # break
             
         fullPathRP = os.path.join(foundVolume, "firmware.uf2")
         #print(fullPathRP)
@@ -378,6 +445,7 @@ def updateJumperlessFirmware(force):
 
 
 
+defaultWokwiSketchText = 'void setup() {'
 
 
 # 555 project
@@ -387,190 +455,55 @@ def updateJumperlessFirmware(force):
 
 # the website URL
 #url_link = "https://wokwi.com/projects/369024970682423297"
-
-
-def openProject():
-    global url_link
-    global disableArduinoFlashing
-    url_entered = 0
-    url_selected = 0
-    entryType = -1  # 0 for index, 1 for name, 2 for link
-        
-    while (url_selected == 0):
-
-        print('\n\nChoose from saved projects or paste the link to you Wokwi project:\n\n')
-
-        try:
-            f = open("savedWokwiProjects.txt", "r")
-        except:
-            f = open("savedWokwiProjects.txt", "x")
-            f = open("savedWokwiProjects.txt", "r")
-
-        index = 0
-
-        lines = f.readlines()
-
-        for line in lines:
-            if (line != '\n'):
-                index += 1
-                print(index, end="\t")
-
-                print(line)
-
-        linkInput = input('\n\n')
-
-        if (linkInput.startswith("http") == True):
-            entryType = 2
-        elif (linkInput == 'force' or linkInput == 'update' or linkInput == 'force update'):
-            jumperlessFirmwareString = ' '
-            updateJumperlessFirmware(True)
-        elif (linkInput.isdigit() == True) and (int(linkInput) <= len(lines)):
-            otherIndex = 0
-            for idx in lines:
-                if (idx != '\n'):
-                    otherIndex += 1
-                    if (otherIndex == int(linkInput)):
-                        idx = idx.rsplit('\t\t')
-                        idxLink = idx[1].rstrip('\n')
-                        #print("\n\nRunning project ", end='')
-                        #print(idx[0])
-                        entryType = 2
-
-                        linkInput = idxLink.rstrip('\n')
-
-                        break
-        else:
-            for name in lines:
-                if name != '\n':
-                    name = name.rsplit('\t\t')
-                    nameText = name[0]
-                    #print (nameText)
-                    if (nameText == linkInput):
-                        entryType = 2
-                        linkInput = name[1].rstrip('\n')
-                        break
-
-        checkurl = ' '
-        url_link = linkInput
-
-#         print("\n\n linkInput = ", end='')
-#         print(linkInput)
-#         print("\n\n url_link = ", end='')
-#         print(url_link)
-
-        #checkurl = requests.get(url_link)
-        #print(checkurl.status_code)
-        try:
-            checkurl = requests.get(url_link)
-            #print(checkurl.status_code)
-            if (checkurl.status_code == requests.codes.ok):
-                url_selected = 1
-                # break
-            else:
-                print("\n\nBad Link")
-                url_link = 0
-                linkInput = 0
-                #url_link = input('\n\nBad link\n\nPaste the link to you Wokwi project here:\n\n')
-                continue
-
-        except:
-            print("\n\nBad Link!!!")
-            url_link = 0
-            #url_link = input('\n\nBad link\n\nPaste the link to you Wokwi project here:\n\n')
-            continue
-
-        matchFound = 0
-        line = 0
-        index = 0
-
-        for line in lines:
-            if (line != '\n'):
-                line = line.rsplit('\t\t')
-                name = line[0]
-                line = line[1]
-                
-                line = line.rstrip('\n')
-                index += 1
-
-                if line == linkInput:
-                    #print ( "Match Found at index ", end = '')
-                    matchFound = index
-                    print("\n\nRunning project ", end='')
-                    print(name)
-                    #print (matchFound)
-                    #print (line)
-                    break
-                #index += 1
-                #print(index, end="\t")
-
-                # print(line)
-
-        if matchFound == 0:
-            name = input("\n\nEnter a name for this new project\n\n")
-            f.close()
-            f = open("savedWokwiProjects.txt", "a")
-            f.write(name)
-            f.write('\t\t')
-            f.write(linkInput)
-            f.write("\n")
-
-            
-            
-            
-            
-        url_link = linkInput
-        
-        if (noArduinocli == False):
-            autoFlash = input("\n\nDo you want to enable Auto-flashing the Arduino from Wokwi? y/n\n\n")
-            if (autoFlash == 'y' or autoFlash == 'Y'):
-                disableArduinoFlashing = 0
-            else:
-                disableArduinoFlashing = 1
-        
-
-    f.close()
-    
-    
-    
-    
-    
-openSerial()    
-updateJumperlessFirmware(False)
-openProject()
-
-
-
-
-
-
-
-
-print("\n\nSave your Wokwi project to update the Jumperless\n\nEnter 'menu' for Bridge App menu\n\n")
-
+menuEntered = 0
 
 
 def bridgeMenu():
     global menuEntered
     global ser
+    global disableArduinoFlashing
+    global noWokwiStuff
+    global url_link
+    global currentString
+    global numAssignedSlots
     #global serTickle
+
 
     while(menuEntered == 1):
 
         print("\t\t\tBridge App Menu\n\n")
-        print("\t\tf = Disable Auto-flashing Arduino\n")
-        print("\t\td = Delete Saved Projects\n")
-        print("\t\tr = Restart Bridge App\n")
-        print("\t\ts = Restart Serial\n")
-        print("\t\tl = Load Project\n")
+
+        print("\t\ta = Assign Wokwi Links to Slots", end='')
+        if (numAssignedSlots > 0):
+            print(" - " + str(numAssignedSlots) + " assigned")
+        else:
+            print()
+        print("\t\td = Delete Saved Projects")
+        print("\t\tr = Restart Bridge App")
+        print("\t\ts = Restart Serial")
+        #print("\t\tl = Load Project")
+        # print("\t\tf = Disable Auto-flashing Arduino - ", end='')
+        # if (disableArduinoFlashing == 0):
+        #     print("Enabled")
+        # else:
+        #     print("Disabled")
+        
+        print("\t\tu = Update Jumperless Firmware - " + currentString)
+
         print("\t\tj = Go Back To Jumperless\n")
 
         menuSelection = input("\n\n")
         
         
         
-        if(menuSelection == 'f'):
-            disableArduinoFlashing = 1
-            break
+        # if(menuSelection == 'f'):
+        #     if (disableArduinoFlashing == 0):
+        #         disableArduinoFlashing = 1
+        #     else:
+        #         disableArduinoFlashing = 0
+
+        #     #disableArduinoFlashing = 1
+        #     break
 
         if (menuSelection == 's'):
             ser.close()
@@ -579,7 +512,7 @@ def bridgeMenu():
             openSerial()
             #time.sleep(1)
             menuEntered = 0
-            time.sleep(.5)
+            time.sleep(.25)
             ser.write(b'm')
             break
         
@@ -587,7 +520,7 @@ def bridgeMenu():
             openProject()
             #time.sleep(1)
             menuEntered = 0
-            time.sleep(.75)
+            time.sleep(.25)
             ser.write(b'm')
             
             break
@@ -595,7 +528,8 @@ def bridgeMenu():
         if (menuSelection == 'r'):
             ser.close()
             openSerial()
-            openProject()
+            #openProject()
+            assignWokwiSlots()
             #time.sleep(1)
             menuEntered = 0
             time.sleep(.5)
@@ -605,7 +539,21 @@ def bridgeMenu():
             
         if(menuSelection == 'j'):
             menuEntered = 0
-            time.sleep(.5)
+            time.sleep(.25)
+            ser.write(b'm')
+            break
+
+        if(menuSelection == 'u'):
+            updateJumperlessFirmware(True)
+            menuEntered = 0
+            time.sleep(.25)
+            ser.write(b'm')
+            break
+
+        if(menuSelection == 'a'):
+            assignWokwiSlots()
+            menuEntered = 0
+            time.sleep(.25)
             ser.write(b'm')
             break
         
@@ -615,10 +563,10 @@ def bridgeMenu():
             print('\n\nEnter the index of the project you\'d like to delete:\n\nr = Return To Menu\ta = Delete All\n\n')
 
             try:
-                f = open("savedWokwiProjects.txt", "r")
+                f = open(savedProjectsFile, "r")
             except:
-                f = open("savedWokwiProjects.txt", "x")
-                f = open("savedWokwiProjects.txt", "r")
+                f = open(savedProjectsFile, "x")
+                f = open(savedProjectsFile, "r")
 
             index = 0
 
@@ -635,7 +583,7 @@ def bridgeMenu():
             
             if (linkInput == 'a'):
                 f.close()
-                f = open("savedWokwiProjects.txt", "w")
+                f = open(savedProjectsFile, "w")
                 f.close()
             
             
@@ -662,18 +610,511 @@ def bridgeMenu():
                     realIndex += 1
                         
                 f.close()
-                f = open("savedWokwiProjects.txt", "w")
+                f = open(savedProjectsFile, "w")
                 
                 for line in lines:
                 
                     f.write(line)
                 f.close()
-                f = open("savedWokwiProjects.txt", "r")
+                f = open(savedProjectsFile, "r")
                 print (f.read())
                 f.close()
                 #menuEntered = 0
             else:
                 break
+
+
+slotLines = [ "slot 0\n", "slot 1\n", "slot 2\n", "slot 3\n", "slot 4\n", "slot 5\n", "slot 6\n", "slot 7\n"]
+defaultSlotLines = [ "slot 0\n", "slot 1\n", "slot 2\n", "slot 3\n", "slot 4\n", "slot 5\n", "slot 6\n", "slot 7\n"]
+slotURLs = [ '!', '!', '!', '!', '!', '!', '!', '!', '!']
+
+numAssignedSlots = 0
+
+def countAssignedSlots():
+    global slotLines
+    global slotURLs
+    global numAssignedSlots
+    numAssignedSlots = 0
+    try:
+        slot = open(slotAssignmentsFile, "r")
+    except:
+        return 
+    slot.seek(0)
+    slotLines = slot.readlines()
+    splitLine = ' '
+
+    idx = 0
+    for line in slotLines:
+        if (line != '\n'):
+            splitLine = line.split('\t')
+            if (len(splitLine) > 1):
+                slotURLs[idx] = splitLine[1]
+                numAssignedSlots += 1
+            idx += 1
+
+    #print(slotURLs)
+    slot.close()
+    return numAssignedSlots
+
+def printSavedProjects():
+    try:
+        f = open(savedProjectsFile, "r")
+    except:
+        f = open(savedProjectsFile, "x")
+        f = open(savedProjectsFile, "r")
+
+    index = 0
+
+    lines = f.readlines()
+
+    for line in lines:
+        if (line != '\n'):
+            index += 1
+            print(index, end="\t")
+
+            print(line, end='')
+
+    f.close()
+
+
+def printOpenProjectOptions():
+
+    print("\n\n")
+
+    print(" 'menu'   to open the Bridge App menu")  
+    print(" 'skip'   to disable Wokwi updates and just use as a terminal")
+    print(" 'update' to force firmware update - yours is up to date (" + currentString + ")")
+    print(" 'slots'  to assign Wokwi projects to slots (this menu) ", end='')
+    
+    countAssignedSlots()  
+    if (numAssignedSlots > 0):
+        print("- " + str(numAssignedSlots) + " assigned")
+    # else:
+    #     print("\n")
+
+    print("\n    ^--   (you can enter these commands at any time)\n")
+
+    print("  ENTER   to accept and go to Jumperless\n")
+
+def printSlotOptions():
+    
+    print( "      'x' to clear all slots")
+    print( "      'c' to clear a single slot")
+    print( "\nEnter the slot number you'd like to assign a project to:\n")
+savedProjectIndex = 0
+
+somethingChoosen = False
+    
+
+def assignWokwiSlots():
+    global url_link
+    global slotLines
+    global slotURLs
+    global numAssignedSlots
+    printOpenProjectOptions()
+    printSlotOptions()
+    #countAssignedSlots()
+
+    try:
+        slot = open(slotAssignmentsFile, "r")
+
+    except:
+        
+        slot = open(slotAssignmentsFile, "x")
+        slot.close()
+        slot = open(slotAssignmentsFile, "w")
+      
+        
+        slot.writelines(defaultSlotLines)
+            
+            #print(slot.read())
+        slot.close()
+        slot = open(slotAssignmentsFile, "r")
+
+    slot.seek(0)
+    firstLine = slot.readline()
+    
+    firstLine = firstLine.strip()
+    firstLineIndex = 0
+
+    while ((firstLine.startswith('slot 0') == False or firstLine.startswith('#') == True or firstLine.startswith('//') == True) ):
+
+        # print("firstLine = ", end='')
+        # print(firstLine)
+        firstLine = slot.readline()
+        firstLine = firstLine.strip()
+        firstLineIndex = firstLineIndex + 1
+
+        if (firstLineIndex > 20):
+            slot = open(slotAssignmentsFile, "w")
+
+            
+            slot.writelines(defaultSlotLines)
+            firstLineIndex = 0
+            #slot.close()
+            slot = open(slotAssignmentsFile, "r")
+            break
+
+    index = 0
+    # print("\n\n")
+    # print(firstLineIndex)
+    # print("\n\n")
+    # slot.seek(firstLineIndex)
+    
+    # slot = open(slotAssignmentsFile, "r")
+    slot.seek(0)
+    # while (index < firstLineIndex):
+    #     slot.readline()
+    #     index += 1
+
+    lines = slot.readlines()
+    #0print("\n\n")
+    # print(firstLineIndex)
+    # print(lines[0])
+    index = 0
+
+    numAssignedSlots = countAssignedSlots()
+    #print(numAssignedSlots)
+
+    for line in lines:
+        
+        if (line != '\n'):
+
+            index += 1
+            print(line, end='')
+    slot.close()
+
+    slotInput = ''
+    linkInput = ''
+    slotInput = input('\n\n')
+    #print(slotInput)
+
+
+    
+    # if (slotInput == 'r'):
+    #     openProject()
+
+
+    if (slotInput == 'x'):
+        print("\n\nClearing all slots\n\n")
+        slot = open(slotAssignmentsFile, "w")
+        index = 0
+        slot.writelines(defaultSlotLines)
+        slot = open(slotAssignmentsFile, "r")
+        #print(slot.readlines())
+        numAssignedSlots = 0
+        slot.close()
+        somethingChoosen = False
+        assignWokwiSlots()
+
+    elif (slotInput.startswith('c')):
+        #slot = open(slotAssignmentsFile, "w")
+        #slotInput = slotInput.lstrip('c')
+        slotInput = input("\n\nEnter the slot number you'd like to clear:\n")
+        
+        if (slotInput.isdigit() == True ):
+            if (int(slotInput) < len(lines)):
+                slotInputInt = int(slotInput)
+                if (slotInputInt < len(lines)):
+                    slot = open(slotAssignmentsFile, "w")
+                    lines[slotInputInt] = "slot " + str(slotInputInt) + "\n"
+
+                    slot.writelines(lines)
+                    numAssignedSlots -= 1
+                    slot.close()
+                    assignWokwiSlots()
+                else:
+                    print("\nInvalid slot")
+                    
+                    assignWokwiSlots()
+            else:
+                print("\nInvalid slot")
+                    
+                assignWokwiSlots()
+        else:
+
+            print("\nInvalid slot")
+            
+            assignWokwiSlots()
+
+
+    elif (slotInput == ''):
+        #print("skipping")
+        #print(slotInput)
+        countAssignedSlots()
+
+        if (numAssignedSlots > 0):
+            return
+        else:
+            #assignWokwiSlots()
+            slotInput = '0'
+    elif (slotInput.isdigit() == False ):
+        slotInput = ''
+        print("\nInvalid slot")
+        assignWokwiSlots()
+
+    elif (int(slotInput) >= len(lines)):
+        slotInput = ''
+        print("\nInvalid slot")
+        assignWokwiSlots()
+    else:
+        print("\nChoose from saved or paste a link to a Wokwi project for Slot ", end='')
+        print( slotInput )
+        print("\n\n")
+        printSavedProjects()
+
+        if (slotInput.isdigit() == True):
+            if (int(slotInput) <= len(lines)):
+                linkInput = searchSavedProjects(input())
+                checkurl = ' '
+                url_link = linkInput
+                try:
+                    checkurl = requests.get(url_link)
+                    if (checkurl.status_code == requests.codes.ok):
+
+                        
+                        notes = searchSavedProjects(linkInput, True)
+                    
+                        print("\n" + notes + " selected for slot " + slotInput)
+
+                        slot = open(slotAssignmentsFile, "w")
+                        lines[int(slotInput)] = "slot " + slotInput + "\t" + url_link + "\t " + notes + "\n"
+                        #for line in lines:
+                        slot.writelines(lines)
+                            #print(line)
+                        slot.close()
+                        assignWokwiSlots()
+                    else:
+                        print("\n\nBad Link")
+                except Exception as e:
+                    print(e)
+                    print("\n\nBad Link!")
+                    assignWokwiSlots()
+                    
+
+    countAssignedSlots()
+
+
+
+def searchSavedProjects(inputToSearchFor, returnName = False):
+    try:
+        f = open(savedProjectsFile, "r")
+    except:
+        f = open(savedProjectsFile, "x")
+        f = open(savedProjectsFile, "r")
+
+    index = 0
+    matchFound = 0
+    returnLink = ' '
+
+    lines = f.readlines()
+
+    linkInput = inputToSearchFor
+
+    if (linkInput.startswith("http") == True): #pasted a link
+        noWokwiStuff = False
+        entryType = "link"
+        if (returnName == False):
+            return linkInput
+        #return linkInput
+
+    elif (linkInput.isdigit() == True ): #entered a number
+        #print(linkInput)
+       # print(int(linkInput))
+        linkInt = int(linkInput)
+        otherIndex = 0
+        entryType = "index"
+
+        for idx in lines:
+            if (idx != '\n'):
+                otherIndex += 1
+                if (otherIndex == linkInt):
+                    idx = idx.rsplit('\t\t')
+                    idxLink = idx[1].rstrip('\n')
+                    linkInput = idxLink.rstrip('\n')
+                    if (returnName == False):
+                        return idxLink.rstrip('\n')
+                    break
+    else:   #entered a name
+        #print("entered a name")
+        for name in lines:
+            if name != '\n':
+                name = name.rsplit('\t\t')
+                nameText = name[0]
+                #print (nameText)
+                if (nameText == linkInput):
+                    entryType = "name"
+                    linkInput = name[1].rstrip('\n')
+                    if (returnName == False):
+
+                        return linkInput
+                    break
+                index += 1
+    matchFound = 0
+    line = 0
+    index = 0
+
+    for line in lines:
+        if (line != '\n'):
+            line = line.rsplit('\t\t')
+            name = line[0]
+            line = line[1]
+            
+            line = line.rstrip('\n')
+            index += 1
+
+            if line == linkInput:
+                #print ( "Match Found at index ", end = '')
+                matchFound = index
+                if (returnName == False):
+                    return line
+                else:
+                    return name
+                #return line
+                # break
+                # url_selected = 1
+                
+
+
+    if matchFound == 0:
+        try:
+            checkurl = requests.get(linkInput)
+            #print(checkurl.status_code)
+            if (checkurl.status_code == requests.codes.ok):
+                url_selected = 1
+                noWokwiStuff = False
+
+                name = input("\n\nEnter a name for this new project\n\n")
+                f.close()
+                f = open(savedProjectsFile, "a")
+                f.write(name)
+                f.write('\t\t')
+                f.write(linkInput)
+                f.write("\n")
+                f.close()
+                if (returnName == False):
+                    return linkInput
+                else:
+                    return name
+                
+            else:
+                assignWokwiSlots()
+        except:
+            assignWokwiSlots()
+
+
+
+
+
+
+
+def openProject():
+    global url_link
+    global disableArduinoFlashing
+    global noWokwiStuff
+    global menuEntered
+    global currentString
+    global numAssignedSlots
+    url_entered = 0
+    url_selected = 0
+    entryType = -1  # 0 for index, 1 for name, 2 for link
+    try:
+        numAssignedSlots = countAssignedSlots()
+    except:
+        numAssignedSlots = 0
+
+    disableArduinoFlashing = 1
+
+
+
+
+    linkInput = input('\n\n')
+
+    if (linkInput == 'slots' or linkInput == 'slot' or linkInput == 's'):
+        assignWokwiSlots()
+        openProject()
+    elif (linkInput == 'force' or linkInput == 'update' or linkInput == 'force update'):
+        jumperlessFirmwareString = ' '
+        updateJumperlessFirmware(True)
+
+    elif(linkInput == 'skip' ):
+        noWokwiStuff = True
+        url_link = ' '
+        print("\nWokwi updates disabled\n\n")
+        ser.write('m'.encode())
+        url_selected = 1
+        #break
+        return
+
+
+    elif(linkInput == 'menu' or linkInput == 'm'):
+        menuEntered = 1
+        
+        #while(menuEntered == 1):
+        bridgeMenu()
+        
+        openProject()
+
+    else:
+        linkInput = searchSavedProjects(linkInput)
+
+
+    checkurl = ' '
+    url_link = linkInput
+
+#         print("\n\n linkInput = ", end='')
+#         print(linkInput)
+#         print("\n\n url_link = ", end='')
+#         print(url_link)
+
+    #checkurl = requests.get(url_link)
+    #print(checkurl.status_code)
+    if (noWokwiStuff == False):
+        try:
+            checkurl = requests.get(url_link)
+            #print(checkurl.status_code)
+            if (checkurl.status_code == requests.codes.ok):
+                url_selected = 1
+                noWokwiStuff = False
+                # break
+            else:
+                print("\n\nBad Link - Status Code: ", end='')  
+                print(checkurl.status_code)
+                url_link = 0
+                linkInput = 0
+                openProject()
+
+        except:
+            print("\n\nBad Link!!!")
+            url_link = 0
+            openProject()
+
+    matchFound = 0
+    line = 0
+    index = 0
+
+    
+    #saveConfig()   
+        
+
+    
+    
+    
+    
+    
+    
+openSerial()    
+updateJumperlessFirmware(False)
+assignWokwiSlots()
+#openProject()
+
+if (noWokwiStuff == False):
+    print("\n\nSave your Wokwi project to update the Jumperless\n\n")
+    
+
+
+
+
 
                             
 portNotFound = 1
@@ -779,6 +1220,7 @@ def serialTermIn():
 
                     decoded_string = decoded_string.lstrip("b' ")
                     decoded_string = decoded_string.rstrip("'")
+                    decoded_string = decoded_string.rstrip("\"")
 
                     print(decoded_string, end='')
                     #print ("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -788,14 +1230,16 @@ def serialTermIn():
                     portNotFound = 0
 
             except:
-                
-                ser.close()
+                try:
+                    ser.close()
+                except:
+                    pass
                 print("Disconnected")
                 portNotFound = 1
                 while (portNotFound == 1):
                     portFound = 0
                    
-                    time.sleep(0.3)
+                    time.sleep(0.2)
                     for port in serial.tools.list_ports.comports():
 
                         if portName in port.device:
@@ -813,7 +1257,7 @@ def serialTermIn():
                             time.sleep(0.2)
                             justChecked = 0
                             portNotFound = 0
-                            justreconnected = 1
+                            #justreconnected = 1
                         except:
                             portFound = 0
                             portNotFound = 1
@@ -833,6 +1277,7 @@ port_controller = threading.Thread(target=serialTermIn, daemon=True)
 # port_controller.daemon(True)
 port_controller.start()
 
+forceWokwiUpdate = 0
 
 def serialTermOut():
     global serialconnected
@@ -840,8 +1285,13 @@ def serialTermOut():
     global justChecked
     global justreconnected
     global menuEntered
+    global forceWokwiUpdate
+    global noWokwiStuff
+    
+    
 
     while True:
+        justreconnected = 0
         resetEntered = 0
 
         while (menuEntered == 0):
@@ -852,9 +1302,28 @@ def serialTermOut():
                 print("Menu Entered")
                 menuEntered = 1
                 continue
+            if (outputBuffer == 'slots') or (outputBuffer == 'Slots'):
+                assignWokwiSlots()
+                #outputBuffer = ' '
+                continue
+            if (outputBuffer == 'wokwi'):
+                forceWokwiUpdate = 1
+                print("Wokwi update forced")
+                continue
 
-            if outputBuffer == b'r':
-                resetEntered = 1
+            if(outputBuffer == 'skip'):
+                if (noWokwiStuff == False):
+                    noWokwiStuff = True
+                    print("\nWokwi updates disabled\n\n")
+                else:
+                    print("\nWokwi updates enabled\n\n")
+                    noWokwiStuff = True
+                outputBuffer = ' '
+                continue
+    
+
+            #if outputBuffer == b'r':
+                #resetEntered = 1
 
             if (serialconnected == 1):
                 #justChecked = 0
@@ -863,12 +1332,12 @@ def serialTermOut():
                 else:
 
                     #print (outputBuffer)
-                    if (outputBuffer != " "):
+                    if (outputBuffer != ' '):
                         try:
                             #print (outputBuffer.encode('ascii'))
                             ser.write(outputBuffer.encode('ascii'))
                         except:
-#                             portNotFound = 1
+                            portNotFound = 1
 
                             while (portNotFound == 1):
                                 portFound = 0
@@ -896,8 +1365,11 @@ def serialTermOut():
                                         ser.close()
                                         portNotFound = 1
                                         time.sleep(.1)
-                            print(outputBuffer.encode('ascii'))
-                            ser.write(outputBuffer.encode('ascii'))
+                            try:
+                                print(outputBuffer.encode('ascii'))
+                                ser.write(outputBuffer.encode('ascii'))
+                            except:
+                                serialconnected=0
 
                         if (resetEntered == 1):
                             time.sleep(.5)
@@ -929,7 +1401,7 @@ def findsketchindex(decoded):
             #print(index)
             return index
         else:
-            if (index > 7):
+            if (index > 20):
                 doneSearching = 1
                 return 0
             
@@ -951,7 +1423,7 @@ def finddiagramindex(decoded):
             #print(index)
             return index
         else:
-            if (index > 7):
+            if (index > 20):
                 doneSearching = 1
                 return 2
             
@@ -971,7 +1443,7 @@ def findlibrariesindex(decoded):
             #print(index)
             return index
         else:
-            if (index > 7):
+            if (index > 20):
                 doneSearching = 1
                 return 3
             
@@ -988,12 +1460,22 @@ port_controller.start()
 
 time.sleep(.75)
 
-lastsketch = 0
-lastlibraries = 0
+
+sketch = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+lastsketch = ['  ', '  ', '  ', '  ', '  ', '  ', '  ', '  ']
+lastlibraries = '  '
+blankDiagrams = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
 #print (arduino.board.attach(arduinoPort,None,"WokwiSketch"))
 #print (arduinoPort)
 
+try:        
+    ser.write('m'.encode())
+except:
+    pass
+
+currentSlotUpdate = 1
+cycled = 0
 while True:
    
     if (menuEntered == 1):
@@ -1006,25 +1488,80 @@ while True:
         #ser = serial.Serial(portName, 460800, timeout=0.050)
 
     while (justreconnected == 1):
-        time.sleep(.01)
+
         #print("just reconnected")
-        lastDiagram = '-1'
-        ser.close()
+        lastDiagram = blankDiagrams
+        
+        forceWokwiUpdate = 1
         time.sleep(.1)
+        ser.close()
+        time.sleep(.1)#######
         #if (portNotFound != 1):
             #ser = serial.Serial(portName, 115200, timeout=None)
         if (serialconnected == 1):
             print('Reconnected')
             portNotFound = 0
             portFound = 1
+            justreconnected = 0
+            forceWokwiUpdate = 1
             break
     else:
         justreconnected = 0
+        
+    #print("noWokwiStuff")
+    #print(noWokwiStuff)
 
-    if (serialconnected == 1):
+    if (serialconnected == 1 and noWokwiStuff == False):
         #print ("connected!!!")
-        result = requests.get(url_link).text
+
+        # if (forceWokwiUpdate == 1 and cycled == 0):
+        #     #currentSlotUpdate = 0
+        #     cycled = 0
+
+        if (numAssignedSlots > 0):
+            # print(currentSlotUpdate)
+            # print(slotURLs)
+            currentSlotUpdate += 1
+
+
+            if (currentSlotUpdate > 7):
+
+                currentSlotUpdate = 0
+                #cycled += 1
+
+
+            # if (forceWokwiUpdate == 1 and cycled == 2):
+                
+            #     forceWokwiUpdate = 0
+            #     cycled = 0
+
+            while(slotURLs[currentSlotUpdate] == '!'):
+                
+                #print(currentSlotUpdate)
+                currentSlotUpdate += 1
+                if (currentSlotUpdate > 7):
+                    currentSlotUpdate = 0
+                    forceWokwiUpdate = 0
+
+            try:
+
+                result = requests.get(slotURLs[currentSlotUpdate]).text
+            except Exception as e:
+                #print(e)
+                continue
+
+
+        else:
+            currentSlotUpdate = 0
+            assignWokwiSlots()
+            #result = requests.get(url_link).text
+            
+        #print(currentSlotUpdate)
+
+
+        
         doc = BeautifulSoup(result, "html.parser")
+     
 
         s = doc.find('script', type='application/json').get_text()
 
@@ -1039,15 +1576,11 @@ while True:
         #print (decoded['props']['pageProps']['p']['files'][0]['name'])
 
 
-        
-
-
-
         librariesExist = 0
         
         
 
-        c = decoded['props']['pageProps']['p']['files'][findsketchindex(decoded)]['content']
+        # c = decoded['props']['pageProps']['p']['files'][findsketchindex(decoded)]['content']
 
         try:
             l = d['props']['pageProps']['p']['files'][findlibrariesindex(decoded)]['content']
@@ -1064,107 +1597,133 @@ while True:
 
         #cf = json.loads(c)
 
-        diagram = str(d)
-        sketch = str(c)
+        diagram[currentSlotUpdate] = str(d)
+        #sketch[currentSlotUpdate] = str(c)
+        #print(c)
 
         if debug == True:
             print("\n\ndiagram.json\n")
-            print(diagram)
+            print(diagram[currentSlotUpdate])
 
-            print("\n\nsketch.ino\n")
-            print(sketch)
+            # print("\n\nsketch.ino\n")
+            # print(sketch[currentSlotUpdate])
 
             print("\n\nlibraries.txt\n")
             print(libraries)
 
-
+        # print("\n\ndiagram.json\n")
+        # print(diagram[currentSlotUpdate])
         justFlashed = 0
             
-        if (sketch != lastsketch and disableArduinoFlashing == 0):
+        # if (sketch[0] != lastsketch[0] and disableArduinoFlashing == 0 and noWokwiStuff == False):
+            
+        #     #all of this sucks and should probably never be used (on Rev 3 at least)
+        #     lastsketch = sketch
+        #     justFlashed = 1
             
             
-            lastsketch = sketch
-            justFlashed = 1
-            
-            
-            try:
-                newpath = './WokwiSketch'
-                compilePath = './WokwiSketch/compile'
+        #     try:
+        #         newpath = './WokwiSketch'
+        #         compilePath = './WokwiSketch/compile'
                 
-                if not os.path.exists(newpath):
-                    os.makedirs(newpath)
-                    os.makedirs(compilePath)
+        #         if not os.path.exists(newpath):
+        #             os.makedirs(newpath)
+        #             os.makedirs(compilePath)
                 
 
-                #print("\n\rFlashing Arduino")
-                sk = open("./WokwiSketch/WokwiSketch.ino", "w")
-                sk.write(sketch)
-                sk.close()
-                time.sleep(0.1)
+        #         #print("\n\rFlashing Arduino")
+        #         sk = open("./WokwiSketch/WokwiSketch.ino", "w")
+        #         sk.write(sketch[0])
+        #         sk.close()
+        #         time.sleep(0.1)
                 
-                ser.write("f 116-70,117-71,".encode())
-                time.sleep(0.3)
+        #         ser.write("f 116-70,117-71,".encode())
+        #         time.sleep(0.3)
                 
-                #ser.write('r\n'.encode())
-                #time.sleep(0.3)
-                #print (librariesExist)
-                
-
-                #time.sleep(0.3) # it fucks up here
-                
-                if (librariesExist == 1 and lastlibraries != libraries):
-                    #print ("librariesExist")
-                    lastlibraries = libraries
-
-                    libList = list(libraries.split("\n"))
-                                      
-                    filteredLibs = list(filter(lambda x: removeLibraryLines(x), libList))     
-                    #print ("libs filtered")
+        #         try:
+        #             menuEntered = 1
+        #             cor = ['arduino:avr']
+        #             #arduino.core.download(cor)
+        #             #arduino.commands.core.install.(cor)
+        #             #arduino.core.update_index()
+        #             arduino.core.install(cor, no_overwrite= None)
+        #             time.sleep(0.5)
                     
-                    if (len(filteredLibs) > 0):
-                        
-                        print ("Installing Arduino Libraries ", end="")
+        #             menuEntered = 0
+                
 
-                        liberror = arduino.lib.install(filteredLibs)
-                        
-                        print (filteredLibs)
+        #             #installedCores = arduino.core.list()
+        #             #print(installedCores)
+        #         except Exception as c:
+        #             print(c)
+
+        #         if librariesExist == 1 and lastlibraries != libraries:
+        #             lastlibraries = libraries
+        #             libList = list(libraries.split("\n"))
+        #             filteredLibs = list(filter(lambda x: removeLibraryLines(x), libList))
+        #             if len(filteredLibs) > 0:
+        #                 print("Installing Arduino Libraries ", end="")
+        #                 liberror = arduino.lib.install(filteredLibs)
+        #                 print(filteredLibs)
+
                 
                 
-                #ser.write('r\n'.encode())
-                time.sleep(0.1)
+        #         #ser.write('r\n'.encode())
+        #         time.sleep(0.1)
                 
-                #arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", upload=True)
-               # try:
-                    #arduino.config("-v")
-                print ("Compiling...")
-                compiledCode = arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", build_path="./WokwiSketch/compile" )
+        #         #arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", upload=True)
+        #        # try:
+        #             #arduino.config("-v")
+        #         ser.write("_".encode())
+        #         print ("Compiling...")
+        #         compiledCode = arduino.compile( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", build_path="./WokwiSketch/compile" )
+        #         ser.write("-".encode())
+        #         time.sleep(0.1)
+        #         print ("Flashing Arduino...")
+        #         ser.write("f {116-70,117-71, }".encode())
+        #         time.sleep(0.1)
                 
-                print ("Flashing Arduino...")
-                arduino.upload( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", input_dir="./WokwiSketch/compile"  )
-                print ("Arduino flashed successfully!")
-                time.sleep(0.1)
-               # except:# Exception as ardEx:
-                    #print (arduino.errors)
-                  #  print (ardEx)
+        #         arduino.upload( "./WokwiSketch" ,port=arduinoPort,fqbn="arduino:avr:nano", input_dir="./WokwiSketch/compile", discovery_timeout="3s", verify=False  )
+        #         print ("Arduino flashed successfully!")
+        #         time.sleep(0.1)
+        #        # except:# Exception as ardEx:
+        #             #print (arduino.errors)
+        #           #  print (ardEx)
                    
                     
                 
-            except Exception as e:
-                print (e)
-                print ("Couldn't Flash Arduino")
+        #     except Exception as e:
+               
+        #         #errors = ({'__stdout': '{\n  "compiler_out": "",\n  "compiler_err": "",\n  "builder_result": null,\n  "upload_result": null,\n  "success": false,\n  "error": "Error during build: Platform \'arduino:avr\' not found: platform not installed\\nTry running `arduino-cli core install arduino:avr`"\n}', '__stderr': '', 'result': {'compiler_out': '', 'compiler_err': '', 'builder_result': None, 'upload_result': None, 'success': False, 'error': "Error during build: Platform 'arduino:avr' not found: platform not installed\nTry running `arduino-cli core install arduino:avr`"}},)
+        #         try:
+        #             jd = json.loads(e.args[0]['__stdout'] )
+        #             print(jd['error'])
+        #         except:
+        #             print(e)
+        #         #errorMessages = e.args[0]['__stdout'] 
+        #         #print (errorMessages)
+        #         #print ("Couldn't Flash Arduino")
 
-                #continue
-                
-            ser.write('m\n'.encode())
-  
+        #         #continue
+        #     try:        
+        #         ser.write('m'.encode())
+        #     except:
+        #         pass
+        # #if(noWokwiStuff == True and justreconnected == 1):
+        #     #time.sleep(0.1)
+        #     #print('Just Reconnected\n\n')
+        #     #justreconnected = 0
             
 
-        if (lastDiagram != diagram or justFlashed == 1):
+
+        if ((lastDiagram != diagram or justFlashed == 1 and noWokwiStuff == False) or (forceWokwiUpdate == 1)):
             justFlashed = 0
+            #print(forceWokwiUpdate)
+            forceWokwiUpdate = 0
             justreconnected = 0
             length = len(f["connections"])
 
-            p = "{\n"
+            p = "{ "
 
             for i in range(length):
 
@@ -1322,20 +1881,43 @@ while True:
                 if conn1.isdigit() == True and conn2.isdigit() == True:
 
                     p = (p + conn1 + '-')
-                    p = (p + conn2 + ',\n')
+                    p = (p + conn2 + ',')
 
-            p = (p + "}\n{\n}")
+            p = ( p + "} ")
 
-            lastDiagram = diagram
+            lastDiagram[currentSlotUpdate] = diagram[currentSlotUpdate]
+            #lastDiagram = diagram
 
             try:
-                ser.write('f'.encode())
                 #print(f)
-                time.sleep(0.4)
                 #print(p)
-                ser.write(p.encode())
+                time.sleep(0.1)
+                if (numAssignedSlots > 0 and slotURLs[currentSlotUpdate] != '!'):
+                    ser.write('o'.encode())
+                    time.sleep(0.010)
+                    ser.write("Slot ".encode())
+                    #print("Slot " + str(currentSlot) + " " + )
+                    ser.write(str(currentSlotUpdate).encode())
+                    ser.write("\n\n\rf ".encode())
+                    ser.write(p.encode())
+                    time.sleep(0.4)
+                # else:
+                #     ser.write('f'.encode())
+                #     time.sleep(0.001)
+                #     ser.write(p.encode())
+                #time.sleep(0.001)
+                #print(p)
+                
 
-            except:
+            except Exception as e:
+                #print('try again')
+                forceWokwiUpdate = 1
+                # if (forceWokwiUpdate >= 2):
+                #     print(e)
+                #     forceWokwiUpdate = 0
+                #     #print('try again')
+                #     continue
+                time.sleep(.5)
                 continue
                 # waitForReconnect()
 
@@ -1353,4 +1935,6 @@ while True:
         
         
         else:
-            time.sleep(.75)
+            if (noWokwiStuff == False):
+                time.sleep(.75)
+

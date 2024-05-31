@@ -27,7 +27,7 @@ int lastButtonState = 0;
 
 volatile int rotaryEncoderMode = 0;
 
-int slotPreview = 0;
+volatile int slotPreview = 0;
 
 
 void initRotaryEncoder(void)
@@ -80,7 +80,7 @@ const char rotaryEncoderHelp[]= "\n\r"  //Github copilot, please don't help me w
 "Wokwi sketches will be loaded into whichever slot is active\n\n\r"
 
 "This is a WIP, so let me know if something's broken or you want\n\r"
-"something added. \n\n\r"
+"something added. \n\n\r "
  ;
 
 
@@ -89,7 +89,7 @@ void printRotaryEncoderHelp(void)
     Serial.print(rotaryEncoderHelp);
     return;
 }
-unsigned long previewLength = 2500;
+unsigned long previewLength = 3500;
 unsigned long previewTimer = 0;
 
 unsigned long buttonHoldTimer = 0;
@@ -110,11 +110,13 @@ int justPressed = 1;
 
 int probeWasActive = 0;
 
+int printSlotChanges = 0;
+
 void rotaryEncoderStuff(void)
 {
     probeWasActive = probeActive;
 
-    if (probeActive == 1)
+    if (probeActive == 1 || millis() < 500)
     {
     //     return;
     // }
@@ -186,13 +188,16 @@ void rotaryEncoderStuff(void)
         slotChanged = 1;
         netSlot = slotPreview;
         buttonHoldTimer = millis();
-
+        if(printSlotChanges == 1)
+        {
         Serial.print("\r                                          \r");
         Serial.print("\rCurrent Slot: ");
         Serial.print(netSlot);
-        Serial.print("\t\t");
-        Serial.print("Selected Slot: ");
-        Serial.print(slotPreview);
+        Serial.print("\t");
+        }
+        // Serial.print("\t\t");
+        // Serial.print("Selected Slot: ");
+        // Serial.print(slotPreview);
 
     }
     else
@@ -206,13 +211,20 @@ void rotaryEncoderStuff(void)
 
     if (millis() - previewTimer > previewLength && showingPreview == 1 && netSlot != slotPreview)
     {
+        slotPreview = netSlot;
         showSavedColors(netSlot);
         //showSavedColors(slotPreview);
         lightUpRail();
         leds.show();
         showingPreview = 0;
-        rawOtherColors[1] = 0x550008,
-
+        rawOtherColors[1] = 0x550008;
+        if (printSlotChanges == 1)
+        {
+        Serial.print("\r                                          \r");
+        Serial.print("\rCurrent Slot: ");
+        Serial.print(netSlot);
+        Serial.print("\t");
+        }
         previewTimer = millis();
     }
 
@@ -296,14 +308,19 @@ void rotaryEncoderStuff(void)
         leds.show();
 
         previewTimer = millis();
-
+        if (printSlotChanges == 1)
+        {
         Serial.print("\r                                          \r");
         Serial.print("\rCurrent Slot: ");
         Serial.print(netSlot);
-        Serial.print("\t\t");
-        Serial.print("Selected Slot: ");
-        Serial.print(slotPreview);
+        Serial.print("\t");
 
+        if (slotPreview != netSlot)
+        {
+        Serial.print("\tSelected Slot: ");
+        Serial.print(slotPreview);
+        }
+        }
         // leds.setPixelColor((lastPosition)+98, 0);
         // leds.setPixelColor((position)+98, 0x460035);
 

@@ -219,8 +219,56 @@ void sendAllPaths(void) // should we sort them by chip? for now, no
   }
 }
 
+uint8_t restoreConnections[12][16][2]; // [chip][index][pairs 0=x, 1=y]
+    
+  
 
 
+int clearAllConnectionsOnChip(int chip, int clearOrRestore)
+{
+
+int numCleared = 0;
+uint8_t netCleared = 0;
+
+if (clearOrRestore == 0)
+{
+  for (int x = 0; x < 16; x++)
+  {
+    if (ch[chip].xStatus[x] != -1)
+    {
+      netCleared = ch[chip].xStatus[x];
+
+      for (int y = 0; y < 8; y++)
+      {
+        if (ch[chip].yStatus[y] == netCleared)
+        {
+          
+          restoreConnections[chip][numCleared][0] = x;
+          restoreConnections[chip][numCleared][1] = y;
+          numCleared++;
+          Serial.print("chip ");
+          Serial.print(chip);
+          Serial.print(" x:");
+          Serial.print(x);
+          Serial.print(" y:");
+          Serial.print(y);
+          Serial.print(" net:");
+          Serial.print(netCleared);
+          Serial.print("\n\r");
+          sendXYraw(chip, x, y, 0);
+        }
+      }
+    }
+  }
+  } else {
+    for (int i = 0; i < numCleared; i++)
+    {
+      sendXYraw(chip, restoreConnections[chip][i][0], restoreConnections[chip][i][1], 1);
+    }
+  }
+  return numCleared;
+
+}
 
 void sendPath(int i, int setOrClear)
 {

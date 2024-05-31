@@ -1,0 +1,8 @@
+slot 0
+slot 1	https://wokwi.com/projects/399339473786215425	 five
+slot 2	https://wokwi.com/projects/399255180790581249	 AAAA
+slot 3	https://wokwi.com/projects/399339473786215425	 five
+slot 4	https://wokwi.com/projects/399255180790581249	 AAAA
+slot 5
+slot 6
+slot 7	https://wokwi.com/projects/399339473786215425	 five

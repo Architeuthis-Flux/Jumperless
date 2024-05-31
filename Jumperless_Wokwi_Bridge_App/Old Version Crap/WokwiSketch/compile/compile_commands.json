@@ -1,0 +1,32 @@
+[
+ {
+  "directory": "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App",
+  "arguments": [
+   "/Users/kevinsanto/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "-c",
+   "-g",
+   "-Os",
+   "-w",
+   "-std=gnu++11",
+   "-fpermissive",
+   "-fno-exceptions",
+   "-ffunction-sections",
+   "-fdata-sections",
+   "-fno-threadsafe-statics",
+   "-Wno-error=narrowing",
+   "-MMD",
+   "-flto",
+   "-mmcu=atmega328p",
+   "-DF_CPU=16000000L",
+   "-DARDUINO=10607",
+   "-DARDUINO_AVR_NANO",
+   "-DARDUINO_ARCH_AVR",
+   "-I/Users/kevinsanto/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/Users/kevinsanto/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/variants/eightanaloginputs",
+   "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/WokwiSketch/compile/sketch/WokwiSketch.ino.cpp",
+   "-o",
+   "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/WokwiSketch/compile/sketch/WokwiSketch.ino.cpp.o"
+  ],
+  "file": "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/WokwiSketch/compile/sketch/WokwiSketch.ino.cpp"
+ }
+]

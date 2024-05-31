@@ -1,0 +1,7 @@
+python3 -m PyInstaller \
+--icon="/Users/kevinsanto/JumperlessWokwiBridge/icon.icns" \
+-y \
+--console \
+--windowed \
+--add-binary "arduino-cli:." \
+JumperlessWokwiBridge_cli.py 

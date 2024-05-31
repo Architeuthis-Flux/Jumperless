@@ -1,0 +1,10 @@
+{
+  "additionalFiles": "",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "build.warn_data_percentage=75",
+  "fqbn": "arduino:avr:nano",
+  "hardwareFolders": "/Users/kevinsanto/Library/Arduino15/packages",
+  "otherLibrariesFolders": "/Users/kevinsanto/Documents/Arduino/libraries",
+  "sketchLocation": "/Users/kevinsanto/Documents/GitHub/Jumperless/Jumperless_Wokwi_Bridge_App/WokwiSketch"
+}

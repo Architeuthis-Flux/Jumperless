@@ -35,7 +35,7 @@ File nodeFileBuffer;
 
 unsigned long timeToFP = 0;
 
-const char rotaryConnectionString[] = "{ AREF-GND, D11-GND, D10-UART_TX, D12-UART_RX, D13-GPIO_0, ";
+const char rotaryConnectionString[] = "{AREF-GND,D11-GND,D10-UART_TX,D12-UART_RX,D13-GPIO_0, ";
 
 void createSlots(int slot, int addRotaryConnections)
 {
@@ -55,8 +55,8 @@ void createSlots(int slot, int addRotaryConnections)
             //         {
             //             //nodeFile.write(' ');
             //         index++;
-                   
-            //         } else 
+
+            //         } else
             //         length++;
             //     }
             // }
@@ -78,11 +78,7 @@ void createSlots(int slot, int addRotaryConnections)
             //     Serial.write(nodeFile.read());
             // }
 
-
             // nodeFile.close();
-           
-            
-
 
             nodeFile = LittleFS.open("nodeFileSlot" + String(i) + ".txt", "w");
             if (i >= 0)
@@ -92,11 +88,11 @@ void createSlots(int slot, int addRotaryConnections)
                 // nodeFile.print("{ AREF-D8, D8-ADC0, ADC0-GPIO_0, D11-GND, D10-ADC2, ADC2-UART_TX, D12-ADC1, ADC1-UART_RX, D13-GND,  ");
                 if (addRotaryConnections > 0)
                 {
-                    nodeFile.print("{ AREF-GND, D11-GND, D10-UART_TX, D12-UART_RX, D13-GPIO_0,  ");
+                    nodeFile.print("{AREF-GND,D11-GND,D10-UART_TX,D12-UART_RX,D13-GPIO_0,");
                     nodeFile.print(i * 4 + 1);
                     nodeFile.print("-");
                     nodeFile.print(i * 4 + 2);
-                    nodeFile.print(",  }");
+                    nodeFile.print(",}");
                 }
                 else
                 {
@@ -113,7 +109,7 @@ void createSlots(int slot, int addRotaryConnections)
         // nodeFile.print("{ D12-D7, D7-ADC0, ADC0-UART_RX, D11-GND, D10-ADC2, ADC2-UART_TX, AREF-ADC1, ADC1-GPIO_0, D13-GND,  ");
         if (addRotaryConnections > 0)
         {
-            nodeFile.print("{ AREF-GND, D11-GND, D10-UART_TX, D12-UART_RX, D13-GPIO_0, } ");
+            nodeFile.print("{AREF-GND,D11-GND,D10-UART_TX,D12-UART_RX,D13-GPIO_0,} ");
             // nodeFile.print(slot * 4 + 1);
             // nodeFile.print("-");
             // nodeFile.print(slot * 4 + 2);
@@ -122,22 +118,51 @@ void createSlots(int slot, int addRotaryConnections)
         nodeFile.close();
     }
 }
-void inputNodeFileList(void)
+void inputNodeFileList(int addRotaryConnections)
 {
-    Serial.println("Paste the nodeFile list here");
+    // addRotaryConnections = 1;
+    // Serial.println("Paste the nodeFile list here\n\n\r");
+
+    unsigned long humanTime = millis();
+
+    int shown = 0;
     while (Serial.available() == 0)
     {
+        if (millis() - humanTime == 400 && shown == 0)
+        {
+            Serial.println("Paste the nodeFile list here\n\n\r");
+            shown = 1;
+        }
     }
     nodeFileString.clear();
-
+    // if (addRotaryConnections > 0)
+    // {
+    //     for (int i = 0; i < 59 ; i++)
+    //     {
+    //     nodeFileString.write(rotaryConnectionString[i]);
+    //     Serial.print(rotaryConnectionString[i]);
+    //     }
+    // }
+    int startInsertion = 0;
     while (Serial.available() > 0)
     {
-        nodeFileString.write(Serial.read());
+        uint8_t c = Serial.read();
+        if (c == '{' && addRotaryConnections > 0)
+        {
+            // startInsertion = 1;
+            for (int i = 0; i < 53; i++)
+            {
+                nodeFileString.write(rotaryConnectionString[i]);
+                // Serial.print(rotaryConnectionString[i]);
+            }
+            continue;
+        }
+        nodeFileString.write(c);
         delayMicroseconds(100);
     }
     // nodeFileString.read(Serial);
     //  Serial.println("nodeFileString");
-    //  Serial.println(nodeFileString);
+    // Serial.println(nodeFileString);
     int lastTokenIndex = 0;
     int tokenFound = 0;
     uint8_t lastReads[8] = {' ', ' ', ' ', ' '};
@@ -165,10 +190,11 @@ void inputNodeFileList(void)
     // nodeFileBuffer.seek(nodeFileBuffer.size());
     // nodeFileBuffer.print("fuck             \n\r");
     nodeFileBuffer.seek(0);
-    // while (nodeFileBuffer.available())
-    // {
-    // Serial.write(nodeFileBuffer.read());
-    // }
+    // Serial.println(" \n\n\n\r");
+    //  while (nodeFileBuffer.available())
+    //  {
+    //  Serial.write(nodeFileBuffer.read());
+    //  }
 
     for (int i = 0; i < NUM_SLOTS; i++) // this just searches for how many slots are in the pasted list
     {
@@ -215,15 +241,8 @@ void inputNodeFileList(void)
             }
             index++;
         }
-
-        // Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        // nodeFile.close();
     }
 
-    Serial.print("\n\rFirst slot found: ");
-    Serial.println(firstSlotNumber, HEX);
-
-    Serial.println("Number of slots found: " + String(numberOfSlotsFound));
     index = 0;
     int lastSlotNumber = firstSlotNumber + numberOfSlotsFound - 1;
 
@@ -232,7 +251,7 @@ void inputNodeFileList(void)
 
         if (i >= firstSlotNumber && i <= lastSlotNumber)
         {
-            Serial.println(i);
+            // Serial.println(i);
             nodeFile = LittleFS.open("nodeFileSlot" + String(i) + ".txt", "w");
         }
 
@@ -270,31 +289,38 @@ void inputNodeFileList(void)
         if (i >= firstSlotNumber && i <= lastSlotNumber)
         {
             nodeFile.seek(0);
-            printNodeFile(i);
-
-            // Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             nodeFile.close();
         }
     }
+    // uint8_t trash = Serial.read();
+    // Serial.write(trash);
+    // delay(10);
 
-    for (int i = 0; i < NUM_SLOTS; i++)
-    {
-        // printNodeFile(i);
-    }
+    // while(Serial.available() > 0)
+    // {
+    //     trash = Serial.read();
+    //     //Serial.write(trash);
+    //     delay(1);
+    // }
+
+    // for (int i = 0; i < NUM_SLOTS; i++)
+    // {
+    //     // printNodeFile(i);
+    // }
 }
 
 void savePreformattedNodeFile(int source, int slot, int keepEncoder)
 {
 
     nodeFile = LittleFS.open("nodeFileSlot" + String(slot) + ".txt", "w+");
-    Serial.println("Slot " + String(slot));
+    // Serial.println("Slot " + String(slot));
 
     // Serial.println(nodeFile);
 
     if (keepEncoder == 1)
     {
         // nodeFile.print("{ D12-D7, D7-ADC0, ADC0-UART_RX, D11-GND, D10-ADC2, ADC2-UART_TX, AREF-ADC1, ADC1-GPIO_0, D13-GND,  ");
-        nodeFile.print("{ AREF-GND, D11-GND, D10-UART_TX, D12-UART_RX, D13-GPIO_0,  ");
+        nodeFile.print("{AREF-GND,D11-GND,D10-UART_TX,D12-UART_RX,D13-GPIO_0,  ");
         // Serial.println(" keeping encoder");
     }
 
