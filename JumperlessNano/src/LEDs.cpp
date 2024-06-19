@@ -579,11 +579,12 @@ void showSavedColors(int slot)
         // delayMicroseconds(100);
         // saveRawColors(slot);
     }
-    if (rotaryEncoderMode == 1)
-    {
+
         for (int i = 0; i < LED_COUNT; i++)
         {
             leds.setPixelColor(i, savedLEDcolors[slot][i]);
+                if (rotaryEncoderMode == 1)
+    {
 
             if (i == slotLEDpositions[netSlot])
             {
@@ -832,7 +833,7 @@ void lightUpNet(int netNumber, int node, int onOff, int brightness2, int hueShif
     //     Serial.print(node);
     //     Serial.print(" onOff: ");
     //     Serial.print(onOff);
-    if (net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] <= NANO_A7)
+    if ((net[netNumber].nodes[1] != 0 && net[netNumber].nodes[1] <= NANO_A7 )||net[netNumber].nodes[0] != 0 && net[netNumber].nodes[0] <= NANO_A7 )
     {
 
         for (int j = 0; j < MAX_NODES; j++)

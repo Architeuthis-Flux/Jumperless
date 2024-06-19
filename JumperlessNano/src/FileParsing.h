@@ -14,6 +14,8 @@ extern bool debugNTCC2;
 extern bool debugLEDs;
 extern bool debugMM;
 
+extern int loadFileOnStart;
+
 // #include "RotaryEncoder.h"
 
 

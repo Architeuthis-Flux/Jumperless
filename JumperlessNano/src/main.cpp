@@ -75,8 +75,11 @@ unsigned long lastNetConfirmTimer = 0;
 
 volatile int sendAllPathsCore2 = 0; // this signals the core 2 to send all the paths to the CH446Q
 
+int loadFileOnStart = 1;
 int rotEncInit = 0;
 // https://wokwi.com/projects/367384677537829889
+
+int core2setupFinished = 0;
 
 void setup()
 {
@@ -117,7 +120,12 @@ void setup()
 
   setDac0_5Vvoltage(0.0);
   setDac1_8Vvoltage(1.9);
-  createSlots(-1, rotaryEncoderMode);
+
+ // if (rotaryEncoderMode == 1)
+ // {
+    createSlots(-1, rotaryEncoderMode);
+ //}
+  //
   clearAllNTCC();
 
   // if (rotaryEncoderMode == 1)
@@ -143,7 +151,7 @@ void setup1()
   startupColors();
   delay(4);
   lightUpRail();
-
+core2setupFinished = 1;
   delay(4);
 
   showLEDsCore2 = 1;
@@ -159,7 +167,7 @@ int baudRate = 115200;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.13"; //// remember to update this
+const char firmwareVersion[] = "1.3.15"; //// remember to update this
 
 int firstLoop = 1;
 volatile int probeActive = 1;
@@ -222,6 +230,14 @@ menu:
 
     goto loadfile;
   }
+  // if (firstLoop == 1 && rotaryEncoderMode == 0 && loadFileOnStart == 1)
+  // {
+  //   delay(50);
+  //   firstLoop = 0;
+  //   probeActive = 0;
+
+  //   goto loadfile;
+  // }
 
   // Serial.print("Slot: ");
   // Serial.println(netSlot);
@@ -503,7 +519,7 @@ goto dontshowmenu;
   case 'x':
     {
     
-    if (netSlot == NUM_SLOTS)
+    if (netSlot == NUM_SLOTS-1)
     {
       netSlot = 0;
     } else {
@@ -540,7 +556,8 @@ goto dontshowmenu;
     getNodesToConnect();
     bridgesToPaths();
     clearLEDs();
-    assignNetColors();
+    //leds.clear();
+    //assignNetColors();
     digitalWrite(RESETPIN, HIGH);
     delayMicroseconds(100);
     // Serial.print("bridgesToPaths\n\r");
@@ -762,6 +779,8 @@ goto dontshowmenu;
     {
       Serial.print("18");
     }
+    Serial.print("\n\n\r7. load slots on start    =    ");
+    Serial.print(loadFileOnStart? "on" : "off");
 
     Serial.print("\n\n\n\r");
 

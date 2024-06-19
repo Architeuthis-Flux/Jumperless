@@ -589,7 +589,7 @@ probeActive = 1;
     assignNetColors();
     // // Serial.print("bridgesToPaths\n\r");
     // delay(18);
-     showNets();
+     //showNets();
      showLEDsCore2 = 1;
     rawOtherColors[1] = 0x550004;
     showLEDsCore2 = 1;
@@ -597,7 +597,7 @@ probeActive = 1;
     sendAllPathsCore2 = 1;
     // delay(25);
     // pinMode(probePin, INPUT);
-    delay(300);
+    delay(100);
     row[1] = -2;
 
     // sprintf(oledBuffer, "        ");

@@ -1508,6 +1508,7 @@ void debugFlagInit(void)
     rotaryEncoderMode = EEPROM.read(ROTARYENCODER_MODE_ADDRESS);
 
     probeSwap = EEPROM.read(PROBESWAPADDRESS);
+    loadFileOnStart = EEPROM.read(LOADFILEONSTART_ADDRESS);
 
 #else
 
@@ -1522,6 +1523,8 @@ void debugFlagInit(void)
 
     // debugLEDs = 1;
 #endif
+    if (loadFileOnStart != 0 && loadFileOnStart != 1)
+        EEPROM.write(LOADFILEONSTART_ADDRESS, 0);
 
     if (debugFP != 0 && debugFP != 1)
         EEPROM.write(DEBUG_FILEPARSINGADDRESS, 0);
@@ -1744,6 +1747,22 @@ void debugFlagSet(int flag)
             EEPROM.write(ROTARYENCODER_MODE_ADDRESS, 1);
 
             rotaryEncoderMode = 1;
+        }
+        break;
+    }
+    case 7:
+    {
+        if (loadFileOnStart == 0)
+        {
+            EEPROM.write(LOADFILEONSTART_ADDRESS, 1);
+
+            loadFileOnStart = 1;
+        }
+        else
+        {
+            EEPROM.write(LOADFILEONSTART_ADDRESS, 0);
+
+            loadFileOnStart = 0;
         }
         break;
     }
