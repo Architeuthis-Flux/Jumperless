@@ -3,7 +3,7 @@
 
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
-
+#### There's also a [new version lauching on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
 
 [![Video](https://img.youtube.com/vi/_k0aKM68Xl4/maxresdefault.jpg)](https://www.youtube.com/watch?v=_k0aKM68Xl4)
 
@@ -14,6 +14,7 @@
 Using a bunch of analog crosspoint switches wired together into one bigger switch, this breadboard makes real, hardware connections between any points on the board or the Arduino Nano header at the top via software command, instead of needing to use jumper wires.
 
 ![BreaboardJump00420](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c3ec1f73-97c5-4268-9da4-672787bc9e1a)
+
 
 
 
