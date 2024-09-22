@@ -3,7 +3,7 @@
 
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
-#### There's also a [new version lauching on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
+#### There's also a [new version](https://github.com/Architeuthis-Flux/JumperlessV5) [lauching on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
 
 [![Video](https://img.youtube.com/vi/_k0aKM68Xl4/maxresdefault.jpg)](https://www.youtube.com/watch?v=_k0aKM68Xl4)
 
