@@ -592,8 +592,8 @@ probeActive = 1;
      //showNets();
      showLEDsCore2 = 1;
     rawOtherColors[1] = 0x550004;
-    showLEDsCore2 = 1;
-
+   showLEDsCore2 = 1;
+   //delay(25);
     sendAllPathsCore2 = 1;
     // delay(25);
     // pinMode(probePin, INPUT);

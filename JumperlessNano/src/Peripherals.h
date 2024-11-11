@@ -38,11 +38,12 @@ void setDac1_8VinputCode(uint16_t value);
 void refillTable (int amplitude = 2047, int offset = 2047, int adc = 2);
 int waveGen(void);
 void GetAdc29Status(int i);
-int readAdc(int channel, int samples = 10);
+int readAdc(int channel, int samples = 32);
 
 void chooseShownReadings(void);
-void showMeasurements(int samples = 50);
-
+void showLEDmeasurements(void);
+void showMeasurements(int samples = 32);
+void initADC(void);
 
 const uint16_t DACLookup_FullSine_9Bit[512] =
 {

@@ -13,6 +13,11 @@
         "cmath": "cpp"
     },
     "cortex-debug.registerUseNaturalFormat": false,
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "prettier.printWidth": 200,
+    "python.analysis.fixAll": [
+
+    ],
+    "platformio-ide.reopenSerialMonitorDelay": 1000
 
 }
