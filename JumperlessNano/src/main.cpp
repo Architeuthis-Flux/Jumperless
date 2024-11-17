@@ -167,7 +167,6 @@ char input;
 int serSource = 0;
 int readInNodesArduino = 0;
 
-
 int restoredNodeFile = 0;
 
 const char firmwareVersion[] = "1.3.18"; //// remember to update this
@@ -488,6 +487,185 @@ skipinput:
     probeActive = 0;
     chooseShownReadings();
     goto dontshowmenu;
+    break;
+  }
+  case '&': {
+    int numberOfAddressBits = 0;
+    int addressRows[20] = {-1};
+
+    // while (Serial.available() > 0) {
+    //   Serial.read();
+    // }
+
+    Serial.print("\n\rEnter rows for address lines (lsb first)\n\r(enter x "
+                 "when finished)\n\r");
+    for (int i = 0; i < 20; i++) {
+
+      Serial.print("\n\rAddress ");
+      Serial.print(i);
+      Serial.print(">  ");
+
+      while (Serial.available() == 0) {
+      }
+
+      int row = Serial.read();
+      if (row == 'x') {
+        numberOfAddressBits = i;
+        Serial.print("x\n\r");
+        break;
+      }
+
+      addressRows[i] = row - '0';
+      if (Serial.available() > 0 && Serial.peek() != '\n') {
+        row = Serial.read();
+
+        addressRows[i] *= 10;
+        addressRows[i] += row - '0';
+      }
+
+      // Serial.print(addressRows[i]);
+    }
+
+    for (int i = 0; i < numberOfAddressBits; i++) {
+      Serial.print(addressRows[i]);
+      Serial.print(" ");
+    }
+
+    int numberOfDataBits = 0;
+    int dataRows[20] = {-1};
+
+    // while (Serial.available() > 0) {
+    //   Serial.read();
+    // }
+
+    Serial.print("\n\rEnter rows for data lines (lsb first)\n\r(enter x when "
+                 "finished)\n\r");
+    for (int i = 0; i < 20; i++) {
+
+      Serial.print("\n\rData ");
+      Serial.print(i);
+      Serial.print(">  ");
+
+      while (Serial.available() == 0) {
+      }
+
+      int row = Serial.read();
+      if (row == 'x') {
+        numberOfDataBits = i;
+        Serial.print("x\n\r");
+        break;
+      }
+
+      dataRows[i] = row - '0';
+      if (Serial.available() > 0 && Serial.peek() != '\n') {
+        row = Serial.read();
+
+        dataRows[i] *= 10;
+        dataRows[i] += row - '0';
+      }
+
+      // Serial.print(dataRows[i]);
+    }
+
+    int clockRow = 0;
+
+    // while (Serial.available() > 0) {
+    //   Serial.read();
+    // }
+
+    Serial.print("enter clock row\n\rClock >");
+
+    while (Serial.available() == 0) {
+    }
+
+    int row = Serial.read();
+
+    clockRow = row - '0';
+    if (Serial.available() > 0 && Serial.peek() != '\n') {
+      row = Serial.read();
+
+      clockRow *= 10;
+      clockRow += row - '0';
+    }
+    Serial.print("\n\n\n\n\r");
+
+    Serial.print("\n\rNumber of address bits: ");
+    Serial.print(numberOfAddressBits);
+    // Serial.print("\n\r");
+    Serial.print("\n\rNumber of data bits: ");
+    Serial.print(numberOfDataBits);
+    Serial.print("\n\r");
+    Serial.print("\n\rClock row: ");
+
+    Serial.print(clockRow);
+    Serial.print("\n\r");
+    for (int i = 0; i < numberOfAddressBits; i++) {
+      Serial.print("a");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.print(addressRows[i]);
+      Serial.print("  ");
+    }
+
+    Serial.print("\n\r");
+    for (int i = 0; i < numberOfDataBits; i++) {
+      Serial.print("d");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.print(dataRows[i]);
+      Serial.print("  ");
+    }
+
+    // createSlots(netSlot, 0); //clears the netlist
+    int addressCount = 0;
+
+    bool addressBits[20] = {0};
+
+    bool dataBits[20] = {0};
+
+    for (addressCount = 0; addressCount < pow(2, numberOfAddressBits);
+         addressCount++) {
+      addressBits[addressRows[addressCount]] = 1;
+      // Serial.println(addressRows[addressCount], BIN);
+      // Serial.println(addressCount, BIN);
+
+      createSlots(netSlot, 0); // clears the netlist
+      delay(100);
+
+      for (int i = 0; i < numberOfAddressBits; i++) {
+        // Serial.print(addressCount & (1 << i) ? "1" : "0");
+        addressBits[i] = addressCount & (1 << i);
+
+        Serial.print(addressBits[i] == true ? "1" : "0");
+
+        addBridgeToNodeFile(addressRows[i],
+                            addressBits[i] == true ? SUPPLY_5V : GND, netSlot);
+      }
+      Serial.println();
+      // TODO: add data bits or do something with them
+      // TODO: wiggle the clock line
+
+      delay(100);
+      printNodeFile();
+
+      probeActive = 1;
+      clearAllNTCC();
+      openNodeFile(netSlot);
+      getNodesToConnect();
+      bridgesToPaths();
+      clearLEDs();
+      digitalWrite(RESETPIN, HIGH);
+      delayMicroseconds(100);
+      digitalWrite(RESETPIN, LOW);
+      showSavedColors(netSlot);
+      chooseShownReadings();
+      sendAllPathsCore2 = 1;
+      showLEDsCore2 = 1;
+      probeActive = 0;
+
+      delay(400);
+    }
+
     break;
   }
 
@@ -1135,7 +1313,7 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
     if (Serial1.available()) {
       char ch = Serial1.read();
       USBSer1.write(ch);
-     // Serial.print(ch);
+      // Serial.print(ch);
 
       if (ch == 'f' && connectFromArduino == '\0') {
         input = 'f';
@@ -1143,10 +1321,10 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
         connectFromArduino = 'f';
         Serial.print("!!!!");
         while (connectFromArduino == 'f') {
-          //delay(10);
+          // delay(10);
         }
       } else {
-        //connectFromArduino = '\0';
+        // connectFromArduino = '\0';
       }
     }
   }
