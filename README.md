@@ -18,7 +18,7 @@ Using a bunch of analog crosspoint switches wired together into one bigger switc
 
 #### [3D Printable Stand](https://www.printables.com/model/684090-stand-for-the-jumperless-breadboard) (you can drop the model through the build plate to adjust the height)
 
-#### [3D Printable Jumperless Trap](https://www.printables.com/model/1040448-jumperless-v1-3-case) (jk it's a carrying case, but make sure you can get it back open before your put you Jumperless in it)
+#### [3D Printable Jumperless Trap](https://www.printables.com/model/1040448-jumperless-v1-3-case) (jk it's a carrying case, but make sure you can get it back open before you put your Jumperless in it)
 
 
 
