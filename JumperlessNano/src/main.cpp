@@ -84,6 +84,8 @@ int core2setupFinished = 0;
 
 int baudRate = 115200;
 
+int excelCounter = 0;
+
 void setup() {
   pinMode(0, OUTPUT);
   pinMode(2, INPUT);
@@ -472,6 +474,13 @@ skipinput:
     printNodeFile();
     break;
 
+  case '*': {
+    excelCounter++;
+    Serial.print("42, 56.9, ");
+    Serial.println(excelCounter);
+    break;
+  }
+
   case 'w':
 
     if (waveGen() == 1) {
@@ -514,9 +523,13 @@ skipinput:
         Serial.print("x\n\r");
         break;
       }
+      if (isDigit(row) == false) {
+        continue;
+      }
 
       addressRows[i] = row - '0';
-      if (Serial.available() > 0 && Serial.peek() != '\n') {
+      char nextChar = Serial.peek();
+      if (Serial.available() > 0 && isDigit(nextChar) == true) {
         row = Serial.read();
 
         addressRows[i] *= 10;
@@ -546,7 +559,7 @@ skipinput:
       Serial.print(i);
       Serial.print(">  ");
 
-      while (Serial.available() == 0) {
+      while (Serial.available() <= 0) {
       }
 
       int row = Serial.read();
@@ -555,16 +568,20 @@ skipinput:
         Serial.print("x\n\r");
         break;
       }
+      if (isDigit(row) == false) {
+        continue;
+      }
 
       dataRows[i] = row - '0';
-      if (Serial.available() > 0 && Serial.peek() != '\n') {
+      char nextChar = Serial.peek();
+      if (Serial.available() > 0 && isDigit(nextChar) == true) {
         row = Serial.read();
 
         dataRows[i] *= 10;
         dataRows[i] += row - '0';
       }
 
-      // Serial.print(dataRows[i]);
+      Serial.print(dataRows[i]);
     }
 
     int clockRow = 0;
@@ -579,13 +596,17 @@ skipinput:
     }
 
     int row = Serial.read();
+    if (isDigit(row) == false) {
 
-    clockRow = row - '0';
-    if (Serial.available() > 0 && Serial.peek() != '\n') {
-      row = Serial.read();
+    } else {
 
-      clockRow *= 10;
-      clockRow += row - '0';
+      clockRow = row - '0';
+      if (Serial.available() > 0 && Serial.peek() != '\n') {
+        row = Serial.read();
+
+        clockRow *= 10;
+        clockRow += row - '0';
+      }
     }
     Serial.print("\n\n\n\n\r");
 
@@ -629,15 +650,16 @@ skipinput:
       // Serial.println(addressRows[addressCount], BIN);
       // Serial.println(addressCount, BIN);
 
-      createSlots(netSlot, 0); // clears the netlist
-      delay(100);
+      // createSlots(netSlot, 0); // clears the netlist
+      // delay(100);
 
       for (int i = 0; i < numberOfAddressBits; i++) {
         // Serial.print(addressCount & (1 << i) ? "1" : "0");
         addressBits[i] = addressCount & (1 << i);
 
         Serial.print(addressBits[i] == true ? "1" : "0");
-
+        removeBridgeFromNodeFile(addressRows[i], -1, netSlot);
+        delay(1);
         addBridgeToNodeFile(addressRows[i],
                             addressBits[i] == true ? SUPPLY_5V : GND, netSlot);
       }
@@ -645,8 +667,8 @@ skipinput:
       // TODO: add data bits or do something with them
       // TODO: wiggle the clock line
 
-      delay(100);
-      printNodeFile();
+      delay(10);
+      // printNodeFile();
 
       probeActive = 1;
       clearAllNTCC();
@@ -663,7 +685,7 @@ skipinput:
       showLEDsCore2 = 1;
       probeActive = 0;
 
-      delay(400);
+      delay(200);
     }
 
     break;
