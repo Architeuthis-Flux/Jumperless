@@ -16,6 +16,10 @@ Using a bunch of analog crosspoint switches wired together into one bigger switc
 ![BreaboardJump00420](https://github.com/Architeuthis-Flux/Jumperless/assets/20519442/c3ec1f73-97c5-4268-9da4-672787bc9e1a)
 
 
+#### [3D Printable Stand](https://www.printables.com/model/684090-stand-for-the-jumperless-breadboard) (you can drop the model through the build plate to adjust the height)
+
+#### [3D Printable Jumperless Trap](https://www.printables.com/model/1040448-jumperless-v1-3-case) (jk it's a carrying case, but make sure you can get it back open before you put your Jumperless in it)
+
 
 
 Try this Wokwi project if something isn't working: https://wokwi.com/projects/389569655762010113
