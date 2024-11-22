@@ -1,6 +1,7 @@
 # Probe Kit Assembly Guide
 ![probePCB copy](https://github.com/user-attachments/assets/ac8bf8a3-5925-482b-8a0c-045cf857685b)
-
+![IMG_6330](https://github.com/user-attachments/assets/046118cf-3725-4387-ba8c-8071d4b8472b)
+![IMG_6328](https://github.com/user-attachments/assets/34ddf0b2-b88f-46fc-87cf-c615e17774b4)
 
 Square holes connect to the Probe 
 Round holes connect to the Button 
@@ -34,3 +35,4 @@ Probe connections are swapped, just turn the connector around.
 
 Or just have fun with it and do it however the hell you want!
 I’m a piece of paper, not a cop.
+
