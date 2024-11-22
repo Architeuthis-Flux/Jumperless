@@ -171,7 +171,7 @@ int readInNodesArduino = 0;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.18"; //// remember to update this
+const char firmwareVersion[] = "1.3.19"; //// remember to update this
 
 int firstLoop = 1;
 volatile int probeActive = 1;
@@ -731,7 +731,7 @@ skipinput:
     // leds.clear();
     // assignNetColors();
     digitalWrite(RESETPIN, HIGH);
-    delayMicroseconds(100);
+    delayMicroseconds(3900);
     // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
@@ -759,8 +759,8 @@ skipinput:
     // sendAllPathsCore2 = 1;
     timer = millis();
 
-    // clearNodeFile(netSlot);
-
+    //clearNodeFile(netSlot);
+    digitalWrite(RESETPIN, HIGH);
     if (connectFromArduino != '\0') {
       serSource = 1;
     } else {
@@ -773,11 +773,11 @@ skipinput:
     openNodeFile(netSlot);
     getNodesToConnect();
     // Serial.print("openNF\n\r");
-    digitalWrite(RESETPIN, HIGH);
+
     bridgesToPaths();
     clearLEDs();
     assignNetColors();
-    delay(1);
+    delay(10);
     // Serial.print("bridgesToPaths\n\r");
     digitalWrite(RESETPIN, LOW);
     // showNets();
@@ -1224,7 +1224,7 @@ void loadFile(int slot) {
   clearLEDs();
   assignNetColors();
   digitalWrite(RESETPIN, HIGH);
-  delayMicroseconds(100);
+  delayMicroseconds(2000);
   // Serial.print("bridgesToPaths\n\r");
   digitalWrite(RESETPIN, LOW);
   // showNets();
@@ -1271,6 +1271,9 @@ void loop1() // core 2 handles the LEDs and the CH446Q8
   }
 
   if (sendAllPathsCore2 == 1) {
+    digitalWrite(RESETPIN, HIGH);
+    delayMicroseconds(3900);
+    digitalWrite(RESETPIN, LOW);
     delayMicroseconds(6200);
     sendAllPaths();
     delayMicroseconds(2200);

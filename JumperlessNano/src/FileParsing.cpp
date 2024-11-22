@@ -309,7 +309,7 @@ void inputNodeFileList(int addRotaryConnections) {
 
 void savePreformattedNodeFile(int source, int slot, int keepEncoder) {
 
-  nodeFile = LittleFS.open("nodeFileSlot" + String(slot) + ".txt", "w+");
+  nodeFile = LittleFS.open("nodeFileSlot" + String(slot) + ".txt", "w");
   // Serial.println("Slot " + String(slot));
 
   // Serial.println(nodeFile);
