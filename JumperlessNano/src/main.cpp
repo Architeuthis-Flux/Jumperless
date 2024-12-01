@@ -135,10 +135,11 @@ void setup() {
   // if (rotaryEncoderMode == 1)
   // {
   // rotEncInit = 1;
-  initRotaryEncoder();
+  // initRotaryEncoder();
   //}
   initADC();
-
+  pinMode(0, OUTPUT);
+  digitalWrite(0, LOW);
   // delay(20);
   // setupAdcUsbStuff(); // I took this out because it was causing a crash on
   delay(10);
@@ -171,7 +172,7 @@ int readInNodesArduino = 0;
 
 int restoredNodeFile = 0;
 
-const char firmwareVersion[] = "1.3.19"; //// remember to update this
+const char firmwareVersion[] = "1.3.20"; //// remember to update this
 
 int firstLoop = 1;
 volatile int probeActive = 1;
@@ -207,12 +208,16 @@ menu:
   rotaryEncoderMode == 1 ? Serial.print(" ON (z/x to cycle)\n\r")
                          : Serial.print(" off\n\r");
   Serial.print("\t\b\bz/x = cycle slots - current slot ");
+
   Serial.print(netSlot);
+
   Serial.print("\n\r");
+  Serial.print("\t\b\bq/Q = set GPIO 0 low/HIGH\n\r");
   Serial.print("\te = show extra menu options\n\r");
 
   if (showExtraMenu == 1) {
     Serial.print("\tb = show bridge array\n\r");
+    Serial.print("\th = send raw XY paths\n\r");
     Serial.print("\tp = probe connections\n\r");
     Serial.print("\tw = waveGen\n\r");
     Serial.print("\tv = toggle show current/voltage\n\r");
@@ -264,9 +269,9 @@ dontshowmenu:
       // Serial.print("\n\n\r");
       // showLEDsCore2 = 1;
     }
-    if (BOOTSEL) {
-      lastNetConfirm(1);
-    }
+    // if (BOOTSEL) {
+    //   //lastNetConfirm(1);
+    // }
 
     if ((millis() % 200) < 5) {
       if (checkProbeButton() == 1) {
@@ -306,6 +311,20 @@ dontshowmenu:
 // Serial.print(input);
 skipinput:
   switch (input) {
+  case 'H': {
+    if (parseRaw(1) == 1) {
+      sendXYraw(rawConn[1], rawConn[2], rawConn[3], 1);
+    }
+    break;
+  }
+  case 'h': {
+
+    if (parseRaw(0) == 1) {
+      sendXYraw(rawConn[1], rawConn[2], rawConn[3], 0);
+    }
+
+    break;
+  }
   case '?': {
     Serial.print("Jumperless firmware version: ");
     Serial.println(firmwareVersion);
@@ -750,6 +769,14 @@ skipinput:
 
     break;
   }
+  case 'q': {
+    digitalWrite(0, LOW);
+    break;
+  }
+  case 'Q': {
+    digitalWrite(0, HIGH);
+    break;
+  }
   case 'f':
 
     probeActive = 1;
@@ -759,7 +786,7 @@ skipinput:
     // sendAllPathsCore2 = 1;
     timer = millis();
 
-    //clearNodeFile(netSlot);
+    // clearNodeFile(netSlot);
     digitalWrite(RESETPIN, HIGH);
     if (connectFromArduino != '\0') {
       serSource = 1;
@@ -857,7 +884,10 @@ skipinput:
     break;
 
   case 'r':
-
+    if (rotaryEncoderInitialized == 0) {
+      initRotaryEncoder();
+      rotaryEncoderInitialized = 1;
+    }
     if (rotaryEncoderMode == 1) {
       // unInitRotaryEncoder();
 

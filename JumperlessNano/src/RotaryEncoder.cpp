@@ -29,6 +29,8 @@ volatile int rotaryEncoderMode = 0;
 
 volatile int slotPreview = 0;
 
+bool rotaryEncoderInitialized = false;
+
 
 void initRotaryEncoder(void)
 {
@@ -39,6 +41,7 @@ void initRotaryEncoder(void)
     offsetEnc = pio_add_program(pioEnc, &quadrature_program);
     smEnc = pio_claim_unused_sm(pioEnc, true);
     quadrature_program_init(pioEnc, smEnc, offsetEnc, QUADRATURE_A_PIN, QUADRATURE_B_PIN);
+    rotaryEncoderInitialized = true;
 }
 
 void unInitRotaryEncoder(void)

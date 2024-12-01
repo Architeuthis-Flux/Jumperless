@@ -16,6 +16,8 @@ extern bool debugMM;
 
 extern int loadFileOnStart;
 
+extern int rawConn[4]; //connect/clear, chip, x, y
+
 // #include "RotaryEncoder.h"
 
 
@@ -31,7 +33,7 @@ void addBridgeToNodeFile(int node1, int node2, int slot = 0);
 void savePreformattedNodeFile (int source = 0, int slot = 0, int keepEncoder = 1);
 
 void openNodeFile(int slot = 0);
-
+int parseRaw(int connectOrClear = 1);
 void splitStringToFields();
 
 void replaceSFNamesWithDefinedInts();

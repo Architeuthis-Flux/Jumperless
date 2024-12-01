@@ -7,6 +7,8 @@ extern volatile int rotaryEncoderMode;
 extern int netSlot;
 extern volatile int slotChanged;
 
+extern bool rotaryEncoderInitialized;
+
 extern volatile int slotPreview;
 extern int rotState;
 extern int encoderIsPressed;

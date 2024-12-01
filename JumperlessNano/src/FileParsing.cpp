@@ -16,10 +16,10 @@
 bool debugFP = EEPROM.read(DEBUG_FILEPARSINGADDRESS);
 bool debugFPtime = EEPROM.read(TIME_FILEPARSINGADDRESS);
 
-createSafeString(nodeFileString, 1200);
+createSafeString(nodeFileString, 3000);
 
 int numConnsJson = 0;
-createSafeString(specialFunctionsString, 800);
+createSafeString(specialFunctionsString, 3000);
 
 char inputBuffer[INPUTBUFFERLENGTH] = {0};
 
@@ -37,6 +37,10 @@ unsigned long timeToFP = 0;
 
 const char rotaryConnectionString[] =
     "{AREF-GND,D11-GND,D10-UART_TX,D12-UART_RX,D13-GPIO_0, ";
+
+
+
+
 
 void createSlots(int slot, int addRotaryConnections) {
   /// delay(2000);
@@ -88,7 +92,7 @@ void createSlots(int slot, int addRotaryConnections) {
       // }
       // nodeFileString.printTo(Serial);
       nodeFile.seek(0);
-      if (nodeFile.size() <= 10) {
+      if (nodeFile.size() <= 5) {
         nodeFile = LittleFS.open("nodeFileSlot" + String(i) + ".txt", "w+");
 
         if (i >= 0) {
@@ -127,6 +131,138 @@ void createSlots(int slot, int addRotaryConnections) {
     nodeFile.close();
   }
 }
+
+
+int rawConn[4]; //connect/clear, chip, x, y
+int parseRaw(int connectOrClear) {
+  // Serial.println("Parsing raw");
+    unsigned long humanTime = millis();
+
+  int shown = 0;
+
+  int connectClear = connectOrClear;
+  int chip = -1;
+  int x = -1;
+  int y = -1;
+
+
+  while (Serial.available() == 0) {
+    if (millis() - humanTime == 300 && shown == 0) {
+        Serial.print("\th/H [clear/CONNECT], chip [A-L/0-11], X [0-15], Y [0-7]\n\n\r");
+    Serial.print("\t\tExample: H,d,13,5\n\r");
+      shown = 1;
+      //break; 
+    }
+    if (millis() - humanTime == 2000 && shown == 1) {
+       return 0;
+    }
+  }
+
+  // nodeFileString.clear();
+
+  // nodeFileString.readUntil(Serial,',');
+  // nodeFileString.trim();  
+  // Serial.print("\n\rconnectClear: ");
+  // nodeFileString.printTo(Serial);
+
+  // if (nodeFileString == "h" || nodeFileString == "H") {
+  //   connectClear = 0;
+  // } else {
+  //   connectClear = 0;
+  // }
+  nodeFileString.clear();
+  nodeFileString.readUntil(Serial,',');
+    nodeFileString.clear();
+  nodeFileString.readUntil(Serial,',');
+  nodeFileString.trim();
+    nodeFileString.replace(",", "");
+
+  Serial.print("\n\rchip: ");
+  nodeFileString.printTo(Serial);
+  //Serial.print("  ->  ");
+
+  nodeFileString.replace("\n", "");
+  nodeFileString.replace("\r", "");
+  nodeFileString.replace("a", "0");
+  nodeFileString.replace("b", "1");
+  nodeFileString.replace("c", "2");
+  nodeFileString.replace("d", "3");
+  nodeFileString.replace("e", "4");
+  nodeFileString.replace("f", "5");
+  nodeFileString.replace("g", "6");
+  nodeFileString.replace("h", "7");
+  nodeFileString.replace("i", "8");
+  nodeFileString.replace("j", "9");
+  nodeFileString.replace("k", "10");
+  nodeFileString.replace("l", "11");
+
+  nodeFileString.replace("A", "0");
+  nodeFileString.replace("B", "1");
+  nodeFileString.replace("C", "2");
+  nodeFileString.replace("D", "3");
+  nodeFileString.replace("E", "4");
+  nodeFileString.replace("F", "5");
+  nodeFileString.replace("G", "6");
+  nodeFileString.replace("H", "7");
+  nodeFileString.replace("I", "8");
+  nodeFileString.replace("J", "9");
+  nodeFileString.replace("K", "10");
+  nodeFileString.replace("L", "11");
+  nodeFileString.replace(",", "");
+
+  //nodeFileString.printTo(Serial);
+
+nodeFileString.toInt(chip);
+  nodeFileString.clear();
+   
+  nodeFileString.readUntil(Serial,',');
+     nodeFileString.replace(",", "");
+  nodeFileString.trim();
+  Serial.print("\n\rX: ");
+  nodeFileString.printTo(Serial);
+
+nodeFileString.toInt(x);
+  nodeFileString.clear();
+  nodeFileString.readUntil(Serial,',');
+      nodeFileString.replace(",", "");
+  nodeFileString.trim();
+  Serial.print("\n\rY: ");
+  nodeFileString.printTo(Serial);
+
+nodeFileString.toInt(y);
+
+Serial.println();
+// Serial.println(chip);
+// Serial.println(x);
+// Serial.println(y);
+
+
+
+if (chip < 0 || chip > 11 || x < 0 || x > 15 || y < 0 || y > 7)
+{
+    Serial.println("Invalid input");
+    return 0;
+}
+
+  rawConn[0] = connectClear;
+  rawConn[1] = chip;
+  rawConn[2] = x;
+  rawConn[3] = y;
+
+  return 1;
+
+
+
+
+
+
+
+}
+
+
+
+
+
 void inputNodeFileList(int addRotaryConnections) {
   // addRotaryConnections = 1;
   // Serial.println("Paste the nodeFile list here\n\n\r");
