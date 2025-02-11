@@ -1,0 +1,43 @@
+; PIO Quadrature Encoder
+;
+;  by Jamon Terrell <github@jamonterrell.com>
+;
+; 
+;  SPDX-FileCopyrightText: 2022 Jamon Terrell <github@jamonterrell.com>
+;  SPDX-License-Identifier: MIT
+
+.program quadrature
+start:
+    wait 0 pin 0            ; wait for B == 0
+    jmp PIN, wait_high      ; if A == 0
+    mov x, !x                   ; x++ {
+    jmp x--, nop1               ;
+nop1:                           ;
+    mov x, !x                   ; }
+; BUG?!?! NO JMP OVER ELSE HERE?!  somehow it works though!?
+wait_high:
+    jmp x--, nop2           ; x-- {
+nop2:                       ; }
+
+    wait 1 PIN 0            ; wait for B == 1
+    jmp PIN, wait_low       ; if A == 0
+    jmp x--, nop3               ; x-- {
+nop3:                           ; }
+wait_low:                   ; else
+    mov x, !x                   ; x++ {
+    jmp x--, nop4               ;
+nop4:                           ;
+    mov x, !x                   ;
+    jmp start                   ; }
+
+% c-sdk {
+static inline void quadrature_program_init(PIO pio, uint sm, uint offset, uint a_pin, uint b_pin) {
+    pio_sm_config c = quadrature_program_get_default_config(offset);
+
+    sm_config_set_in_pins(&c, b_pin);
+    sm_config_set_jmp_pin(&c, a_pin);
+    sm_config_set_in_shift(&c, false, true, 32);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

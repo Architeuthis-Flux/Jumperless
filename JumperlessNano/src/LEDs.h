@@ -18,6 +18,7 @@
 
 
 
+
 #define PCBEXTINCTION 30 //extra brightness for to offset the extinction through pcb
 #define PCBREDSHIFTPINK -18    //extra hue shift to offset the hue shift through pcb
 #define PCBGREENSHIFTPINK -25
@@ -48,8 +49,19 @@
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
 
-extern int showLEDsCore2;
+extern volatile bool core2busy;
+
 extern int logoFlash;
+
+
+extern int brightenedNet;
+extern int brightenedRail;
+extern int brightenedAmount;
+extern bool lightUpName;
+
+extern int netColorMode; // 0 = rainbow, 1 = shuffle
+extern int displayMode;
+extern int numberOfShownNets;
 
 
 typedef struct rgbColor
@@ -119,6 +131,7 @@ extern uint32_t savedLEDcolors[NUM_SLOTS][LED_COUNT];
 extern rgbColor netColors[MAX_NETS];
 struct rgbColor shiftHue (struct rgbColor colorToShift, int hueShift = 0, int brightnessShift = 0, int saturationShift = 0,int specialFunction = -1);
 void initLEDs(void);
+uint32_t scaleBrightness(uint32_t hexColor, int scaleFactor);
 char LEDbrightnessMenu(void);
 
 void refreshSavedColors(void);
@@ -129,10 +142,10 @@ void clearLEDs(void);
 void randomColors(uint32_t color, int wait);
 void rainbowy(int ,int, int wait);
 void showNets(void);
-void assignNetColors ();
+void assignNetColors (int preview = 0);
 void lightUpRail (int logo = -1, int railNumber = -1, int onOff = 1, int brightness = DEFAULTRAILBRIGHTNESS, int supplySwitchPosition= 0);
 
-void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0);//-1 means all nodes (default)
+void lightUpNet (int netNumber = 0 , int node = -1, int onOff = 1, int brightness = DEFAULTBRIGHTNESS, int hueShift = 0, uint32_t forceColor = -1);//-1 means all nodes (default)
 void lightUpNode (int node, uint32_t color);
 rgbColor pcbColorCorrect (rgbColor colorToCorrect);
 hsvColor RgbToHsv(rgbColor rgb);
@@ -142,7 +155,11 @@ rgbColor unpackRgb(uint32_t color);
 uint32_t scaleUpBrightness(uint32_t hexColor, int scaleFactor = 8, int minBrightness = 0x45);
 uint32_t scaleDownBrightness(uint32_t hexColor, int scaleFactor = 5, int maxBrightness = 0x45);
 void turnOffSkippedNodes();
-void clearLEDsExceptRails();    
+void clearLEDsExceptRails();   
+
+
+void showSkippedNodes(uint32_t onColor = 0x0f1f2f, uint32_t offColor =  0x040007);
+
 
 uint32_t packRgb(uint8_t r, uint8_t g, uint8_t b);
 void startupColors(void);

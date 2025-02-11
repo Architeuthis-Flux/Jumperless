@@ -4,6 +4,8 @@
 #define JUMPERLESSDEFINESRP2040_H
 
 
+#define REV 1
+
 
 extern volatile int sendAllPathsCore2;
 
@@ -19,6 +21,14 @@ extern volatile int sendAllPathsCore2;
 #define QUADRATURE_A_PIN 16
 #define QUADRATURE_B_PIN 17
 #define BUTTON_ENC 0
+
+
+
+#define REVISIONADDRESS 22
+#define SHOW_PROBE_CURRENT_ADDRESS 23
+#define MENUBRIGHTNESS_ADDRESS 25
+#define NETCOLORMODE_ADDRESS 26
+#define DISPLAYMODE_ADDRESS 28
 
 
 #define LOADFILEONSTART_ADDRESS 29
@@ -38,13 +48,39 @@ extern volatile int sendAllPathsCore2;
 #define FIRSTSTARTUPADDRESS 43
 
 
+#define DAC0_ADDRESS0 94
+#define DAC1_ADDRESS0 102
 
+
+#define DAC0_SPREAD_ADDRESS 110
+#define DAC1_SPREAD_ADDRESS 118
+#define TOP_RAIL_SPREAD_ADDRESS 126
+#define BOTTOM_RAIL_SPREAD_ADDRESS 134
+
+#define DAC0_ZERO_ADDRESS 142
+#define DAC1_ZERO_ADDRESS 146
+#define TOP_RAIL_ZERO_ADDRESS 150
+#define BOTTOM_RAIL_ZERO_ADDRESS 154
+
+#define CALIBRATED_ADDRESS 158
+
+#define PATH_DUPLICATE_ADDRESS 160
+#define POWER_DUPLICATE_ADDRESS 161
+#define DAC_DUPLICATE_ADDRESS 162
+#define POWER_PRIORITY_ADDRESS 163
+#define DAC_PRIORITY_ADDRESS 164
+
+
+
+#define MAX_NETS_FOR_WIRES 14
+#define MAX_PATHS_FOR_WIRES 38
 
 
 #define MAX_NETS 64
 #define MAX_BRIDGES 255
 #define MAX_NODES 64
 #define MAX_DNI 8 //max number of doNotIntersect rules
+#define MAX_DUPLICATE 25 // max number of duplicates
 
 #define LASTCOMMANDADDRESS 1
 #define CLEARBEFORECOMMANDADDRESS 4
@@ -171,7 +207,7 @@ extern volatile int sendAllPathsCore2;
 
 
 
-
+#define NANO_VIN 69
 
 
 #define NANO_D0  70 //these are completely arbitrary but they should come in handy
@@ -199,8 +235,16 @@ extern volatile int sendAllPathsCore2;
 #define NANO_A6  92 
 #define NANO_A7  93
 
+#define NANO_RESET_0  94
+#define NANO_RESET_1  95
 
 #define GND  100 
+#define NANO_GND_1 96
+#define NANO_GND_0 97
+
+#define TOP_RAIL_GND 104
+#define BOTTOM_RAIL_GND 126
+
 #define SUPPLY_3V3  103
 #define SUPPLY_5V  105
 

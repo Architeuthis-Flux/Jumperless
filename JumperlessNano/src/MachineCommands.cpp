@@ -431,13 +431,13 @@ void writeNodeFileFromInputBuffer(void)
 
     if (!nodeFileMachineMode)
     {
-        if (debugFP)
+        if (false)
             Serial.println("Failed to open nodeFileMachineMode");
         return;
     }
     else
     {
-        if (debugFP)
+        if (false)
             Serial.println("\n\ropened nodeFile.txt\n\n\rloading bridges from file\n\r");
     }
     // nodeFile.print("{\n\r");

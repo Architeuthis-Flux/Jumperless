@@ -13,6 +13,11 @@ extern int newBridgeIndex;
 extern bool debugNM;
 extern bool debugNMtime;
 
+extern int numberOfShownNets;
+
+
+
+int findNodeInNet(uint16_t node);
 
 void writeJSONtoFile();
 
@@ -34,7 +39,7 @@ void nameNet(int);
 
 void addNodeToNet(int, int); //just add those nodes to the net
 
-void addBridgeToNet(uint8_t, int8_t, int8_t); //just add those nodes to the net
+void addBridgeToNet(uint16_t, int16_t, int16_t); //just add those nodes to the net
 
 int checkDoNotIntersectsByNet(int,int); //make sure none of the nodes on the net violate doNotIntersect rules, exit and warn
 
@@ -54,6 +59,7 @@ const char* definesToChar (int defined, int longOrShort = 0); //0 = short, 1 = l
 
 void printBridgeArray();
 
+void populateSpecialFunctions(int net, int node);
 
 
 void checkIfNodesAreABridge(); //if both of those nodes make up a memberBridge[][] pair. if not, warn and exit

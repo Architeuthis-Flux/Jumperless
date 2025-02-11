@@ -23,7 +23,7 @@ uint8_t intersections[8]; //if this net shares a node with another net, store th
 
 int8_t doNotIntersectNodes[8]; //if the net tries to share a node with a net that contains any #defined nodes here, it won't connect and throw an error (SUPPLY to GND)
 
-uint8_t priority = 0; //this isn't implemented - priority = 1 means it will move connections to take the most direct path, priority = 2 means connections will be doubled up when possible, priority = 3 means both
+int8_t visible = 0;
 
 rgbColor color; //color of the net in hex
 
@@ -32,6 +32,12 @@ uint32_t rawColor; //color of the net in hex (for the machine)
 char *colorName; //name of the color
 
 bool machine = false; //whether this net was created by the machine or by the user
+
+uint8_t priority = 0;
+
+int duplicatePaths[MAX_DUPLICATE] = {-1, -1, -1, -1,-1, -1, -1, -1,-1,-1}; // if the paths are redundant (for lower resistance) this is the pathNumber of the other one(s)
+
+int numberOfDuplicates = 0; // if the paths are redundant (for lower resistance) this is the number of duplicates
 };
 
 extern struct netStruct net[MAX_NETS];
@@ -53,6 +59,8 @@ int8_t yStatus[8];  //store the row/nano it's connected to
 const int8_t xMap[16];
 
 const int8_t yMap[8];
+
+int uncommittedHops; //store the path number of the uncommitted hop
 
 };
 
@@ -143,6 +151,7 @@ struct pathStruct{
   bool sameChip;
   bool Lchip;
   bool skip = false;
+    int duplicate = 0; // the "parent" path if 1, the "child" path if 2, 0 if not a duplicate
 
 };
 

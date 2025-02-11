@@ -15,7 +15,9 @@
 #include "hardware/pwm.h"
 #include <EEPROM.h>
 #include "RotaryEncoder.h"
-
+#include "Graphics.h"
+#include "PersistentStuff.h"
+#include "Commands.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
