@@ -178,7 +178,7 @@ int readInNodesArduino = 0;
 
 
 
-const char firmwareVersion[] = "1.3.21"; //// remember to update this
+const char firmwareVersion[] = "1.3.22"; //// remember to update this
 
 int firstLoop = 1;
 volatile int probeActive = 1;
