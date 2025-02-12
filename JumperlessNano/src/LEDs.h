@@ -48,7 +48,7 @@
 extern Adafruit_NeoPixel leds;
 extern bool debugLEDs;
 
-extern int showLEDsCore2;
+//extern volatile int showLEDsCore2;
 extern int logoFlash;
 
 

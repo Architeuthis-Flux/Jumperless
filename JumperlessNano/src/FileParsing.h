@@ -16,10 +16,12 @@ extern bool debugMM;
 
 extern int loadFileOnStart;
 
+extern volatile int abortWait;
+
 extern int rawConn[4]; //connect/clear, chip, x, y
 
 // #include "RotaryEncoder.h"
-
+int openFileThreadSafe(int openTypeEnum, int slot = 0, int flashOrLocal = 0);
 
 //extern File nodeFile;  
 void createSlots(int slot = -1, int addRotaryConnections = 0);
@@ -30,7 +32,7 @@ void changeWokwiDefinesToJumperless ();
 void writeToNodeFile(int slot = 0);
 void removeBridgeFromNodeFile(int node1, int node2 = -1, int slot = 0);
 void addBridgeToNodeFile(int node1, int node2, int slot = 0);
-void savePreformattedNodeFile (int source = 0, int slot = 0, int keepEncoder = 1);
+void savePreformattedNodeFile (int source = 0, int slot = 0, int keepEncoder = 1, int ack = 0);
 
 void openNodeFile(int slot = 0);
 int parseRaw(int connectOrClear = 1);

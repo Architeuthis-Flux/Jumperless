@@ -22,6 +22,12 @@ int numberOfUniqueNets = 0;
 int numberOfNets = 0;
 int numberOfPaths = 0;
 
+int powerPriority = 1;
+int dacPriority = 1;
+int powerDuplicates = 0;
+int dacDuplicates = 0;
+int pathDuplicates = 0;
+
 int pathsWithCandidates[MAX_BRIDGES] = {0};
 int pathsWithCandidatesIndex = 0;
 
@@ -744,8 +750,360 @@ void commitPaths(void)
 //     printChipStatus();
     resolveAltPaths();
 
+
     // duplicateSFnets();
 }
+
+int newBridges[MAX_NETS][MAX_DUPLICATE][2] = { 0 };
+
+void fillUnusedPaths(int duplicatePathsOverride, int duplicatePathsPower,
+                     int duplicatePathsDac) {
+  /// return;
+
+  int duplicatePathIndex = 0;
+
+  uint8_t nodeCount[MAX_NETS] = { 0 };
+  uint8_t bridgeCount[MAX_NETS] = { 0 };
+
+  for (int i = 0; i < MAX_NETS; i++) {
+    for (int j = 0; j < MAX_DUPLICATE; j++) {
+      for (int k = 0; k < 2; k++) {
+        newBridges[i][j][k] = 0;
+        }
+      }
+    }
+
+  for (int n = 0; n < numberOfNets; n++) {
+    // Serial.print("net[");
+    // Serial.print(n);
+    // Serial.print("] \n\rnumber: ");
+    // Serial.println(net[n].number);
+    for (int i = 0; i < MAX_NODES; i++) {
+      if (net[n].nodes[i] == 0) {
+        break;
+        }
+      nodeCount[n]++;
+      // Serial.print(" \n\rnode: ");
+      // Serial.println(net[n].nodes[i]);
+      }
+
+    for (int i = 0; i < MAX_BRIDGES; i++) {
+      if (net[n].bridges[i][0] == 0) {
+        break;
+        }
+      bridgeCount[n]++;
+      // Serial.print(" \n\rbridges: ");
+      // Serial.print(net[n].bridges[i][0]);
+      // Serial.print("-");
+      // Serial.println(net[n].bridges[i][1]);
+      }
+    // Serial.println("\n\r");
+    }
+
+  int duplindex = 0;
+  // first figure out which paths need duplicates
+  for (int i = 0; i < numberOfPaths; i++) {
+    if (bridgeCount[path[i].net] > 0) {
+      // path[i].duplicate = 1;
+      // net[path[i].net].duplicatePaths[duplindex] = i;
+      if (path[i].net <= 3) {
+        net[path[i].net].numberOfDuplicates = powerDuplicates;
+        } else if (path[i].net == 4 || path[i].net == 5) {
+          net[path[i].net].numberOfDuplicates = dacDuplicates;
+          } else {
+          net[path[i].net].numberOfDuplicates = pathDuplicates;
+          }
+      }
+    }
+
+  // get the nodes in the net and cycle them, so if the bridges are A-B, B-C,
+  // the duplicate paths will start with A-C
+
+  //  A-B, B-C                        -> A-C
+  //  A-B, B-C, C-D                   -> A-C, A-D, B-D
+  //  A-B, B-C, C-D, D-E              -> A-C, A-D, A-E, B-D, B-E,
+  //  A-B, B-C, C-D, D-E, E-F         -> A-C, A-D, A-E, A-F, B-D, B-E, B-F, C-E,
+  //  C-F, D-F A-B, B-C, C-D, D-E, E-F, F-G    -> A-C, A-D, A-E, A-F, A-G, B-D,
+  //  B-E, B-F, B-G, C-E, C-F, C-G, D-F, D-G, E-G A-B, B-C, C-D, D-E, E-F, F-G,
+  //  G-H -> A-C, A-D, A-E, A-F, A-G, A-H, B-D, B-E, B-F, B-G, B-H, C-E, C-F,
+  //  C-G, C-H, D-F, D-G, D-H, E-G, E-H, F-H
+
+  // int bridgeLUT[MAX_DUPLICATE] = {1, 1, 3, 5, 10, 15, 21, 28, 36, 45, 55, 66,
+  // 78, 91, 105, 120, 136, 153, 171, 190, 210, 231, 253, 276, 300};
+
+  // int16_t tempNodes[MAX_NETS][MAX_NODES] = {0};
+
+  for (int i = 1; i < numberOfNets; i++) {
+    if (net[i].numberOfDuplicates == 0) {
+      continue;
+      }
+
+    // int16_t tempNodes[MAX_NODES];
+    //  Serial.print("net[");
+    //  Serial.print(i);
+    //  Serial.print("]  nodes[");
+
+    for (int j = 0; j < nodeCount[i]; j++) {
+      // tempNodes[j] = net[i].nodes[j];
+      //   Serial.print(tempNodes[j]);
+      // Serial.print(net[i].nodes[j]);
+      // Serial.print(", ");
+      }
+    // Serial.println("]\t\t");
+
+    int targetBridgeCount = net[i].numberOfDuplicates;
+    int skip = 1;
+
+    int unique = 0;
+
+    int testCounter0 = 0;
+    int testCounter1 = 1; // nodeCount[i] / 2;
+    int testBridge[2] = { -1, -1 };
+
+    int bridge0 = 0;
+    int bridge1 = 1;
+
+    for (int j = 0; j <= targetBridgeCount; j++) {
+      if (nodeCount[i] >= 3) {
+        for (int l = 0; l < MAX_DUPLICATE; l++) {
+          if (unique == -1) {
+            bridge1++;
+            if (bridge1 >= nodeCount[i]) {
+              bridge0++;
+              if (bridge0 >= nodeCount[i]) {
+                bridge0 = 0;
+                }
+              bridge1 = bridge0 + 1;
+              }
+            unique = 0;
+            }
+          if (net[i].nodes[bridge0] == 0 || net[i].nodes[bridge1] == 0) {
+            break;
+            }
+          if (net[i].nodes[bridge0] == net[i].nodes[bridge1]) {
+            unique = -1;
+            continue;
+            }
+          if (net[i].nodes[bridge0] == net[i].bridges[l][0] &&
+              net[i].nodes[bridge1] == net[i].bridges[l][1]) {
+            unique = -1;
+            continue;
+            }
+          if (net[i].nodes[bridge0] == net[i].bridges[l][1] &&
+              net[i].nodes[bridge1] == net[i].bridges[l][0]) {
+            unique = -1;
+            continue;
+            }
+          unique = 1;
+          // Serial.print(net[i].nodes[bridge0]);
+          // Serial.print("-");
+          // Serial.print(net[i].nodes[bridge1]);
+          // Serial.println("]\t\t");
+          // Serial.print("net[");
+
+          break;
+          }
+        }
+      newBridges[i][j][0] = net[i].nodes[bridge0];
+      newBridges[i][j][1] = net[i].nodes[bridge1];
+
+      net[i].bridges[j][0] = newBridges[i][j][0];
+      net[i].bridges[j][1] = newBridges[i][j][1];
+
+      bridge1++;
+
+      if (bridge1 >= nodeCount[i]) {
+        bridge0++;
+        if (bridge0 >= nodeCount[i]) {
+          bridge0 = 0;
+          }
+        bridge1 = bridge0 + 1;
+        }
+
+      if (newBridges[i][j][0] == newBridges[i][j][1] ||
+          newBridges[i][j][0] == 0 || newBridges[i][j][1] == 0) {
+        // Serial.print("skipping ");
+        // Serial.println(j);
+        j--;
+        continue;
+        } else {
+        duplicatePathIndex++;
+        }
+      }
+    }
+  // int maxxed = 0;
+  int priorities[MAX_NETS] = { 0 };
+  int maxp = 0;
+
+  for (int j = 0; j < MAX_DUPLICATE; j++) {
+    for (int i = 0; i < numberOfNets; i++) {
+      priorities[i] = net[i].priority;
+      if (i < 6 && net[i].priority > maxp) {
+        maxp = net[i].priority;
+        }
+      }
+    for (int k = 0; k < maxp; k++) {
+      for (int i = 0; i < 6; i++) {
+        // for (int p = 0; p < net[i].priority; p++) {
+
+        if (net[i].numberOfDuplicates == 0) {
+          continue;
+          }
+
+        if (newBridges[i][j][0] >= 110 && newBridges[i][j][0] <= 115 ||
+            newBridges[i][j][1] >= 110 && newBridges[i][j][1] <= 115) {
+          continue;
+          }
+
+        if (priorities[i] <= 0) {
+          continue;
+          }
+
+        if (priorities[i] > 0) {
+          priorities[i]--;
+          }
+
+
+
+        if (newBridges[i][j][0] != 0 || newBridges[i][j][1] != 0) {
+          path[numberOfPaths].net = i;
+          path[numberOfPaths].node1 = newBridges[i][j][0];
+          path[numberOfPaths].node2 = newBridges[i][j][1];
+          path[numberOfPaths].altPathNeeded = false;
+          path[numberOfPaths].sameChip = false;
+          path[numberOfPaths].skip = false;
+          path[numberOfPaths].duplicate = 1;
+          numberOfPaths++;
+          if (numberOfPaths >= MAX_BRIDGES - 1) {
+            // maxxed = 1;
+            return;
+            break;
+            }
+          }
+        // }
+        // Serial.print("\n\r");
+        }
+      }
+
+    // for (int i = 0; i < 6; i++) {
+    //   priorities[i] = net[i].priority;
+    // }
+    for (int i = 5; i < numberOfNets; i++) {
+      if (net[i].numberOfDuplicates == 0) {
+        continue;
+        }
+
+      if (newBridges[i][j][0] >= 110 && newBridges[i][j][0] <= 115 ||
+          newBridges[i][j][1] >= 110 && newBridges[i][j][1] <= 115) {
+        continue;
+        }
+
+      if (priorities[i] <= 0) {
+        continue;
+        }
+
+      if (priorities[i] > 0) {
+        priorities[i]--;
+        }
+
+      if (newBridges[i][j][0] != 0 && newBridges[i][j][1] != 0) {
+        ///
+        net[i].bridges[bridgeCount[i]][0] = newBridges[i][j][0];
+        net[i].bridges[bridgeCount[i]][1] = newBridges[i][j][1];
+        bridgeCount[i]++; ///!why is this incrementing bridgeCount[0]?
+
+        path[numberOfPaths].net = i;
+        path[numberOfPaths].node1 = newBridges[i][j][0];
+        path[numberOfPaths].node2 = newBridges[i][j][1];
+        path[numberOfPaths].altPathNeeded = false;
+        path[numberOfPaths].sameChip = false;
+        path[numberOfPaths].skip = false;
+        path[numberOfPaths].duplicate = 1;
+        numberOfPaths++;
+        if (numberOfPaths >= MAX_BRIDGES - 1) {
+          // maxxed = 1;
+          return;
+          break;
+          }
+        }
+      // }
+      // Serial.print("\n\r");
+      }
+    }
+  // Serial.print("done filling unused paths\n\r");
+  }
+
+int checkForOverlappingPaths() {
+  int found = 0;
+
+  for (int i = 0; i <= numberOfPaths; i++) {
+    int fchip[4] = { path[i].chip[0], path[i].chip[1], path[i].chip[2],
+                    path[i].chip[3] };
+
+    for (int j = 0; j < numberOfPaths; j++) {
+      if (i == j) {
+        continue;
+        }
+      if (path[i].net == path[j].net) {
+        continue;
+        }
+      int schip[4] = { path[j].chip[0], path[j].chip[1], path[j].chip[2],
+                      path[j].chip[3] };
+
+      for (int f = 0; f < 4; f++) {
+        for (int s = 0; s < 4; s++) {
+          if (fchip[f] == schip[s] && fchip[f] != -1) {
+            if (path[i].x[f] == -1 || path[j].x[s] == -1) {
+              continue;
+              }
+            if (path[i].x[f] == path[j].x[s]) {
+              // if (debugNTCC3) {
+              Serial.print("Path ");
+              Serial.print(i);
+              Serial.print(" and ");
+              Serial.print(j);
+              Serial.print(" overlap at x ");
+              Serial.print(path[i].x[f]);
+              Serial.print(" on chip ");
+              Serial.print(chipNumToChar(fchip[f]));
+              Serial.print("   nets ");
+              Serial.print(path[i].net);
+              Serial.print(" and ");
+              Serial.println(path[j].net);
+
+              // printPathsCompact();
+              // printChipStatus();
+              // }
+              // return 1;
+              found++;
+              } else if (path[i].y[f] == path[j].y[s]) {
+                // if (debugNTCC3) {
+                Serial.print("Path ");
+                Serial.print(i);
+                Serial.print(" and ");
+                Serial.print(j);
+                Serial.print(" overlap at y ");
+                Serial.print(path[i].y[f]);
+                Serial.print(" on chip ");
+                Serial.print(chipNumToChar(fchip[f]));
+                Serial.print("   nets ");
+                Serial.print(path[i].net);
+                Serial.print(" and ");
+                Serial.println(path[j].net);
+
+                // printPathsCompact();
+                // printChipStatus();
+                // }
+                // return 1;
+                found++;
+                }
+            }
+          }
+        }
+      }
+    }
+  return found;
+  }
 
 void duplicateSFnets(void)
 {

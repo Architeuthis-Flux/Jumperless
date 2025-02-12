@@ -32,6 +32,11 @@ uint32_t rawColor; //color of the net in hex (for the machine)
 char *colorName; //name of the color
 
 bool machine = false; //whether this net was created by the machine or by the user
+
+int duplicatePaths[MAX_DUPLICATE] = {-1, -1, -1, -1,-1, -1, -1, -1,-1,-1}; // if the paths are redundant (for lower resistance) this is the pathNumber of the other one(s)
+
+int numberOfDuplicates = 0; // if the paths are redundant (for lower resistance) this is the number of duplicates
+
 };
 
 extern struct netStruct net[MAX_NETS];
@@ -144,6 +149,7 @@ struct pathStruct{
   bool Lchip;
   bool skip = false;
 
+ int duplicate = 0; // the "parent" path if 1, the "child" path if 2, 0 if not a duplicate
 };
 
 

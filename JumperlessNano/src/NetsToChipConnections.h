@@ -13,6 +13,12 @@ extern int numberOfPaths;
 extern bool debugNTCC;
 extern bool debugNTCC2;
 
+extern int powerPriority;
+extern int dacPriority;
+extern int powerDuplicates;
+extern int dacDuplicates;
+extern int pathDuplicates;
+
 extern int numberOfUnconnectablePaths;
 extern int unconnectablePaths[10][2];
 
@@ -20,6 +26,10 @@ void clearAllNTCC(void);
 
 void sortPathsByNet(void);  
 void bridgesToPaths(void);
+
+int checkForOverlappingPaths(void);
+void fillUnusedPaths(int duplicatePathsOverride, int duplicatePathsPower,
+                     int duplicatePathsDac);
 
 void findStartAndEndChips(int node1, int node2, int net);
 

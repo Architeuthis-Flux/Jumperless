@@ -1,0 +1,74 @@
+---
+AlignAfterOpenBracket: Never
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlinesLeft: false
+AlignOperands: false
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: true
+BinPackParameters: true
+PackConstructorInitializers: Never
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: WebKit
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializersBeforeComma: false
+BreakStringLiterals: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+Cpp11BracedListStyle: false
+DerivePointerAlignment: false
+IncludeCategories:
+ - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+   Priority:        2
+ - Regex:           '^(<|"(gtest|isl|json)/)'
+   Priority:        3
+ - Regex:           '.\*'
+   Priority:        1
+IndentCaseLabels: true
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+MaxEmptyLinesToKeep: 3
+NamespaceIndentation: None
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: false
+PenaltyBreakBeforeFirstCallParameter: 999050
+PenaltyBreakComment: 100
+PenaltyBreakFirstLessLess: 0
+PenaltyBreakString: 500
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 400
+PointerAlignment: Left
+ReflowComments: true
+SortIncludes: false
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: false
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: Cpp20
+AccessModifierOffset: -2
+BreakBeforeBraces: BS_WebKit
+JavaScriptQuotes: Single
+JavaScriptWrapImports: false
+UseTab: Always
+TabWidth: 2
+ConstructorInitializerIndentWidth: 2
+TableGenBreakInsideDAGArg: DontBreak
+ContinuationIndentWidth: 2
+IndentWidth: 2
+ColumnLimit: 500
+Language: Cpp
+...

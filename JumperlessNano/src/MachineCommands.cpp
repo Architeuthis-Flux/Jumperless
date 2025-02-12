@@ -24,6 +24,234 @@ enum machineModeInstruction lastReceivedInstruction = unknown;
 
 char machineModeInstructionString[NUMBEROFINSTRUCTIONS][20] = {"unknown", "netlist", "getnetlist", "bridgelist", "getbridgelist", "lightnode", "lightnet", "getmeasurement", "gpio", "uart", "arduinoflash", "setnetcolor", "setnodecolor", "setsupplyswitch", "getsupplyswitch", "getchipstatus", "getunconnectedpaths"};
 
+unsigned long lastNetConfirmTimer = 0;
+int restoredNodeFile = 0;
+
+void lastNetConfirm(int forceLastNet) {
+    // while (tud_connected() == 0 && millis() < 500)
+    //   ;
+  
+    // if (millis() - lastNetConfirmTimer < 3000 && tud_connected() == 1)
+    // {
+    //   // Serial.println(lastNetConfirmTimer);
+  
+    //   // lastNetConfirmTimer = millis();
+    //   return;
+    // }
+  
+    if (forceLastNet == 1) {
+  
+      int bootselPressed = 0;
+      openNodeFile();
+      getNodesToConnect();
+      // Serial.print("openNF\n\r");
+      digitalWrite(RESETPIN, HIGH);
+      bridgesToPaths();
+      clearLEDs();
+      assignNetColors();
+  
+      sendAllPathsCore2 = 1;
+      Serial.print("\n\r   short press BOOTSEL to restore last netlist\n\r");
+      Serial.print("   long press to cancel\n\r");
+      delay(250);
+      if (BOOTSEL) {
+        bootselPressed = 1;
+      }
+  
+      while (forceLastNet == 1) {
+        if (BOOTSEL)
+          bootselPressed = 1;
+  
+        // clearLEDs();
+        // leds.show();
+        leds.clear();
+        lightUpRail(-1, -1, 1, 28);//supplySwitchPosition);
+        leds.show();
+        // showLEDsCore2 = 1;
+  
+        if (BOOTSEL)
+          bootselPressed = 1;
+  
+        delay(250);
+  
+        // showLEDsCore2 = 2;
+        sendAllPathsCore2 = 1;
+        // Serial.print("p\n\r");
+        if (BOOTSEL)
+          bootselPressed = 1;
+        // delay(250);
+  
+        if (bootselPressed == 1) {
+          unsigned long longPressTimer = millis();
+          int fade = 8;
+          while (BOOTSEL) {
+  
+            sendAllPathsCore2 = 1;
+            showLEDsCore2 = 2;
+            delay(250);
+            clearLEDs();
+            // leds.clear();
+            showLEDsCore2 = 2;
+  
+            if (fade <= 0) {
+              clearAllNTCC();
+              clearLEDs();
+              startupColors();
+              // clearNodeFile();
+              sendAllPathsCore2 = 1;
+              lastNetConfirmTimer = millis();
+              restoredNodeFile = 0;
+              // delay(1000);
+              Serial.print("\n\r   cancelled\n\r");
+              return;
+            }
+  
+            delay(fade * 10);
+            fade--;
+          }
+  
+          digitalWrite(RESETPIN, LOW);
+          restoredNodeFile = 1;
+          sendAllPathsCore2 = 1;
+          Serial.print("\n\r   restoring last netlist\n\r");
+          printNodeFile();
+          return;
+        }
+        delay(250);
+      }
+    }
+  }
+  unsigned long lastTimeNetlistLoaded = 0;
+  unsigned long lastTimeCommandRecieved = 0;
+  
+  void machineMode(void) // read in commands in machine readable format
+  {
+    int sequenceNumber = -1;
+  
+    lastTimeCommandRecieved = millis();
+  
+    if (millis() - lastTimeCommandRecieved > 100) {
+      machineModeRespond(sequenceNumber, true);
+      return;
+    }
+    enum machineModeInstruction receivedInstruction =
+        parseMachineInstructions(&sequenceNumber);
+  
+    // Serial.print("receivedInstruction: ");
+    // Serial.print(receivedInstruction);
+    // Serial.print("\n\r");
+  
+    switch (receivedInstruction) {
+    case netlist:
+      lastTimeNetlistLoaded = millis();
+      clearAllNTCC();
+  
+      // writeNodeFileFromInputBuffer();
+  
+      digitalWrite(RESETPIN, HIGH);
+  
+      machineNetlistToNetstruct();
+      populateBridgesFromNodes();
+      bridgesToPaths();
+  
+      clearLEDs();
+      assignNetColors();
+      // showNets();
+      digitalWrite(RESETPIN, LOW);
+      sendAllPathsCore2 = 1;
+      break;
+  
+    case getnetlist:
+      if (millis() - lastTimeNetlistLoaded > 300) {
+  
+        listNetsMachine();
+      } else {
+        machineModeRespond(0, true);
+        // Serial.print ("too soon bro\n\r");
+        return;
+      }
+      break;
+  
+    case bridgelist:
+      clearAllNTCC();
+  
+      writeNodeFileFromInputBuffer();
+  
+      openNodeFile();
+      getNodesToConnect();
+      // Serial.print("openNF\n\r");
+      digitalWrite(RESETPIN, HIGH);
+      bridgesToPaths();
+      clearLEDs();
+      assignNetColors();
+      // Serial.print("bridgesToPaths\n\r");
+      digitalWrite(RESETPIN, LOW);
+      // showNets();
+  
+      sendAllPathsCore2 = 1;
+      break;
+  
+    case getbridgelist:
+      listBridgesMachine();
+      break;
+  
+    case lightnode:
+      lightUpNodesFromInputBuffer();
+      break;
+  
+    case lightnet:
+      lightUpNetsFromInputBuffer();
+      //   lightUpNet();
+      // assignNetColors();
+      // showLEDsCore2 = 1;
+      break;
+  
+      // case getmeasurement:
+      //   showMeasurements();
+      //   break;
+  
+    case setsupplyswitch:
+  
+     // supplySwitchPosition = setSupplySwitch();
+      // printSupplySwitch(supplySwitchPosition);
+      machineModeRespond(sequenceNumber, true);
+  
+      showLEDsCore2 = 1;
+      break;
+  
+    case getsupplyswitch:
+      // if (millis() - lastTimeNetlistLoaded > 100)
+      //{
+  
+      //printSupplySwitch(supplySwitchPosition);
+      // machineModeRespond(sequenceNumber, true);
+  
+      // }else {
+      // Serial.print ("\n\rtoo soon bro\n\r");
+      // machineModeRespond(0, true);
+      // return;
+      // }
+      break;
+  
+    case getchipstatus:
+      printChipStatusMachine();
+      break;
+  
+      // case gpio:
+      //   break;
+    case getunconnectedpaths:
+      getUnconnectedPaths();
+      break;
+  
+    case unknown:
+      machineModeRespond(sequenceNumber, false);
+      return;
+    }
+  
+    machineModeRespond(sequenceNumber, true);
+  }
+
+
 enum machineModeInstruction parseMachineInstructions(int *sequenceNumber)
 {
 

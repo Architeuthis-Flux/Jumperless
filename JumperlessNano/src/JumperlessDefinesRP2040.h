@@ -6,10 +6,15 @@
 
 
 extern volatile int sendAllPathsCore2;
+extern volatile int showLEDsCore2;
+extern volatile int core1busy;
+extern volatile int core2busy;
+extern volatile int core1request;
 
 
 
 #define INPUTBUFFERLENGTH 8000
+
 
 #define PIOSTUFF 1 //comment these out to remove them
 #define EEPROMSTUFF 1
@@ -45,6 +50,7 @@ extern volatile int sendAllPathsCore2;
 #define MAX_BRIDGES 255
 #define MAX_NODES 64
 #define MAX_DNI 8 //max number of doNotIntersect rules
+#define MAX_DUPLICATE 12
 
 #define LASTCOMMANDADDRESS 1
 #define CLEARBEFORECOMMANDADDRESS 4

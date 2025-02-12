@@ -16,7 +16,7 @@ volatile uint8_t LEDbrightness;
 volatile uint8_t LEDbrightnessRail;
 volatile uint8_t LEDbrightnessSpecial;
 
-int showLEDsCore2 = 0;
+volatile int showLEDsCore2 = 0;
 
 int netNumberC2 = 0;
 int onOffC2 = 0;

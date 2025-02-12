@@ -22,11 +22,12 @@ enum measuredState
 
 };
 
+int justReadProbe(void);
 
 int voltageSelect(void);
 int longShortPress(int pressLength = 500); 
 int doubleSingleClick(void);
-int selectFromLastFound(void);
+int selectFromLastFound(int print = 1);
 int checkLastFound(int);
 void clearLastFound(void);
 int probeMode(int pin = 19, int setOrClear = 1);
