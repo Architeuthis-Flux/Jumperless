@@ -1,9 +1,15 @@
 # Jumperless
 ### a jumperless breadboard
 
+
+ 
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
 #### There's also a [new version](https://github.com/Architeuthis-Flux/JumperlessV5) [lauching on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
+
+
+## [Getting started using your Jumperless](https://hackaday.io/project/191238-jumperless/log/222858-getting-started-using-your-jumperless)
+###### (at this point some of the stuff in that guide is a bit out of date, but generally is good advice)
 
 [![Video](https://img.youtube.com/vi/_k0aKM68Xl4/maxresdefault.jpg)](https://www.youtube.com/watch?v=_k0aKM68Xl4)
 
