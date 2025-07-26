@@ -5,7 +5,9 @@
  
 ##### If you want one of these, they're available in [my Tindie store](https://www.tindie.com/products/architeuthisflux/jumperless/)
 
-#### There's also a [new version](https://github.com/Architeuthis-Flux/JumperlessV5) [lauching on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
+# There's now a way cooler version, [Jumperless V5](https://github.com/Architeuthis-Flux/JumperlessV5) 
+
+#### You can get a V5 [on Crowd Supply](https://www.crowdsupply.com/architeuthis-flux/jumperless-v5)
 
 
 ## [Getting started using your Jumperless](https://hackaday.io/project/191238-jumperless/log/222858-getting-started-using-your-jumperless)
