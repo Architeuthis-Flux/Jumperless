@@ -1,2 +1,0 @@
-SafeString_v_ArduinoString 
-compares results from SafeString to Arduino String for indexOf lastIndexOf and startsWith endsWith

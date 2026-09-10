@@ -1,2 +1,0 @@
- Reads commands from SafeStringStream test data 
- Commands terminated by <space> , CR or NL

@@ -1,1 +1,0 @@
-Demostrates SafeString length(), trim() methods

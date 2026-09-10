@@ -1,1 +1,0 @@
-Replace characters in a SafeString. 

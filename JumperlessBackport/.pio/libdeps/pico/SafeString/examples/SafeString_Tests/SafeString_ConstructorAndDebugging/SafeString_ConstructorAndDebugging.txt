@@ -1,2 +1,0 @@
-How to initialize SafeString objects and use the createSafeString macro and make assignments to them 
-How to turn on SafeString debugging error messages.

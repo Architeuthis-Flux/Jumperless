@@ -1,1 +1,0 @@
-Use nextToken() to tokenize SafeString and then use toDouble() and toLong() to convert fields to numbers

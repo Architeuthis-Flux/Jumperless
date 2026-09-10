@@ -1,1 +1,0 @@
-Use print(value, decPlaces, width) to print value in a fixed width

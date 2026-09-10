@@ -1,3 +1,0 @@
- Reads commands from Serial without blocking rest of the program
- Commands terminated by <space> , CR or NL
- The Arduino monitor must be set to Newline or Carrage Return or Both NL & CR for this sketch to work.

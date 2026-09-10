@@ -1,1 +1,0 @@
-Examples of SafeString to Number conversions and comparing these to the results from String methods

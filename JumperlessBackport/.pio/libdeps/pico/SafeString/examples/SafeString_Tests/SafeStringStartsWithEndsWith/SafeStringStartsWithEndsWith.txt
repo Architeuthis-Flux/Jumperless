@@ -1,1 +1,0 @@
-Check which characters/substrings a given SafeString starts or ends with. 

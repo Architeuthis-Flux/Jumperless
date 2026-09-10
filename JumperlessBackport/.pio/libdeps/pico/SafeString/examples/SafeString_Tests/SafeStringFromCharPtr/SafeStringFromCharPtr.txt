@@ -1,1 +1,0 @@
-How to initialize SafeString objects from char* using createSafeStringFromCharPtr

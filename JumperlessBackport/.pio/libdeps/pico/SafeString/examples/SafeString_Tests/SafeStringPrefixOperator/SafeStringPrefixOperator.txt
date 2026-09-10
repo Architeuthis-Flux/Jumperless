@@ -1,1 +1,0 @@
-Examples of SafeString -= prefix operator  prefix() function
